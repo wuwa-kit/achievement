@@ -1,9 +1,10 @@
 param(
     [Parameter(Mandatory)][string]$Tag,
-    [Parameter(Mandatory)][string]$OutputPath
+    [Parameter(Mandatory)][string]$OutputPath,
+    [string]$UpdateNotesPath
 )
 $ErrorActionPreference = 'Stop'
-if ($Tag -notmatch '^v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$') {
+if ($Tag -cnotmatch '^v?[0-9]{1,9}\.[0-9]{1,9}\.[0-9]{1,9}(?:-[0-9A-Za-z.-]+)?$') {
     throw '版本标签应为 v0.1.0 或 v0.1.0-beta.1 形式。'
 }
 $version = $Tag -replace '^v', ''
@@ -21,3 +22,6 @@ $notes = ($match.Groups['notes'].Value.Trim(), $footer.Value.Trim()) -join "`n`n
 $parent = Split-Path -Parent $OutputPath
 if ($parent) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }
 Set-Content -LiteralPath $OutputPath -Value $notes -Encoding utf8
+if ($UpdateNotesPath) {
+    Set-Content -LiteralPath $UpdateNotesPath -Value $match.Groups['notes'].Value.Trim() -Encoding utf8
+}

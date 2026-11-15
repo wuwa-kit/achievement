@@ -2,9 +2,11 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const cwd = fileURLToPath(new URL('../', import.meta.url))
+const releaseTag = process.env.RELEASE_TAG
+const releaseVersion = releaseTag ? [`-p:DesktopReleaseTag=${releaseTag}`] : []
 const desktopPublish = [
-  ['publish', 'Wuwa.Desktop', '-c', 'Release', '--self-contained', 'true', '-o', 'artifacts/app-compact'],
-  ['publish', 'Wuwa.Desktop', '-c', 'Release', '--self-contained', 'false', '-p:DesktopLite=true', '-o', 'artifacts/app-lite'],
+  ['publish', 'Wuwa.Desktop', '-c', 'Release', '--self-contained', 'true', '-o', 'artifacts/app-compact', ...releaseVersion],
+  ['publish', 'Wuwa.Desktop', '-c', 'Release', '--self-contained', 'false', '-p:DesktopLite=true', '-o', 'artifacts/app-lite', ...releaseVersion],
 ]
 const commands: Record<string, string[][]> = {
   build: [['build', 'Wuwa.Desktop', '-c', 'Release']],

@@ -6,7 +6,7 @@ Windows 用のデスクトップツールで、『鳴潮』のゲームプロセ
 
 [オンラインプレビュー](https://wu.songe.li)
 
-Windows x64 向けの[標準版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.2/WuwaAchievementExport-v0.1.2.exe)または [Lite 版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.2/WuwaAchievementExport-Lite-v0.1.2.exe)をダウンロードできます。標準版には .NET が含まれています。Lite 版を使うには、[.NET 10 Desktop Runtime（x64）](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe)を別途ダウンロードしてインストールしてください。
+Windows x64 向けの[標準版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.3/WuwaAchievementExport-v0.1.3.exe)または [Lite 版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.3/WuwaAchievementExport-Lite-v0.1.3.exe)をダウンロードできます。標準版には .NET が含まれています。Lite 版を使うには、[.NET 10 Desktop Runtime（x64）](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe)を別途ダウンロードしてインストールしてください。
 
 ## 使い方
 

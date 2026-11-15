@@ -774,7 +774,7 @@ export default function App() {
         open={!!ticket && !receipt && !pendingImport}
         heading={tr('ui.receiveDesktop')}
         message={tr('ui.receivePrompt')}
-        cancelLabel={tr('common.cancelArchiveAction')}
+        cancelLabel={tr('common.cancel')}
         confirmLabel={receiving ? tr('ui.receiving') : tr('ui.confirmReceive')}
         loading={busy || receiving}
         testId="desktop-import-dialog"

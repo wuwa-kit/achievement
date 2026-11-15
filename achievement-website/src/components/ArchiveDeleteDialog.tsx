@@ -18,7 +18,7 @@ export function ArchiveDeleteDialog({
       open={open}
       heading={t('common.deleteArchive')}
       message={message}
-      cancelLabel={t('common.cancelArchiveAction')}
+      cancelLabel={t('common.cancel')}
       confirmLabel={t('common.deleteArchive')}
       confirmTone="danger"
       onOpenChange={onOpenChange}

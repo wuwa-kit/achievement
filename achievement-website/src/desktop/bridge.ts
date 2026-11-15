@@ -35,7 +35,31 @@ export interface DesktopState {
   error: string | null
   collectionDiagnostic?: CollectionDiagnostic | null
 }
+export type UpdateEdition = 'standard' | 'lite'
+export interface UpdateAvailability {
+  status: 'checked'
+  currentVersion: string
+  currentEdition: UpdateEdition
+  release: {
+    version: string
+    notes: string
+    assets: Record<UpdateEdition, { size: number }>
+  } | null
+}
+export type UpdateCheck =
+  | UpdateAvailability
+  | { status: 'manifestMissing' | 'networkError' | 'checkTimeout' | 'invalidManifest' }
+  | { status: 'httpError'; httpStatus: number }
+type UpdateTarget = { edition: UpdateEdition; version: string }
+export type UpdateDownload = { attemptId: string; received: number } & (
+  | { status: 'downloading' | 'ready' | 'cancelled' }
+  | { status: 'failed'; failure: 'integrityFailed' | 'saveFailed' | 'downloadFailed' }
+)
 type Methods = {
+  'update.check': { params: undefined; result: UpdateCheck }
+  'update.download': { params: UpdateTarget & { attemptId: string }; result: null }
+  'update.cancel': { params: undefined; result: null }
+  'update.restart': { params: UpdateTarget; result: null }
   'preferences.save': {
     params: { language: AppLanguage; theme: 'auto' | 'light' | 'dark' }
     result: DesktopSettings
@@ -63,9 +87,11 @@ type Message = {
   id?: string
   result?: unknown
   error?: string
-  event?: string
-  data?: DesktopState
-}
+} & (
+  | { event?: undefined; data?: undefined }
+  | { event: 'state'; data: DesktopState }
+  | { event: 'updateDownload'; data: UpdateDownload }
+)
 interface WebView {
   postMessage(message: unknown): void
   addEventListener(type: 'message', listener: (event: MessageEvent<Message>) => void): void
@@ -88,8 +114,10 @@ export const getInitialDesktopSettings = () =>
       : request('settings.get'))
 const pending = new Map<string, { resolve(value: unknown): void; reject(error: Error): void }>()
 const listeners = new Set<(state: DesktopState) => void>()
+const updateListeners = new Set<(state: UpdateDownload) => void>()
 webview?.addEventListener('message', ({ data }) => {
-  if (data.event === 'state' && data.data) listeners.forEach((listener) => listener(data.data!))
+  if (data.event === 'state') listeners.forEach((listener) => listener(data.data))
+  if (data.event === 'updateDownload') updateListeners.forEach((listener) => listener(data.data))
   if (!data.id) return
   const request = pending.get(data.id)
   if (!request) return
@@ -134,6 +162,13 @@ export function subscribe(listener: (state: DesktopState) => void) {
   listeners.add(listener)
   return () => {
     listeners.delete(listener)
+  }
+}
+
+export function subscribeUpdateDownload(listener: (state: UpdateDownload) => void) {
+  updateListeners.add(listener)
+  return () => {
+    updateListeners.delete(listener)
   }
 }
 

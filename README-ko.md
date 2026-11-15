@@ -6,7 +6,7 @@ Windows 데스크톱 도구로 《명조: 워더링 웨이브》 게임 프로�
 
 [온라인 미리 보기](https://wu.songe.li)
 
-Windows x64용 [표준 버전](https://github.com/wuwa-kit/achievement/releases/download/v0.1.2/WuwaAchievementExport-v0.1.2.exe) 또는 [Lite 버전](https://github.com/wuwa-kit/achievement/releases/download/v0.1.2/WuwaAchievementExport-Lite-v0.1.2.exe)을 다운로드하세요. 표준 버전에는 .NET이 포함되어 있습니다. Lite 버전을 사용하려면 [.NET 10 Desktop Runtime(x64)](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe)을 별도로 다운로드하여 설치하세요.
+Windows x64용 [표준 버전](https://github.com/wuwa-kit/achievement/releases/download/v0.1.3/WuwaAchievementExport-v0.1.3.exe) 또는 [Lite 버전](https://github.com/wuwa-kit/achievement/releases/download/v0.1.3/WuwaAchievementExport-Lite-v0.1.3.exe)을 다운로드하세요. 표준 버전에는 .NET이 포함되어 있습니다. Lite 버전을 사용하려면 [.NET 10 Desktop Runtime(x64)](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe)을 별도로 다운로드하여 설치하세요.
 
 ## 빠른 시작
 

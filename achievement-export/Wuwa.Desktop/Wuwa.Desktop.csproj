@@ -8,7 +8,15 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>
+    <DesktopReleaseTag Condition="'$(DesktopReleaseTag)' == ''">0.0.0</DesktopReleaseTag>
+    <Version>$([System.Text.RegularExpressions.Regex]::Replace('$(DesktopReleaseTag)', '^[vV]', ''))</Version>
+    <DesktopEdition Condition="'$(DesktopLite)' != 'true'">standard</DesktopEdition>
+    <DesktopEdition Condition="'$(DesktopLite)' == 'true'">lite</DesktopEdition>
   </PropertyGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="DesktopReleaseTag" Value="$(DesktopReleaseTag)" />
+    <AssemblyMetadata Include="DesktopEdition" Value="$(DesktopEdition)" />
+  </ItemGroup>
   <PropertyGroup Condition="'$(DesktopLite)' == 'true'">
     <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
   </PropertyGroup>

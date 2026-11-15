@@ -67,7 +67,7 @@ public partial class MainWindow : Window
         Title = Text("desktopTitle", "common");
         settings = settings with { Theme = settings.Theme is "light" or "dark" ? settings.Theme : "auto" };
         Loaded += InitializeBrowser;
-        Closed += (_, _) => Browser.Dispose();
+        Closed += (_, _) => { windowClosed = true; Browser.Dispose(); };
     }
     private async void InitializeBrowser(object sender, RoutedEventArgs args)
     {
@@ -158,6 +158,16 @@ public partial class MainWindow : Window
                 case "theme.set": ApplyTheme(message.GetProperty("params").GetProperty("dark").GetBoolean()); break;
                 case "settings.get": result = settings; break;
                 case "state.get": result = State(); break;
+                case "update.check": result = await CheckUpdateAsync(); break;
+                case "update.download":
+                    var update = message.GetProperty("params");
+                    StartUpdateDownload(update.GetProperty("edition").GetString()!, update.GetProperty("version").GetString()!, update.GetProperty("attemptId").GetString()!);
+                    break;
+                case "update.cancel": updateDownload?.Cancel(); break;
+                case "update.restart":
+                    var restart = message.GetProperty("params");
+                    await RestartWithUpdateAsync(restart.GetProperty("edition").GetString()!, restart.GetProperty("version").GetString()!);
+                    break;
                 case "preferences.save":
                     var preferences = message.GetProperty("params");
                     var language = preferences.GetProperty("language").GetString();
@@ -245,10 +255,14 @@ public partial class MainWindow : Window
                 default: throw new ArgumentException(Text("unknownCommand"));
             }
             Reply(new { id, result });
+            if (method == "update.restart") Close();
         }
         catch (Exception exception) { if (id is not null) Reply(new { id, error = exception.GetBaseException().Message }); }
     }
-    private void Reply(object message) => Browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(message, JsonOptions));
+    private void Reply(object message)
+    {
+        if (!windowClosed) Browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(message, JsonOptions));
+    }
     private async Task RegisterBootstrap()
     {
         var core = Browser.CoreWebView2;
@@ -264,7 +278,7 @@ public partial class MainWindow : Window
         Title = Text("desktopTitle", "common");
         await RegisterBootstrap();
     }
-    private void EnsureIdle() { if (operation is not null) throw new InvalidOperationException(Text("running")); }
+    private void EnsureIdle() { if (operation is not null || updateRestarting) throw new InvalidOperationException(Text("running")); }
     private async Task<bool> ExportLogs(string gamePath)
     {
         var dialog = new SaveFileDialog
@@ -351,6 +365,14 @@ public partial class MainWindow : Window
     private void OpenBrowser() { if (transfer is not null) Process.Start(new ProcessStartInfo(transfer.BrowserUrl.AbsoluteUri) { UseShellExecute = true }); }
     private void Window_Closing(object? sender, CancelEventArgs e)
     {
+        if (updateRestarting) { e.Cancel = true; return; }
+        if (updateDownload is not null)
+        {
+            e.Cancel = true;
+            closeAfterUpdateDownload = true;
+            updateDownload.Cancel();
+            return;
+        }
         if (operation is null) return;
         e.Cancel = true; closeRequested = true;
         StopOperation();

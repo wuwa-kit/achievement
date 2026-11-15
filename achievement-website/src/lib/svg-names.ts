@@ -23,6 +23,7 @@ export type WSvgName =
   | 'github'
   | 'languages'
   | 'menu'
+  | 'refresh-cw'
   | 'search'
   | 'trophy'
   | 'trash-2'

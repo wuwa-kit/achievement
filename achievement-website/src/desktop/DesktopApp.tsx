@@ -11,6 +11,7 @@ import { WInput } from '../components/ui/WInput'
 import { WLanguageSwitch } from '../components/ui/WLanguageSwitch'
 import { useTranslation } from 'react-i18next'
 import { HistoryCard } from './HistoryCard'
+import { DesktopUpdate } from './DesktopUpdate'
 
 export default function DesktopApp() {
   const {
@@ -58,6 +59,7 @@ export default function DesktopApp() {
         <div className="desktop-header mb-2 flex items-center justify-between gap-3">
           <div className="min-w-0 text-[16px] wrap-anywhere">{t('desktop.game')}</div>
           <div className="desktop-tools flex shrink-0 items-center gap-2">
+            <DesktopUpdate />
             <WTooltip text={t('desktop.exportLogs')}>
               <WButton
                 className="grid size-9 shrink-0 place-items-center rounded-md border border-(--color-border) bg-(--color-surface) enabled:hover:bg-(--color-surface-soft)"
