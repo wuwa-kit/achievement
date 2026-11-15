@@ -6,12 +6,14 @@ A tool for exporting, organizing, and viewing your Wuthering Waves achievement p
 
 [Online preview](https://wu.songe.li)
 
+Download the [Standard edition](https://github.com/wuwa-kit/achievement/releases/download/v0.1.0/WuwaAchievementExport-v0.1.0.exe) or the [Lite edition](https://github.com/wuwa-kit/achievement/releases/download/v0.1.0/WuwaAchievementExport-Lite-v0.1.0.exe) for Windows x64. The Lite edition requires .NET 10 Desktop Runtime (x64).
+
 - **Browse achievements**: Browse by category, search and filter, and view multilingual text and hidden achievements.
 - **Track progress**: See achievement completion, Astrite rewards from completed achievements, and hidden achievement progress.
 - **Manage multiple accounts**: Save profiles by UID. Exporting the same account again updates its progress.
 - **Save locally**: Transfer directly from the desktop exporter, import JSON files, or download snapshots. Account profiles are stored in your browser.
 
-The desktop app exports account progress, and the web app combines it with static achievement data. The Windows exporter is distributed as a self-contained executable; no .NET installation is required.
+The desktop app exports account progress, and the web app combines it with static achievement data. The Standard edition of the Windows exporter includes .NET.
 
 ## Documentation
 
