@@ -126,100 +126,88 @@ test('late catalog response cannot replace an imported account', async ({ page }
   }
 })
 
-for (const format of ['account', 'compact']) {
-  test(`sequential ${format} desktop handoffs select the new UID and download its data`, async ({
-    page,
-  }, info) => {
-    const executable = fileURLToPath(
-      new URL(
-        '../../achievement-export/artifacts/transfer-tests/Wuwa.Transfer.Tests.exe',
-        import.meta.url,
+test('sequential v3 desktop handoffs select the new UID and download its data', async ({
+  page,
+}, info) => {
+  const executable = fileURLToPath(
+    new URL(
+      '../../achievement-export/artifacts/transfer-tests/Wuwa.Transfer.Tests.exe',
+      import.meta.url,
+    ),
+  )
+  async function readAccount(file: string, uid: string) {
+    const snapshot = JSON.parse(
+      (await readFile(new URL('../../fixtures/local/' + file, import.meta.url), 'utf8')).replace(
+        /^\uFEFF/,
+        '',
       ),
     )
-    // Real account snapshots rebuilt by C# tests; UID labels here are synthetic test identities.
-    const accountA = JSON.parse(
-      await readFile(
-        new URL(`../../artifacts/csharp-regression/${format}-a/achievements.json`, import.meta.url),
-        'utf8',
-      ),
-    )
-    const accountB = JSON.parse(
-      await readFile(
-        new URL(`../../artifacts/csharp-regression/${format}-b/achievements.json`, import.meta.url),
-        'utf8',
-      ),
-    )
-    await page.goto('/')
-    for (const [index, payload] of [
-      { ...accountA, uid: '10001' },
-      { ...accountB, uid: '10002' },
-      { ...accountB, uid: '10002' },
-    ].entries()) {
-      const file = info.outputPath('account-' + index + '.json')
-      const ticket = info.outputPath('ticket-' + index + '.txt')
-      await writeFile(file, JSON.stringify(payload))
-      const child = spawn(executable, ['serve', file, ticket], {
-        windowsHide: true,
-        stdio: ['ignore', 'pipe', 'pipe'],
-      })
-      let output = ''
-      child.stdout.on('data', (chunk) => {
-        output += String(chunk)
-      })
-      try {
-        let url = ''
-        await expect
-          .poll(async () => {
-            try {
-              url = await readFile(ticket, 'utf8')
-              return url.startsWith('http://')
-            } catch {
-              return false
-            }
-          })
-          .toBe(true)
-        await page.goto(url)
-        await page.getByTestId('confirm-desktop-import').click()
-        await expect.poll(() => output).toContain('Received')
-        await expect(page.getByTestId('账号档案')).toHaveAttribute(
-          'data-value',
-          'uid:' + payload.uid,
-        )
-        if (format === 'account')
-          await expect(page.getByTestId('completed-astrite')).toHaveText(
-            payload.achievements
-              .filter((a: { status: string }) => ['completed', 'reward_claimed'].includes(a.status))
-              .reduce((sum: number, a: { astrite: number }) => sum + a.astrite, 0)
-              .toString(),
-          )
-        await expect(page.locator('.nav-overview .nav-count')).toHaveText(
-          `${payload.completedCount}/1305`,
-        )
-        await expectOptions(page, '账号档案', index === 0 ? 2 : 3)
-      } finally {
-        child.kill()
-      }
+    return {
+      schemaVersion: 3,
+      kind: 'account-progress',
+      complete: true,
+      uid,
+      capturedAt: snapshot.at,
+      resourceFingerprint: 'test',
+      count: snapshot.count,
+      completedCount: snapshot.modelFinishCount,
+      starCount: snapshot.modelStarCount,
+      achievements: snapshot.achievements,
+      groupStates: snapshot.groupStates,
     }
-    await page.reload()
-    await expect(page.getByTestId('账号档案')).toHaveAttribute('data-value', 'uid:10002')
-    await expect(page.locator('.nav-overview .nav-count')).toHaveText('1200/1305')
-    const downloaded = page.waitForEvent('download')
-    await page.getByTestId('档案更多操作').click()
-    await page.getByTestId('export-achievement-file').click()
-    const download = await downloaded
-    const payload = JSON.parse(await readFile((await download.path())!, 'utf8'))
-    expect(payload.uid).toBe('10002')
-    expect(payload.completedCount).toBe(1200)
-    expect(payload.achievements).toEqual(accountB.achievements)
-    expect(payload.schemaVersion).toBe(format === 'compact' ? 3 : 2)
-    if (format === 'compact') {
-      expect(payload.kind).toBe('account-progress')
-      expect(payload.languages).toBeUndefined()
-      expect(payload.achievements[0].texts).toBeUndefined()
+  }
+  const [accountA, accountB] = await Promise.all([
+    readAccount('session-24624/achievement-snapshot.json', '10001'),
+    readAccount('csharp-session-10324-20261114-071240/attempt-8-second.json', '10002'),
+  ])
+  await page.goto('/')
+  for (const [index, payload] of [accountA, accountB, accountB].entries()) {
+    const file = info.outputPath('account-' + index + '.json')
+    const ticket = info.outputPath('ticket-' + index + '.txt')
+    await writeFile(file, JSON.stringify(payload))
+    const child = spawn(executable, ['serve', file, ticket], {
+      windowsHide: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    let output = ''
+    child.stdout.on('data', (chunk) => {
+      output += String(chunk)
+    })
+    try {
+      let url = ''
+      await expect
+        .poll(async () => {
+          try {
+            url = await readFile(ticket, 'utf8')
+            return url.startsWith('http://')
+          } catch {
+            return false
+          }
+        })
+        .toBe(true)
+      await page.goto(url)
+      await page.getByTestId('confirm-desktop-import').click()
+      await expect.poll(() => output).toContain('Received')
+      await expect(page.getByTestId('账号档案')).toHaveAttribute('data-value', 'uid:' + payload.uid)
+      await expect(page.locator('.nav-overview .nav-count')).toHaveText(
+        `${payload.completedCount}/1305`,
+      )
+      await expectOptions(page, '账号档案', index === 0 ? 2 : 3)
+    } finally {
+      child.kill()
     }
-    await selectValue(page, page.getByTestId('账号档案'), 'uid:10001')
-    await expect(page.locator('.nav-overview .nav-count')).toHaveText(
-      `${accountA.completedCount}/1305`,
-    )
-  })
-}
+  }
+  await page.reload()
+  await expect(page.getByTestId('账号档案')).toHaveAttribute('data-value', 'uid:10002')
+  await expect(page.locator('.nav-overview .nav-count')).toHaveText('1200/1305')
+  const downloaded = page.waitForEvent('download')
+  await page.getByTestId('档案更多操作').click()
+  await page.getByTestId('export-achievement-file').click()
+  const download = await downloaded
+  const payload = JSON.parse(await readFile((await download.path())!, 'utf8'))
+  expect(payload).toEqual(accountB)
+  await selectValue(page, page.getByTestId('账号档案'), 'uid:10001')
+  await expect(page.locator('.nav-overview .nav-count')).toHaveText(
+    `${accountA.completedCount}/1305`,
+  )
+})

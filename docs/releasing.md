@@ -2,10 +2,10 @@
 
 远程仓库为 `https://github.com/wuwa-kit/achievement`。
 
-- `deloy`：每次推送（所有分支及标签）构建网站，保存 `website` artifact；也可手动运行。`main` 分支按已配置的凭据部署到 Cloudflare Pages 和/或 Netlify。
+- `deloy` 在推送 `main` 时构建网站，也可从 `main` 手动运行。工作流上传 `website` artifact，公开仓库还会更新 jsDelivr 的发布分支。
 - `release`：推送版本标签（如 `v0.1.0`）时构建 Windows x64 标准版和 Lite 版，从 `achievement-export/CHANGELOG.md` 提取版本说明。Actions artifact 和 GitHub Release 中的文件名带版本标签，例如 `WuwaAchievementExport-v0.1.0.exe` 和 `WuwaAchievementExport-Lite-v0.1.0.exe`。也可选择标签手动运行。带后缀的版本标记为预发布。缺少对应更新日志时停止发布。
 
-Cloudflare 部署需要 Secrets `CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID`，并预先创建 Pages 项目。项目名默认 `wuwa-achievement-export`，可通过仓库变量 `CLOUDFLARE_PROJECT_NAME` 修改。Netlify 部署需要 Secrets `NETLIFY_AUTH_TOKEN`、`NETLIFY_SITE_ID`。未配置对应凭据时跳过该平台部署，网站构建和 artifact 上传仍执行。
+配置 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID` 后，工作流会部署到已有的 Cloudflare Pages 项目 `wuwa-achievement-export`。缺少凭据时仍构建网站和上传 artifact。
 
 CI 不读取或上传本机 `fixtures/local/` 和账号导出数据。
 

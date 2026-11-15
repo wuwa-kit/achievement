@@ -1,19 +1,28 @@
-# 鸣潮成就档案
+# 鸣潮成就导出工具
 
 简体中文 | [English](README-en.md)
 
-用于导出、整理和查看鸣潮成就进度的工具，由 Windows 桌面导出器和网页组成。
+使用 Windows 桌面工具从《鸣潮》游戏进程内存中读取账号成就进度，一键导出为 JSON。导出后可在网页中查看、筛选和管理成就档案。
 
 [在线预览](https://wu.songe.li)
 
-下载 Windows x64 [标准版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.0/WuwaAchievementExport-v0.1.0.exe)或 [Lite 版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.0/WuwaAchievementExport-Lite-v0.1.0.exe)。Lite 版需要 .NET 10 Desktop Runtime（x64）。
+下载 Windows x64 [标准版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.0/WuwaAchievementExport-v0.1.0.exe)或 [Lite 版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.0/WuwaAchievementExport-Lite-v0.1.0.exe)。标准版内置 .NET，Lite 版需要安装 .NET 10 Desktop Runtime（x64）。
+
+## 快速开始
+
+1. 打开桌面导出器，点击运行图标，在工具启动的游戏中登录。
+2. 登录后，工具会自动读取成就进度并保存档案。导出成功后，可从历史卡片发送到网页或另存为 JSON。
+
+## 导出原理
+
+导出器使用堆诊断定位成就数据，读取游戏进程内存，并将结果保存为本地 JSON。导出器不向游戏进程写入数据，也不修改游戏内的成就进度。
+
+## 网页功能
 
 - **成就浏览**：分类查看、搜索与筛选，支持多语言文本和隐藏成就。
 - **进度统计**：查看完成度、已完成星声奖励和隐藏成就进度。
 - **多账号管理**：按 UID 保存档案，同一账号重新导出时更新进度。
 - **本地保存**：支持桌面直接交接、JSON 导入与下载，账号档案保存在当前浏览器。
-
-桌面导出账号进度，网页结合静态成就资料展示详情。Windows 导出器标准版内置 .NET。
 
 ## 文档
 

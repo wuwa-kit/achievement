@@ -7,7 +7,7 @@ internal static class RuntimeProfile
     public static void Verify(string path)
     {
         string actual;
-        try { actual = Catalog.HashFile(path); }
+        try { actual = GameResources.HashFile(path); }
         catch (Exception error) when (error is FileNotFoundException or DirectoryNotFoundException)
         {
             throw new CollectionException(CollectionFailure.RuntimeMissing, $"Runtime file is missing: {path}", error);

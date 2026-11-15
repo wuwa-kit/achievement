@@ -80,7 +80,7 @@ internal static class Program
                     } break;
                 case "analyze":
                     var binaryPaths = new[] { options.Game, Path.Combine(Path.GetDirectoryName(options.Game)!, "Client/Binaries/Win64/Client-Win64-Shipping.exe") };
-                    Json.Save(Path.Combine(options.Output, "analysis.json"), new { mode = "static-read-only", collectedAt = DateTimeOffset.Now.ToString("o"), binaries = binaryPaths.Select(path => new { path, sha256 = Catalog.HashFile(path), length = new FileInfo(path).Length, evidence = BinaryInspector.Evidence(path) }).ToArray() }); break;
+                    Json.Save(Path.Combine(options.Output, "analysis.json"), new { mode = "static-read-only", collectedAt = DateTimeOffset.Now.ToString("o"), binaries = binaryPaths.Select(path => new { path, sha256 = GameResources.HashFile(path), length = new FileInfo(path).Length, evidence = BinaryInspector.Evidence(path) }).ToArray() }); break;
                 case "export-events":
                     string log = options.Extra.GetValueOrDefault("log", Path.Combine(Path.GetDirectoryName(options.Game)!, "Client/Saved/Logs/Client.log"));
                     var events = LogEvidence.Find(log).Select(line => Regex.Match(line, @"^\[(?<time>[^\]]+)\].*\[Achievement\].*OnAchievementGroupProgressNotify \[id: (?<id>\d+)\]\[currentState: (?<state>\w+)\]")).Where(m => m.Success).Select(m => new { id = int.Parse(m.Groups["id"].Value), observedAt = m.Groups["time"].Value, rawState = m.Groups["state"].Value }).ToArray();

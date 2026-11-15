@@ -28,12 +28,6 @@ internal static class Json
     }
     public static T Get<T>(this JsonNode node, string name) => node[name] is { } value ? value.GetValue<T>() : throw new InvalidDataException($"Missing field: {name}");
     public static IEnumerable<JsonObject> Rows(this JsonNode node, string name) => node[name]?.AsArray().Select(n => n?.AsObject() ?? throw new InvalidDataException(name)) ?? throw new InvalidDataException(name);
-    public static JsonObject Pick(this JsonNode node, params string[] keys)
-    {
-        var result = new JsonObject();
-        foreach (var key in keys) result[key] = node[key]?.DeepClone();
-        return result;
-    }
 }
 
 internal sealed record Achievement(int Id, int PreviousId, int NextId, int? CurrentProgress, int? MaxProgress, bool? HasGetReward, int? FinishTimeRaw);

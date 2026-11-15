@@ -44,7 +44,7 @@ internal static class Workflow
         if (Process.GetProcessesByName("Client-Win64-Shipping").Length > 0) throw new CollectionException(CollectionFailure.GameRunning, "Wuthering Waves is already running");
         _ = typeof(GCHeapDump).Assembly;
         string quality = Launcher.Quality(options.Game, options.Quality);
-        string fingerprint = Catalog.Fingerprint(options.Game);
+        string fingerprint = GameResources.Fingerprint(options.Game);
         cancellation.ThrowIfCancellationRequested();
         DateTime started = DateTime.Now;
         string run = session.DirectoryPath;
@@ -89,7 +89,7 @@ internal static class Workflow
                 Json.Save(Path.Combine(run, "achievement-snapshot.json"), second);
                 using (timings.Measure("生成账号进度文件"))
                 {
-                    if (Catalog.Fingerprint(options.Game) != fingerprint) throw new CollectionException(CollectionFailure.ResourcesChanged, "Resources changed during export");
+                    if (GameResources.Fingerprint(options.Game) != fingerprint) throw new CollectionException(CollectionFailure.ResourcesChanged, "Resources changed during export");
                     string? latestUid = ReadUid(log, started);
                     if (uid != latestUid) throw new CollectionException(CollectionFailure.AccountChanged, "Account changed during export");
                     export = AccountExport.Build(first, second, uid, fingerprint);

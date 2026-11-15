@@ -40,8 +40,6 @@ jobs:
           path: achievement-website/dist/
           if-no-files-found: error
 
-      # Like deploy-inspect: deploy main to either configured hosting provider.
-      # Build/artifact upload works even when no hosting credentials are configured.
       - name: Deploy Cloudflare Pages
         if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
         run: >-

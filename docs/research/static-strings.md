@@ -19,10 +19,10 @@
 ```powershell
 New-Item -ItemType Directory -Force artifacts/static-strings
 Invoke-WebRequest 'https://yarik0chka.github.io/wuwa-keys/keys.json' -OutFile artifacts/static-strings/public-keys.json
-node research/tools/inventory-static-paks.mjs
-node research/tools/inspect-static-strings.mjs
-node research/tools/extract-static-strings.mjs
-node research/tools/compare-static-strings.mjs
+mise exec -- node research/tools/inventory-static-paks.mjs
+mise exec -- node research/tools/inspect-static-strings.mjs
+mise exec -- node research/tools/extract-static-strings.mjs
+mise exec -- node research/tools/compare-static-strings.mjs
 ```
 
 第一步脚本可接受两个参数：`Client` 目录、公开密钥 JSON 路径。其余脚本读取上一步的本地结果，不执行网络请求。所有脚本只在仓库 `artifacts/static-strings` 下写入输出。
@@ -36,13 +36,11 @@ node research/tools/compare-static-strings.mjs
 
 ## 当前边界
 
-这是验证脚本，尚未替换正式导出器的配置查询流程。
-
-字符串查询以已有配置目录中的 text key 为范围，而不是借用其文本值；已有文本值仅用于最终对照。要完全替代运行时配置查询，还需解析 `db_achievement.db` 中的 `BinData`，以及分类、星级和奖励配置的结构。
+脚本使用现有 `data/achievement-catalog.json` 的 text key 查询离线数据库，再对照两边的文本。核验范围限于字符串，完整目录更新还需要解析 `db_achievement.db` 中的 `BinData` 以及分类、星级和奖励结构。
 
 本机同一路径的基础包/补丁按扫描结果后者覆盖；正式集成必须显式实现客户端挂载优先级、删除记录和版本选择，不能把目录遍历顺序作为通用规则。本次选中的目标字段未遇到非零 RedirectDbIndex；脚本从字符串库中取唯一非空值，有冲突则记为差异，没有实现通用重定向优先级。未来版本需另行验证，不能无条件沿用。
 
-公开密钥可能随版本变化。密钥来自社区，正式工具需要明确配置来源、离线缓存和失败处理，不应默默回退到进程内加载。
+公开密钥来自社区，可能随游戏版本变化。
 
 ## 格式参考
 

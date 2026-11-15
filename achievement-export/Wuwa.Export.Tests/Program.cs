@@ -5,77 +5,23 @@ using Wuwa.Export;
 string root = Path.GetFullPath(args.FirstOrDefault() ?? "..");
 var first = Json.Load<Snapshot>(Path.Combine(root, "fixtures/local/session-24624/achievement-snapshot-first.json"));
 var second = Json.Load<Snapshot>(Path.Combine(root, "fixtures/local/session-24624/achievement-snapshot.json"));
-var catalog = Json.Read(Path.Combine(root, "data/achievement-catalog.json"));
-var expected = Json.Read(Path.Combine(root, "fixtures/local/csharp-live/achievements.json"));
-var actual = ExportBuilder.Build(first, second, catalog);
 int tests = 0;
 void Check(bool condition, string message) { if (!condition) throw new Exception(message); tests++; Console.WriteLine("PASS " + message); }
 void Reject(Action action, string name) { bool rejected = false; try { action(); } catch (InvalidDataException) { rejected = true; } Check(rejected, name); }
-// Use the original PowerShell output as a full schema/behavior oracle, not a few totals.
-foreach (var (key, value) in expected)
-{
-    if (key == "catalogFingerprint") continue; // The historical export predates the current catalog.
-    if (new[] { "capturedAt", "processId", "coverage", "count", "otherGameplayCount", "groupStates", "achievements", "clientModelCount", "catalogOnlyCount", "unknownCount", "languageCoverage", "categories", "mainMenuCount", "astriteSummary" }.Contains(key)) continue;
-    Check(JsonNode.DeepEquals(value, actual[key]), "PowerShell parity: " + key);
-}
-Check(actual.Get<string>("catalogFingerprint") == catalog.Get<string>("resourceFingerprint"),
-    "Export records the fingerprint of its catalog");
-Check(actual.Get<int>("count") == 1305 && actual.Get<int>("otherGameplayCount") == 0, "Only 1305 main-menu achievements exported");
-Check(actual.Rows("achievements").All(a => a.Get<bool>("inMainMenu") && a.Get<int>("categoryId") is >= 1 and <= 4), "No FunctionType 2 records exported");
-Check(JsonNode.DeepEquals(Json.Node(expected.Rows("achievements").Where(a => a.Get<bool>("inMainMenu") && a.Get<int>("id") != 400205 && a.Get<int>("id") != 201196)), actual["achievements"]), "Main achievement fields unchanged");
-Check(actual.Rows("groupStates").Count() == 36, "Only main-menu group state exported");
-Reject(() => ExportBuilder.Build(first, second with { Achievements = [second.Achievements[0], .. second.Achievements.Skip(2), second.Achievements[0]] }, catalog), "Duplicate IDs rejected");
-Reject(() => ExportBuilder.Build(first, second with { GroupStates = [second.GroupStates[0] with { Unlocked = !second.GroupStates[0].Unlocked }, .. second.GroupStates.Skip(1)] }, catalog), "Changing groups rejected");
-Reject(() => ExportBuilder.Build(first, second with { ModelStarCount = second.ModelStarCount + 1 }, catalog), "Changing model star count rejected");
-var missingCatalog = (JsonObject)catalog.DeepClone(); missingCatalog["achievements"]!.AsArray().RemoveAt(0);
-Reject(() => ExportBuilder.Build(first, second, missingCatalog), "Missing catalog entry rejected");
-var runtime = Json.Read(Path.Combine(root, "fixtures/local/achievement-catalog.runtime.json"));
-var rebuilt = Catalog.Build(runtime, catalog.Get<string>("resourceFingerprint"));
-foreach (var key in new[] { "achievements", "groups", "categories", "languageCoverage", "astriteItem", "languages" }) Check(JsonNode.DeepEquals(catalog[key], rebuilt[key]), "Catalog parity: " + key);
 Check(FixedResourceFingerprint() == "4F759B40C5514DAB2071E0B9122B7E95BFE81091606A652AC758ED3FFC20A6EF",
-    "Resource fingerprint matches the fixed PowerShell-compatible fixture");
+    "Resource fingerprint matches the fixed fixture");
 Check(HeapObjects.Load(Path.Combine(root, "fixtures/local/session-24624/heap.gcdump")).Count(o => o.Type == "AchievementModel") == 1, "Managed GC dump reader");
 string output = Path.Combine(root, "artifacts/csharp-regression");
-ExportBuilder.SaveViews(actual, output);
-Check(JsonNode.DeepEquals(actual, Json.Read(Path.Combine(output, "achievements.json"))), "Atomic JSON read-back");
 string fixture = Path.Combine(output, "quality-fixture"); Directory.CreateDirectory(Path.Combine(fixture, "game")); Directory.CreateDirectory(Path.Combine(fixture, "kr_game_cache"));
 byte[] state = Encoding.UTF8.GetBytes("{\"activeGameScope\":{\"gameIdentity\":\"Aki\",\"bundleName\":\"UHD\"}}");
 for (int i = 0; i < state.Length; i++) state[i] ^= 0x63;
 File.WriteAllText(Path.Combine(fixture, "kr_game_cache/platform_ui_state.bin"), Convert.ToBase64String(state));
 Check(Launcher.Quality(Path.Combine(fixture, "game/Wuthering Waves.exe"), "auto") == "uhd", "Launcher cache quality decoded");
 Check(Launcher.Quality(Path.Combine(fixture, "game/Wuthering Waves.exe"), "sd") == "sd", "Explicit quality precedence");
-var partial = second with { Count = second.Count - 1, Achievements = second.Achievements.Where(a => a.Id != 400205).ToArray() };
-var completedCatalog = ExportBuilder.Build(partial, partial, catalog);
-Check(completedCatalog.Get<int>("count") == 1305 && completedCatalog.Rows("achievements").All(a => a.Get<int>("id") != 400205), "Absent anomalous record not exported");
-Check(actual.Rows("achievements").All(a => a.Get<int>("id") != 400205), "Materialized empty anomalous record not exported");
-Check(actual.Rows("categories").SelectMany(c => c.Rows("groups")).All(g => !g["achievementIds"]!.AsArray().Any(id => id!.GetValue<int>() == 400205)), "Anomaly absent from hierarchy references");
-Check(actual.Get<int>("unknownCount") == 0 && actual["astriteSummary"]!["configuredTotal"]!.GetValue<int>() == 8800, "Counts and rewards reflect filtered export");
-Check(actual.Rows("languageCoverage").All(c => c.Get<int>("mainCount") == 1305), "Language coverage reflects filtered export");
-var restored = second with { Achievements = second.Achievements.Select(a => a.Id == 400205 ? a with { CurrentProgress = 0, MaxProgress = 1 } : a).ToArray() };
-Check(ExportBuilder.Build(restored, restored, catalog).Get<int>("count") == 1306, "Valid progress restores anomalous record");
+
 var switchedFirst = Json.Load<Snapshot>(Path.Combine(root, "fixtures/local/csharp-session-10324-20261114-071240/attempt-8-first.json"));
 var switchedSecond = Json.Load<Snapshot>(Path.Combine(root, "fixtures/local/csharp-session-10324-20261114-071240/attempt-8-second.json"));
-Check(switchedSecond.Achievements.Count(a => a.HasGetReward == true || a.FinishTimeRaw > 0) == 1294, "Switched account includes 94 completed event achievements");
-var switchedExport = ExportBuilder.Build(switchedFirst, switchedSecond, catalog);
-Check(switchedExport.Get<int>("completedCount") == 1200 && switchedExport.Get<int>("starCount") == 1571, "Switched account main-menu totals preserved");
-Check(switchedExport.Rows("achievements").Count(a => a.Get<string>("status") is "reward_claimed" or "completed") == 1200, "Event completions excluded from main-menu validation and export");
-var wrongTotal = switchedSecond with { ModelFinishCount = 1201 };
-Reject(() => ExportBuilder.Build(wrongTotal, wrongTotal, catalog), "Stable but incorrect main-menu total rejected");
-ExportBuilder.Validate(switchedFirst, switchedSecond);
-Check(true, "Pre-refresh stability check accepts full model without catalog");
-var withoutTimes = switchedSecond with { Achievements = switchedSecond.Achievements.Select(a => a.HasGetReward == true ? a with { FinishTimeRaw = null } : a).ToArray() };
-Check(ExportBuilder.Build(withoutTimes, withoutTimes, catalog).Get<int>("completedCount") == 1200, "Claimed achievements do not require a timestamp");
-var eventIds = catalog.Rows("achievements").Where(a => !a.Get<bool>("inMainMenu")).Select(a => a.Get<int>("id")).ToHashSet();
-var eventGroupIds = catalog.Rows("groups").Where(g => g.Get<int>("categoryId") > 4).Select(g => g.Get<int>("id")).ToHashSet();
-var changedEvents = switchedSecond with {
-    Achievements = switchedSecond.Achievements.Select(a => eventIds.Contains(a.Id) ? a with { CurrentProgress = (a.CurrentProgress ?? 0) + 1 } : a).ToArray(),
-    GroupStates = switchedSecond.GroupStates.Select(g => eventGroupIds.Contains(g.Id) ? g with { Unlocked = !g.Unlocked } : g).ToArray()
-};
-Check(JsonNode.DeepEquals(switchedExport, ExportBuilder.Build(switchedFirst, changedEvents, catalog)), "Non-exported event changes do not block or alter main export");
-Reject(() => ExportBuilder.Validate(switchedFirst, changedEvents), "Before catalog refresh full-model stability is still required");
-var mainRecord = switchedSecond.Achievements.First(a => !eventIds.Contains(a.Id));
-var changedMain = switchedSecond with { Achievements = switchedSecond.Achievements.Select(a => a.Id == mainRecord.Id ? a with { CurrentProgress = (a.CurrentProgress ?? 0) + 1 } : a).ToArray() };
-Reject(() => ExportBuilder.Build(switchedFirst, changedMain, catalog), "Changing main achievement progress still rejected");
+
 int metadataReads = 0;
 byte[] FakeMemory(long address, int size)
 {
@@ -136,7 +82,7 @@ var preflightOptions = new Options("export", root, preflightGame, preflightOutpu
 var preflight = CollectionError(() => Workflow.Run(preflightOptions, CancellationToken.None));
 var persistedFailure = Json.Read(Path.Combine(preflightOutput, "export-result.json"));
 Check(preflight.Diagnostic is { Code: "unsupportedRuntime", Phase: "preflight", Directory: not null } diagnostic &&
-    diagnostic.Detail.Contains(RuntimeProfile.Hash) && diagnostic.Detail.Contains(Catalog.HashFile(preflightRuntime)) &&
+    diagnostic.Detail.Contains(RuntimeProfile.Hash) && diagnostic.Detail.Contains(GameResources.HashFile(preflightRuntime)) &&
     File.Exists(Path.Combine(diagnostic.Directory, "collection-error.json")) &&
     persistedFailure["pid"] is null && persistedFailure["diagnostic"]?["id"]?.GetValue<string>() == diagnostic.Id &&
     File.ReadAllText(previousExport) == "previous result", "Runtime mismatch stops before game launch and preserves the last export");
@@ -148,9 +94,6 @@ try { using (timings.Measure("failure")) throw new InvalidDataException("fixture
 var stage = timings.Measure("success"); stage.Dispose(); stage.Dispose();
 var timingRows = JsonNode.Parse(File.ReadAllText(Path.Combine(timingDirectory, "timings.json")))!.AsArray();
 Check(timingRows.Count == 2 && messages.Count == 4, "Stage timings survive exceptions and dispose only once");
-
-
-
 
 var uidStart = new DateTime(2026, 11, 14, 8, 0, 0);
 Check(LogEvidence.CurrentUid("[2026.11.14-08.00.12:623][265][GameThread]Sharphereal: Display: [C#][1150][Info][Log] 设置当前UID [UID: 10001]", uidStart) == "10001", "Current game UID extracted");
@@ -174,13 +117,7 @@ foreach (bool bom in new[] { false, true })
     File.WriteAllBytes(path, bom ? [0xEF, 0xBB, 0xBF, .. content] : content);
     Check(LogEvidence.CurrentUid(LogEvidence.ReadText(path), uidStart) == "10002", $"UID log decoding encoded={encoded}, BOM={bom}");
 }
-ExportBuilder.SaveViews(actual, Path.Combine(output, "account-a"));
-ExportBuilder.SaveViews(switchedExport, Path.Combine(output, "account-b"));
-Check(actual.Rows("achievements").All(a => a.Get<int>("id") != 201196), "Deprecated achievement excluded");
-Check(actual.Rows("categories").SelectMany(c => c.Rows("groups")).All(g => !g["achievementIds"]!.AsArray().Any(id => id!.GetValue<int>() == 201196)), "Deprecated achievement removed from hierarchy");
-var restoredCatalog = (JsonObject)catalog.DeepClone();
-restoredCatalog.Rows("achievements").Single(a => a.Get<int>("id") == 201196)["texts"]!["zh-Hans"]!["title"] = "正式成就";
-Check(ExportBuilder.Build(first, second, restoredCatalog).Rows("achievements").Any(a => a.Get<int>("id") == 201196), "Official replacement title restores achievement");
+
 var compact = AccountExport.Build(first, second, "10001", "test-resources");
 var compactB = AccountExport.Build(switchedFirst, switchedSecond, "10002", "test-resources");
 Check(compact.Get<int>("schemaVersion") == 3 && compact.Get<int>("count") == second.Count, "Compact export preserves all observed IDs");
@@ -188,12 +125,14 @@ Check(compact["languages"] is null && compact["categories"] is null && compact.R
 Check(compact.Rows("achievements").Any(a => a.Get<int>("id") == 201196), "Exclusions belong to website, not account capture");
 Reject(() => AccountExport.Build(first, second with { ModelStarCount = second.ModelStarCount + 1 }, null, "test"), "Unstable compact export rejected");
 Reject(() => AccountExport.Build(first, second with { Achievements = [second.Achievements[0], .. second.Achievements.Skip(2), second.Achievements[0]] }, null, "test"), "Duplicate compact IDs rejected");
+var changedGroup = second.GroupStates[0] with { Unlocked = !second.GroupStates[0].Unlocked };
+Reject(() => AccountExport.Build(first, second with { GroupStates = [changedGroup, .. second.GroupStates.Skip(1)] }, null, "test"), "Changing group state rejected");
 var newId = new Achievement(999999, -1, -1, 0, 1, false, 0);
 var future = second with { Count = second.Count + 1, Achievements = [.. second.Achievements, newId] };
 Check(AccountExport.Build(future, future, null, "test").Rows("achievements").Any(a => a.Get<int>("id") == 999999), "New IDs export without a catalog");
-AccountExport.Save(compact, Path.Combine(output, "compact-a"));
-AccountExport.Save(compactB, Path.Combine(output, "compact-b"));
-Check(typeof(AccountExport).Assembly.GetType("MonoCatalogBridge") is null, "Published exporter excludes injection bridge");
+string saved = AccountExport.Save(compact, Path.Combine(output, "compact-a"));
+Check(JsonNode.DeepEquals(compact, Json.Read(saved)), "Account export round-trips after atomic save");
+Check(compactB.Get<int>("completedCount") == 1200 && compactB.Get<int>("starCount") == 1571, "Switched account totals preserved");
 Check(typeof(AccountExport).Assembly.GetManifestResourceNames().Length == 0, "Exporter has no embedded catalog or exclusions");
 Console.WriteLine($"{tests} assertions passed; both account snapshots validated.");
 
@@ -219,7 +158,7 @@ static string FixedResourceFingerprint()
         WriteFile("Client/Saved/Resources/patch/resource.pak", 3);
         WriteFile("Client/Content/Paks/Video/ignored.pak", 5);
         WriteFile("Client/Saved/Resources/patch/ignored.sig", 6);
-        return Catalog.Fingerprint(Path.Combine(fixture.FullName, "Wuthering Waves.exe"));
+        return GameResources.Fingerprint(Path.Combine(fixture.FullName, "Wuthering Waves.exe"));
     }
     finally
     {
