@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <ApplicationManifest>app.manifest</ApplicationManifest><AssemblyName>WuwaAchievementExport</AssemblyName>
+    <ApplicationIcon>Assets/achievement-tab.ico</ApplicationIcon>
+    <PublishTrimmed>false</PublishTrimmed><PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="$(ApplicationIcon)" />
+    <EmbeddedResource Include="Assets/caption-achievement-*.png" LogicalName="%(Filename)%(Extension)" />
+    <EmbeddedResource Include="../../achievement-website/src/i18n/*.json" LogicalName="Locale.%(Filename).json" />
+    <ProjectReference Include="../Wuwa.Export/Wuwa.Export.csproj" />
+    <ProjectReference Include="../Wuwa.Transfer/Wuwa.Transfer.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+  </ItemGroup>
+  <Target Name="BuildDesktopUi" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)/../.." Command="pnpm --filter achievement-website build" />
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)/../scripts/package-ui.ps1&quot;" />
+    <ItemGroup>
+      <_DesktopUiFile Include="obj/desktop-ui/**/*" />
+      <EmbeddedResource Include="@(_DesktopUiFile)" LogicalName="DesktopUi/$([System.String]::Copy('%(_DesktopUiFile.RecursiveDir)').Replace('\', '/'))%(_DesktopUiFile.Filename)%(_DesktopUiFile.Extension)" />
+    </ItemGroup>
+  </Target>
+  <!-- Runtime-pack satellites are not filtered by SatelliteResourceLanguages. -->
+  <Target Name="FilterBundledFrameworkLanguages" AfterTargets="PrepareForBundle" BeforeTargets="_GenerateSingleFileBundleInputCache">
+    <ItemGroup>
+      <FilesToBundle Remove="@(FilesToBundle)" Condition="$([System.String]::Copy('%(FilesToBundle.RelativePath)').EndsWith('.resources.dll')) and !$([System.String]::Copy('%(FilesToBundle.RelativePath)').StartsWith('zh-Hans'))" />
+    </ItemGroup>
+  </Target>
+</Project>

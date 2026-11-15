@@ -1,0 +1,30 @@
+/* Native scrolling stays enabled; only browser-drawn tracks are hidden. */
+* {
+  scrollbar-width: none !important;
+}
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+.w-scrollbar {
+  --os-size: 10px;
+  --os-padding-perpendicular: 2px;
+  --os-padding-axis: 4px;
+  --os-track-border-radius: 999px;
+  --os-handle-border-radius: 999px;
+  --os-handle-bg: color-mix(in srgb, var(--color-muted) 45%, transparent);
+  --os-handle-bg-hover: color-mix(in srgb, var(--color-muted) 70%, transparent);
+  --os-handle-bg-active: var(--color-muted);
+  --os-handle-min-size: 28px;
+  --os-handle-interactive-area-offset: 3px;
+}
+.sidebar .w-scrollbar {
+  --color-muted: var(--color-nav-muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-scrollbar,
+  .w-scrollbar * {
+    transition: none !important;
+  }
+}

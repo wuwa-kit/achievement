@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": 201196,
+      "reason": "客户端明确标记为废弃，不参与成就统计。",
+      "condition": "titleEquals",
+      "language": "zh-Hans",
+      "title": "dnt/这是一个废弃的成就"
+    },
+    {
+      "id": 400205,
+      "reason": "当前客户端未显示，且未提供进度；暂不参与成就统计。",
+      "condition": "missingProgress"
+    }
+  ]
+}

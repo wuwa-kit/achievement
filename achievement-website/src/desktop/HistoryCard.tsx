@@ -1,0 +1,87 @@
+import { formatDate } from '../i18n/index.ts'
+import { useRef, useState } from 'react'
+import { WButton } from '../components/ui/WButton'
+import { WPopover } from '../components/ui/WPopover'
+import { WTooltip } from '../components/ui/WTooltip'
+import { WSvg } from '../components/ui/WSvg'
+import type { HistoryEntry, HistoryExportFormat } from './bridge'
+import { useTranslation } from 'react-i18next'
+
+export function HistoryCard({
+  entry,
+  disabled,
+  onExport,
+  onDelete,
+}: {
+  entry: HistoryEntry
+  disabled: boolean
+  onExport: (format: HistoryExportFormat) => void
+  onDelete: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const exportRef = useRef<HTMLButtonElement>(null)
+  const { t } = useTranslation()
+  return (
+    <div className="desktop-history-card flex items-center gap-4 rounded-[9px] border border-(--color-border) bg-(--color-surface) px-[18px] py-2.5">
+      <div className="desktop-history-info flex min-w-0 flex-1 items-center gap-3">
+        <div className="min-w-0 wrap-anywhere">
+          <div className="desktop-history-uid text-[15px]">{`UID ${entry.uid}`}</div>
+          <div className="desktop-history-time mt-1.5 text-[12px] text-(--color-muted)">
+            {formatDate(entry.exportedAt)}
+          </div>
+        </div>
+        <WTooltip text={t('desktop.achievements')}>
+          <span className="desktop-history-count inline-flex shrink-0 items-center gap-1.5 text-[13px] text-(--color-muted)">
+            <WSvg name="trophy" size={16} />
+            {`${entry.completedCount}/${entry.totalCount}`}
+          </span>
+        </WTooltip>
+      </div>
+      <div className="flex shrink-0 flex-col gap-1">
+        <WTooltip text={t('common.deleteArchive')}>
+          <WButton
+            className="grid size-8 place-items-center rounded-md enabled:hover:bg-(--color-surface-soft)"
+            data-testid="删除档案"
+            disabled={disabled}
+            onClick={onDelete}
+          >
+            <WSvg name="trash-2" size={18} />
+          </WButton>
+        </WTooltip>
+        <WTooltip text={t('desktop.exportOptions')}>
+          <WButton
+            ref={exportRef}
+            className="grid size-8 place-items-center rounded-md enabled:hover:bg-(--color-surface-soft) data-[expanded=true]:bg-(--color-surface-soft)"
+            data-testid="历史记录导出"
+            disabled={disabled}
+            data-expanded={open}
+            onClick={() => setOpen(!open)}
+          >
+            <WSvg name="arrow-down-to-line" size={18} />
+          </WButton>
+        </WTooltip>
+      </div>
+      <WPopover
+        open={open}
+        onOpenChange={setOpen}
+        anchorRef={exportRef}
+        placement="bottom-end"
+        className="desktop-history-menu [--popover-padding:5px]"
+      >
+        {(['web', 'json'] as const).map((format) => (
+          <WButton
+            key={format}
+            className="block w-full rounded-[5px] px-3.5 py-2.5 text-left text-[13px] enabled:hover:bg-(--color-surface-soft)"
+            disabled={disabled}
+            onClick={() => {
+              setOpen(false)
+              onExport(format)
+            }}
+          >
+            {format === 'json' ? t('common.exportAchievementFile') : t('desktop.' + format)}
+          </WButton>
+        ))}
+      </WPopover>
+    </div>
+  )
+}

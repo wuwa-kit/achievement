@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN" class="font-sans">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#eef0f5" />
+    <script id="initial-theme">
+      ;(() => {
+        let mode = 'auto'
+        try {
+          const saved = window.chrome?.webview
+            ? window.__WUWA_SETTINGS__?.theme
+            : localStorage.getItem('wuwa-theme')
+          if (['auto', 'light', 'dark'].includes(saved)) mode = saved
+        } catch {}
+        const resolved =
+          mode === 'auto'
+            ? matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+            : mode
+        const root = document.documentElement
+        const background = resolved === 'dark' ? '#111521' : '#eef0f5'
+        root.dataset.themeMode = mode
+        root.dataset.theme = resolved
+        root.style.colorScheme = resolved
+        root.style.backgroundColor = background
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', background)
+      })()
+    </script>
+    <meta
+      name="description"
+      content="本地鸣潮成就档案：浏览分类、进度、隐藏成就、多语言文本与星声奖励。"
+    />
+    <title>鸣潮 · 成就档案</title>
+    <link rel="icon" type="image/png" href="/src/assets/achievement-icons/achievement-app.png" />
+  </head>
+  <body class="min-w-[360px]">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

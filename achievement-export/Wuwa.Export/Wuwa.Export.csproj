@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AssemblyName>Wuwa.Export</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>
+    <PublishTrimmed>false</PublishTrimmed>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <DiagnosticFolder>$(NuGetPackageRoot)dotnet-gcdump/10.0.750501/tools/net8.0/any</DiagnosticFolder>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="ExportBuilder.cs;AchievementExclusions.cs" />
+    <PackageDownload Include="dotnet-gcdump" Version="[10.0.750501]" />
+    <Compile Include="../Native/StartupProcess.cs;../Native/LogEvidence.cs;../Native/HeapObjects.cs;../Native/ProcessProbe.cs;../Native/BinaryInspector.cs" Link="Native/%(Filename)%(Extension)" />
+    <Reference Include="$(DiagnosticFolder)/*.dll"><Private>true</Private></Reference>
+  </ItemGroup>
+</Project>

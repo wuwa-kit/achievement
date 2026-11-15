@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <mask id="achievement-hidden-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+    <path fill="#fff" d="M0 0h24v24H0z" />
+    <path d="m3 3 18 18" stroke="#000" stroke-width="5" />
+  </mask>
+  <path
+    fill="currentColor"
+    fill-rule="evenodd"
+    mask="url(#achievement-hidden-cut)"
+    d="M1.5 12 6.8 7.1 12 5.3l5.2 1.8 5.3 4.9-5.3 4.9-5.2 1.8-5.2-1.8L1.5 12ZM8.2 12 12 8.2l3.8 3.8-3.8 3.8L8.2 12Z"
+  />
+  <path d="m3 3 18 18" stroke="currentColor" stroke-width="2.2" />
+</svg>

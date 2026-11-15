@@ -1,0 +1,52 @@
+# 磁盘字符串解析验证
+
+2026-11-14，本机基础资源及 3.8.10 热更新资源验证成功。整个过程仅使用文件读取、AES 解码及 SQLite 只读查询，没有启动游戏、读取游戏进程或加载查询模块，也没有修改安装目录。
+
+## 验证结果
+
+- 扫描 `Client/Content/Paks` 和 `Client/Saved/Resources`，共 454 个 PAK，均为 v12；452 个索引加密，2 个索引未加密。
+- 通过公开资源密钥识别候选解码参数；随后校验全部 454 个包的主索引、目录索引 SHA-1，全部通过。候选挂载路径可读本身不作为解码成功依据。
+- 找到 `Client/Content/Aki/ConfigDB/<language>/lang_multi_text.db`、`lang_multi_text_1sthalf.db`、`lang_hot_patch.db`、`lang_achievement.db`，以及 `db_achievement.db`。
+- 提取所选数据库共 82 个，全部呈现 SQLite 文件头。当前目标条目不压缩，使用 CustomData=2 的前 0x800 字节加密。解析器拒绝未支持的压缩方式或标记，不猜测内容。
+- 查询 `MultiText` 表的 `Id`、`Content`、`RedirectDbIndex`。例如 `Achievement_100101_Name` 为简中“抛瓦！”、英文“POWER!”；`Achievement_201196_Name` 为简中“dnt/这是一个废弃的成就”。
+- 对照现有 `data/achievement-catalog.json` 的成就名称、描述、小类及大类名称：13 种语言，每种 2,791 个字段，共 36,283 次比较，差异 **0**。包括缺失值比较；这不代表 13 种语言都有翻译。id/ru/vi 全部对应空值。
+- 对参与字符串查询的数据库执行 SQLite `PRAGMA quick_check`，全部通过。
+
+## 复跑
+
+需要支持 `node:sqlite` 的 Node（项目固定版本可用）。以下从仓库根目录执行；输出位于被 Git 忽略的 `artifacts/static-strings/`，不要提交整份游戏数据库。
+
+```powershell
+New-Item -ItemType Directory -Force artifacts/static-strings
+Invoke-WebRequest 'https://yarik0chka.github.io/wuwa-keys/keys.json' -OutFile artifacts/static-strings/public-keys.json
+node research/tools/inventory-static-paks.mjs
+node research/tools/inspect-static-strings.mjs
+node research/tools/extract-static-strings.mjs
+node research/tools/compare-static-strings.mjs
+```
+
+第一步脚本可接受两个参数：`Client` 目录、公开密钥 JSON 路径。其余脚本读取上一步的本地结果，不执行网络请求。所有脚本只在仓库 `artifacts/static-strings` 下写入输出。
+
+主要输出：
+
+- `directory-report.json`：包目录、数量及索引校验结果。
+- `extraction-report.json`：数据库来源包、虚拟路径、提取文件路径及 SHA-256。
+- `achievement-strings.json`：离线读出的成就及分类字符串。
+- `comparison.json`：各语言比较数量、缺失数量及差异详情。
+
+## 当前边界
+
+这是验证脚本，尚未替换正式导出器的配置查询流程。
+
+字符串查询以已有配置目录中的 text key 为范围，而不是借用其文本值；已有文本值仅用于最终对照。要完全替代运行时配置查询，还需解析 `db_achievement.db` 中的 `BinData`，以及分类、星级和奖励配置的结构。
+
+本机同一路径的基础包/补丁按扫描结果后者覆盖；正式集成必须显式实现客户端挂载优先级、删除记录和版本选择，不能把目录遍历顺序作为通用规则。本次选中的目标字段未遇到非零 RedirectDbIndex；脚本从字符串库中取唯一非空值，有冲突则记为差异，没有实现通用重定向优先级。未来版本需另行验证，不能无条件沿用。
+
+公开密钥可能随版本变化。密钥来自社区，正式工具需要明确配置来源、离线缓存和失败处理，不应默默回退到进程内加载。
+
+## 格式参考
+
+- [CUE4Parse FPakInfo](https://github.com/FabianFG/CUE4Parse/blob/master/CUE4Parse/UE4/Pak/Objects/FPakInfo.cs)：包尾结构与版本。
+- [CUE4Parse FPakEntry](https://github.com/FabianFG/CUE4Parse/blob/master/CUE4Parse/UE4/Pak/Objects/FPakEntry.cs)：鸣潮 v12 条目布局。
+- [CUE4Parse PartialEncryptionPakFileReader](https://github.com/FabianFG/CUE4Parse/blob/master/CUE4Parse/GameTypes/Misc/UE4/Paks/PartialEncryptionPakFileReader.cs)：按 CustomData 处理部分加密。
+- [wuwa-keys](https://github.com/yarik0chka/wuwa-keys)：公开资源解码参数来源。

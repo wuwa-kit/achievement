@@ -1,0 +1,11 @@
+{
+  "name": "achievement-export",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/dotnet.ts build",
+    "test": "node scripts/dotnet.ts test",
+    "publish:desktop": "node scripts/dotnet.ts publish",
+    "publish:test-host": "node scripts/dotnet.ts test-host"
+  }
+}

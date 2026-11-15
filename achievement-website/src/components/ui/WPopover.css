@@ -1,0 +1,28 @@
+.w-popover {
+  opacity: 0;
+  translate: 0 -4px;
+  transition:
+    opacity 160ms ease,
+    translate 160ms ease,
+    display 160ms allow-discrete,
+    overlay 160ms allow-discrete,
+    var(--w-color-transition);
+}
+.w-popover:popover-open {
+  opacity: 1;
+  translate: 0 0;
+}
+.w-popover[data-state='closing'] {
+  pointer-events: none;
+}
+@starting-style {
+  .w-popover:popover-open {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-popover {
+    transition: none;
+  }
+}

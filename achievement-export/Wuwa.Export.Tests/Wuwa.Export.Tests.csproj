@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0-windows</TargetFramework><RuntimeIdentifier>win-x64</RuntimeIdentifier><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../Wuwa.Export/Wuwa.Export.csproj" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="../Wuwa.Export/ExportBuilder.cs;../Wuwa.Export/AchievementExclusions.cs" />
+    <EmbeddedResource Include="../../data/achievement-exclusions.json" LogicalName="achievement-exclusions.json" />
+  </ItemGroup>
+</Project>

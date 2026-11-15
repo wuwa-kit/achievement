@@ -1,0 +1,102 @@
+@import 'tailwindcss' source(none);
+
+@source './';
+@source '../index.html';
+
+@custom-variant compact {
+  @media (max-width: 1250px) {
+    @slot;
+  }
+}
+@custom-variant sidebar-overlay {
+  @media (max-width: 900px) {
+    @slot;
+  }
+}
+@custom-variant narrow {
+  @media (max-width: 600px) {
+    @slot;
+  }
+}
+@custom-variant desktop-narrow {
+  @media (max-width: 560px) {
+    @slot;
+  }
+}
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@utility w-transition-colors {
+  transition: var(--w-color-transition);
+}
+
+@font-face {
+  font-family: 'mc-gamefont';
+  src: url('https://media-cdn-mingchao.kurogame.com/font/H7GBK-Heavy.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'desktop-gamefont';
+  src: url('/fonts/H7GBK-Heavy.ttf') format('truetype');
+  font-weight: 900;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: 'mc-gamefont', Inter, 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-desktop: 'desktop-gamefont', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-mono: 'Cascadia Code', Consolas, monospace;
+}
+
+@layer base {
+  :root {
+    font-synthesis: none;
+    --w-color-transition-duration: 160ms;
+    --w-color-transition:
+      color var(--w-color-transition-duration) ease,
+      background-color var(--w-color-transition-duration) ease,
+      border-color var(--w-color-transition-duration) ease,
+      outline-color var(--w-color-transition-duration) ease,
+      accent-color var(--w-color-transition-duration) ease,
+      box-shadow var(--w-color-transition-duration) ease;
+  }
+  button:focus-visible,
+  a:focus-visible,
+  input:not(.w-input):focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 4px;
+  }
+  ::selection {
+    background-color: var(--color-selection);
+    color: var(--color-text);
+  }
+}
+
+/* The marker is centered on the parent list’s border. */
+.sub-navigation button[data-selected='true']::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--sub-nav-inset) - var(--sub-nav-line-width) / 2);
+  inset-block: 5px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--color-nav-gold);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+[hidden] {
+  display: none !important;
+}

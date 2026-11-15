@@ -1,0 +1,3 @@
+<Window x:Class="Wuwa.Desktop.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:wv="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf" Title="鸣潮 · 成就导出" Icon="Assets/achievement-tab.ico" Width="680" Height="600" MinWidth="580" MinHeight="480" WindowStartupLocation="CenterScreen" Background="#EEF0F5" Closing="Window_Closing">
+  <wv:WebView2 x:Name="Browser"/>
+</Window>

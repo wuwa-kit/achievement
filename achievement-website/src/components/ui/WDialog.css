@@ -1,0 +1,51 @@
+.w-dialog {
+  opacity: 0;
+  scale: 0.96;
+  transition:
+    opacity 200ms ease,
+    scale 200ms ease,
+    display 200ms allow-discrete,
+    overlay 200ms allow-discrete,
+    var(--w-color-transition);
+}
+
+.w-dialog[open] {
+  opacity: 1;
+  scale: 1;
+}
+
+.w-dialog::backdrop {
+  opacity: 0;
+  transition:
+    opacity 200ms ease,
+    display 200ms allow-discrete,
+    overlay 200ms allow-discrete,
+    background-color var(--w-color-transition-duration) ease;
+}
+
+.w-dialog[open]::backdrop {
+  opacity: 1;
+}
+
+.w-dialog[data-state='closing'],
+.w-dialog[data-state='closing']::backdrop {
+  pointer-events: none;
+}
+
+@starting-style {
+  .w-dialog[open] {
+    opacity: 0;
+    scale: 0.96;
+  }
+
+  .w-dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .w-dialog,
+  .w-dialog::backdrop {
+    transition: none;
+  }
+}
