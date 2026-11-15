@@ -15,6 +15,10 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <DiagnosticFolder>$(NuGetPackageRoot)dotnet-gcdump/10.0.750501/tools/net8.0/any</DiagnosticFolder>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(DesktopLite)' == 'true'">
+    <SelfContained>false</SelfContained>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="ExportBuilder.cs;AchievementExclusions.cs" />
     <PackageDownload Include="dotnet-gcdump" Version="[10.0.750501]" />

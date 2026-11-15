@@ -9,6 +9,9 @@
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(DesktopLite)' == 'true'">
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
   </PropertyGroup>
@@ -35,5 +38,8 @@
     <ItemGroup>
       <FilesToBundle Remove="@(FilesToBundle)" Condition="$([System.String]::Copy('%(FilesToBundle.RelativePath)').EndsWith('.resources.dll')) and !$([System.String]::Copy('%(FilesToBundle.RelativePath)').StartsWith('zh-Hans'))" />
     </ItemGroup>
+  </Target>
+  <Target Name="RenameLiteExecutable" AfterTargets="Publish" Condition="'$(DesktopLite)' == 'true'">
+    <Move SourceFiles="$(PublishDir)$(AssemblyName).exe" DestinationFiles="$(PublishDir)$(AssemblyName)-Lite.exe" />
   </Target>
 </Project>

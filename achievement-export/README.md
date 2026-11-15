@@ -8,7 +8,7 @@
 
 在项目根目录运行 mise exec -- pnpm --filter achievement-export build、test 或 publish:desktop。
 
-桌面入口：artifacts/app-compact/WuwaAchievementExport.exe；CLI：publish-compact/Wuwa.Export.exe。Windows x64 自包含发布物无需安装 SDK，桌面只需分发 WuwaAchievementExport.exe，其他 PDB 和 XML 文件用于调试，无需附带。双击桌面接受 UAC，点击运行图标并登录游戏；流程成功后关闭游戏，在下方新增历史卡片。
+桌面提供两个 Windows x64 单文件。标准版 `artifacts/app-compact/WuwaAchievementExport.exe` 内置 .NET，Lite 版 `artifacts/app-lite/WuwaAchievementExport-Lite.exe` 需要安装 .NET 10 Desktop Runtime（x64）。CLI 位于 `publish-compact/Wuwa.Export.exe`。双击桌面程序并接受 UAC 提示，点击运行图标并登录游戏。流程成功后关闭游戏，下方会新增历史卡片。
 
 桌面发送目标由构建配置决定。Debug 使用 `http://127.0.0.1:5173`，Release 使用 `https://wu.songe.li`。
 
@@ -43,7 +43,7 @@ HttpListener（Windows HTTP.sys）临时服务注册回环地址的随机端口�
 
 ## 分发体积优化
 
-正式桌面启用自包含单文件压缩，原生依赖运行时自动解压加载；无需预装 .NET。移除 ASP.NET Core 框架引用，交接使用 HttpListener，保留 Origin、Host、密钥、请求大小、超时、确认与回环客户端检查。最多同时处理 16 个请求。Windows 桌面保持 requireAdministrator 清单。
+标准版启用自包含单文件压缩，两个版本的原生依赖均在运行时自动解压加载。移除 ASP.NET Core 框架引用，交接使用 HttpListener，保留 Origin、Host、密钥、请求大小、超时、确认与回环客户端检查。最多同时处理 16 个请求。Windows 桌面保持 requireAdministrator 清单。
 
 仅保留简体中文框架卫星资源和默认资源。SatelliteResourceLanguages 不会过滤所有运行时资源，因此在 PrepareForBundle 后额外过滤；网页成就多语言不受影响。
 

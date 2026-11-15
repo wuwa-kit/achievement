@@ -28,7 +28,7 @@ mise exec -- pnpm publish:desktop
 
 涉及桌面的构建与测试需要 Windows。回归测试依赖未入库的本机样本，准备方式见 [样本说明](../fixtures/README.md)。可用 pnpm --filter achievement-website 或 pnpm --filter achievement-export 单独运行子项目命令。
 
-桌面产物为 achievement-export/artifacts/app-compact/WuwaAchievementExport.exe，自包含分发无需安装 Node、pnpm 或 .NET。自动构建和发布配置见 [构建与发布](releasing.md)。
+桌面产物为 `achievement-export/artifacts/app-compact/WuwaAchievementExport.exe`（内置 .NET）和 `achievement-export/artifacts/app-lite/WuwaAchievementExport-Lite.exe`（使用系统的 .NET 10 Desktop Runtime x64）。自动构建和发布配置见 [构建与发布](releasing.md)。
 
 ## 数据流程
 

@@ -29,28 +29,33 @@ jobs:
         run: |
           if ($env:RELEASE_REF_TYPE -ne 'tag') { throw '请选择标签运行 release 工作流。' }
           ./scripts/release-notes.ps1 -Tag $env:RELEASE_TAG -OutputPath artifacts/release-notes.md
-      - uses: actions/setup-dotnet@v5
+      - uses: jdx/mise-action@v5
         with:
-          global-json-file: achievement-export/global.json
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "26.13.1"
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Publish compressed standalone desktop
-        run: dotnet publish Wuwa.Desktop -c Release --self-contained true -o artifacts/app-compact
-      - name: Package desktop
+          cache: false
+      - run: mise exec -- pnpm install --frozen-lockfile
+      - name: Publish Windows desktop executables
+        run: mise exec -- node scripts/dotnet.ts publish-desktop
+      - name: Name release executables
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          Compress-Archive -LiteralPath artifacts/app-compact/WuwaAchievementExport.exe -DestinationPath artifacts/wuwa-desktop-compact.zip
+          $releaseDir = 'artifacts/release'
+          New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null
+          $sources = @(
+            'artifacts/app-compact/WuwaAchievementExport.exe',
+            'artifacts/app-lite/WuwaAchievementExport-Lite.exe'
+          )
+          foreach ($source in $sources) {
+            $file = Get-Item -LiteralPath $source
+            $name = "$($file.BaseName)-$($env:RELEASE_TAG)$($file.Extension)"
+            Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $releaseDir $name)
+          }
       - uses: actions/upload-artifact@v6
         with:
           name: wuwa-desktop-windows-x64
           compression-level: 0
           if-no-files-found: error
-          path: |
-            achievement-export/artifacts/app-compact/WuwaAchievementExport.exe
-            achievement-export/artifacts/wuwa-desktop-compact.zip
+          path: achievement-export/artifacts/release/*.exe
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -59,11 +64,11 @@ jobs:
         run: |
           $releaseArgs = @(
             'release', 'create', $env:RELEASE_TAG,
-            'artifacts/app-compact/WuwaAchievementExport.exe',
-            'artifacts/wuwa-desktop-compact.zip',
             '--verify-tag', '--title', $env:RELEASE_TAG,
             '--notes-file', 'artifacts/release-notes.md'
           )
+          $releaseArgs += Get-ChildItem -LiteralPath artifacts/release -File -Filter '*.exe' |
+            ForEach-Object FullName
           if ($env:RELEASE_TAG -match '-') { $releaseArgs += '--prerelease' }
           gh @releaseArgs
           if ($LASTEXITCODE -ne 0) { throw 'GitHub Release 发布失败。' }
