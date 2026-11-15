@@ -67,7 +67,7 @@ internal sealed class DesktopUpdater(string directory, HttpClient client)
         var release = JsonSerializer.Deserialize<UpdateRelease>(json, JsonOptions);
         if (release is null || release.SchemaVersion != 1 || string.IsNullOrWhiteSpace(release.Notes) ||
             !TryReadVersion(release.Version, out var latest, out var preview) || preview ||
-            !ValidAsset(release.Assets?.Standard, $"WuwaAchievementExport-{release.Version}.exe") ||
+            !ValidAsset(release.Assets?.Standard, $"WuwaAchievementExport-Full-{release.Version}.exe", $"WuwaAchievementExport-{release.Version}.exe") ||
             !ValidAsset(release.Assets?.Lite, $"WuwaAchievementExport-Lite-{release.Version}.exe") ||
             !TryReadVersion(currentTag, out var current, out var currentIsPreview))
             throw new InvalidDataException("Invalid desktop update manifest or version.");
@@ -158,8 +158,9 @@ internal sealed class DesktopUpdater(string directory, HttpClient client)
     private static bool HashMatches(byte[] hash, UpdateAsset asset) =>
         Convert.ToHexString(hash).Equals(asset.Sha256, StringComparison.OrdinalIgnoreCase);
 
-    private static bool ValidAsset(UpdateAsset? asset, string fileName) => asset is not null &&
-        asset.FileName == fileName && asset.Size is > 0 and <= MaxAssetSize &&
+    private static bool ValidAsset(UpdateAsset? asset, string fileName, string? legacyFileName = null) => asset is not null &&
+        (asset.FileName == fileName || (legacyFileName is not null && asset.FileName == legacyFileName)) &&
+        asset.Size is > 0 and <= MaxAssetSize &&
         asset.Sha256 is { Length: 64 } hash && hash.All(Uri.IsHexDigit);
 
     private static bool TryReadVersion(string? tag, out Version? version, out bool preview)

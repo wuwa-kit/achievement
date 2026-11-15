@@ -6,7 +6,7 @@ The Windows desktop app reads your Wuthering Waves achievement progress directly
 
 [Online preview](https://wu.songe.li)
 
-Download the [Standard edition](https://github.com/wuwa-kit/achievement/releases/download/v0.1.3/WuwaAchievementExport-v0.1.3.exe) or the [Lite edition](https://github.com/wuwa-kit/achievement/releases/download/v0.1.3/WuwaAchievementExport-Lite-v0.1.3.exe) for Windows x64. The Standard edition includes .NET. For the Lite edition, download and install the [.NET 10 Desktop Runtime (x64)](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe) separately.
+Download the [Standard edition](https://github.com/wuwa-kit/achievement/releases/download/v0.1.3/WuwaAchievementExport-Full-v0.1.3.exe) or the [Lite edition](https://github.com/wuwa-kit/achievement/releases/download/v0.1.3/WuwaAchievementExport-Lite-v0.1.3.exe) for Windows x64. The Standard edition includes .NET. For the Lite edition, download and install the [.NET 10 Desktop Runtime (x64)](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe) separately.
 
 ## Quick start
 

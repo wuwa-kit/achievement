@@ -50,7 +50,8 @@ jobs:
           $assets = @{}
           foreach ($edition in $sources.Keys) {
             $file = Get-Item -LiteralPath $sources[$edition]
-            $name = "$($file.BaseName)-$($env:RELEASE_TAG)$($file.Extension)"
+            $baseName = if ($edition -eq 'standard') { "$($file.BaseName)-Full" } else { $file.BaseName }
+            $name = "$baseName-$($env:RELEASE_TAG)$($file.Extension)"
             $destination = Join-Path $releaseDir $name
             Copy-Item -LiteralPath $file.FullName -Destination $destination
             $assets[$edition] = @{

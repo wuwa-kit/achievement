@@ -8,7 +8,7 @@ internal static class DesktopUpdaterTests
     public static async Task RunAsync(string directory)
     {
         const string tag = "v0.10.0";
-        const string standardName = "WuwaAchievementExport-v0.10.0.exe";
+        const string standardName = "WuwaAchievementExport-Full-v0.10.0.exe";
         const string liteName = "WuwaAchievementExport-Lite-v0.10.0.exe";
         var standardBytes = new byte[] { 10, 20, 30 };
         var liteBytes = new byte[] { 40, 50 };
@@ -42,6 +42,11 @@ internal static class DesktopUpdaterTests
         Check(await updater.CheckAsync("v0.10.0-beta.1") == new UpdateCheckResult("checked", release));
         Check(await updater.CheckAsync(tag) == new UpdateCheckResult("checked"));
         Check(await updater.CheckAsync("v0.11.0") == new UpdateCheckResult("checked"));
+
+        var legacyStandard = Asset("WuwaAchievementExport-v0.10.0.exe", standardBytes);
+        manifest = release with { Assets = release.Assets with { Standard = legacyStandard } };
+        Check(await updater.CheckAsync("v0.9.9") == new UpdateCheckResult("checked", manifest));
+        manifest = release;
 
         redirect = new Uri("https://github.com/wuwa-kit/achievement/releases/download/v0.10.0/update.json");
         manifestStatus = HttpStatusCode.NotFound;
