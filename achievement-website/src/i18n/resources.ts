@@ -15,6 +15,21 @@ export const appLanguages = Object.keys(translations) as AppLanguage[]
 export const isLanguage = (value: unknown): value is AppLanguage =>
   typeof value === 'string' && Object.hasOwn(translations, value)
 
+export const defaultLanguage: AppLanguage = 'en'
+
+export function detectLanguage(preferences: readonly string[]): AppLanguage {
+  for (const locale of preferences) {
+    const [language, subtag] = locale.toLowerCase().split('-')
+    if (language === 'zh') {
+      return subtag === 'hant' || subtag === 'tw' || subtag === 'hk' || subtag === 'mo'
+        ? 'zh-TW'
+        : 'zh-CN'
+    }
+    if (isLanguage(language)) return language
+  }
+  return defaultLanguage
+}
+
 // Language names are autonyms so the picker remains recognizable in every locale.
 export const contentLanguageCodes: Record<AppLanguage, keyof typeof zh.contentLanguages> = {
   'zh-CN': 'zh-Hans',

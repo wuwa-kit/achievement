@@ -18,6 +18,7 @@ export type WSvgName =
   | 'eye'
   | 'ellipsis'
   | 'file-json'
+  | 'file-export'
   | 'globe2'
   | 'github'
   | 'languages'

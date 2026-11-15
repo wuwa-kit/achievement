@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Text.Json.Nodes;
 using Wuwa.Desktop;
 
@@ -48,5 +49,35 @@ try
     Check(store.Delete(entries[0].Id) && store.List().Single().Uid == "456");
     Check(!File.Exists(archive));
     Console.WriteLine("UID validation, atomic account replacement, stale entries, deletion, and JSON checks passed.");
+
+    var diagnostics = Path.Combine(directory, "diagnostics");
+    var session = Directory.CreateDirectory(Path.Combine(diagnostics, "csharp-session-20261115")).FullName;
+    File.WriteAllText(Path.Combine(session, "gcdump.log"), "diagnostic output");
+    File.WriteAllText(Path.Combine(session, "achievement-snapshot.json"), "private snapshot");
+    File.WriteAllText(Path.Combine(session, "heap.gcdump"), "private heap");
+    var game = Path.Combine(directory, "game");
+    var logs = Directory.CreateDirectory(Path.Combine(game, "Client", "Saved", "Logs")).FullName;
+    File.WriteAllText(Path.Combine(game, "launcherDownloadConfig.json"), """{"appId":50004,"version":"3.8.0"}""");
+    var mount = Directory.CreateDirectory(Path.Combine(game, "Client", "Saved", "Resources", "3.8.0", "Mount")).FullName;
+    var scriptPak = $"Resource/3.8.11/pakchunk18-WindowsNoEditor_P,15,{new string('A', 40)},{new string('B', 40)}";
+    File.WriteAllText(Path.Combine(mount, "MountResource.txt"), scriptPak + ",,\n");
+    const string prefix = "[2026.11.15-08.00.12:623][265][GameThread]Sharphereal: Display: [C#][1150][Info][Log][YYZ][42] ";
+    File.WriteAllLines(Path.Combine(logs, "Client.log"),
+        [prefix + "设置当前UID [UID: 123456789] token=private", prefix + "当前母包_热更版本号 [version: 3.8.0_3.8.11]", prefix + "unrelated private log"]);
+    Check(DiagnosticArchive.FileName(DateTimeOffset.FromUnixTimeMilliseconds(1234)) == "wuwa-achievement-export-log-1234.zip");
+    var diagnosticZip = Path.Combine(directory, "diagnostic.zip");
+    DiagnosticArchive.Save(diagnosticZip, diagnostics, Path.Combine(game, "Wuthering Waves.exe"));
+    using var bundle = ZipFile.OpenRead(diagnosticZip);
+    Check(bundle.Entries.Select(entry => entry.FullName).Order().SequenceEqual(
+        ["collection/gcdump.log", "game/Client.log", "game/metadata.json"]));
+    using var logReader = new StreamReader(bundle.GetEntry("game/Client.log")!.Open());
+    string exportedLog = logReader.ReadToEnd();
+    Check(exportedLog.Contains("设置当前UID [UID: <redacted>]") && exportedLog.Contains("3.8.0_3.8.11"));
+    Check(!exportedLog.Contains("123456789") && !exportedLog.Contains("private"));
+    using var metadataReader = new StreamReader(bundle.GetEntry("game/metadata.json")!.Open());
+    var metadata = JsonNode.Parse(metadataReader.ReadToEnd());
+    Check(metadata?["launcherAppId"]?.GetValue<string>() == "50004");
+    Check(metadata?["scriptPakMount"]?.GetValue<string>() == scriptPak);
+    Console.WriteLine("Diagnostic archive contents, epoch filename, and log redaction passed.");
 }
 finally { Directory.Delete(directory, true); }

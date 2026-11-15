@@ -22,6 +22,8 @@
     "home": "ホームに戻る"
   },
   "desktop": {
+    "exportLogs": "ログをエクスポート",
+    "logsSaved": "ログを保存しました",
     "exportOptions": "エクスポートオプション",
     "history": "履歴",
     "noHistory": "エクスポートが完了すると、ここに履歴が表示されます",
@@ -241,6 +243,8 @@
     "textLanguage": "実績テキストの言語"
   },
   "native": {
+    "zipFilter": "ZIP アーカイブ (*.zip)|*.zip",
+    "logsSaveFailed": "ログのアーカイブを保存できませんでした",
     "startup": "デスクトップ画面を起動できません。Microsoft Edge WebView2 Runtime をインストールしてください",
     "assetsMissing": "デスクトップ画面のリソースがありません",
     "invalidSettings": "設定が無効です",

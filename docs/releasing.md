@@ -10,6 +10,6 @@
 CI 不读取或上传本机 `fixtures/local/` 和账号导出数据。
 
 
-发布前更新 [桌面更新日志](../achievement-export/CHANGELOG.md)，提交后推送对应版本标签。
+发布前用英文更新 [桌面更新日志](../achievement-export/CHANGELOG.md)，提交后推送对应版本标签。发布脚本会把更新日志底部的 `Lite edition requirements` 段落追加到每次发布说明的末尾。
 
 两个 EXE 均嵌入 React `/desktop` 界面和本地字体，均需 Microsoft Edge WebView2 Runtime。标准版内置 .NET，Lite 版使用系统已安装的 .NET 10 Desktop Runtime（x64）。release 工作流使用 mise 安装固定版本的构建工具。

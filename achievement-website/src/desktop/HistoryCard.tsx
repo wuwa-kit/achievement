@@ -4,16 +4,21 @@ import { WButton } from '../components/ui/WButton'
 import { WPopover } from '../components/ui/WPopover'
 import { WTooltip } from '../components/ui/WTooltip'
 import { WSvg } from '../components/ui/WSvg'
+import astriteIcon from '../assets/achievement-icons/astrite.png?no-inline'
+import { achievementTabIcon } from '../lib/achievement-icons'
+import type { HistorySummary } from '../stores/desktop'
 import type { HistoryEntry, HistoryExportFormat } from './bridge'
 import { useTranslation } from 'react-i18next'
 
 export function HistoryCard({
   entry,
+  summary,
   disabled,
   onExport,
   onDelete,
 }: {
   entry: HistoryEntry
+  summary: HistorySummary | null | undefined
   disabled: boolean
   onExport: (format: HistoryExportFormat) => void
   onDelete: () => void
@@ -23,19 +28,35 @@ export function HistoryCard({
   const { t } = useTranslation()
   return (
     <div className="desktop-history-card flex items-center gap-4 rounded-[9px] border border-(--color-border) bg-(--color-surface) px-[18px] py-2.5">
-      <div className="desktop-history-info flex min-w-0 flex-1 items-center gap-3">
+      <div className="desktop-history-info flex min-w-0 flex-1 items-center gap-6">
         <div className="min-w-0 wrap-anywhere">
           <div className="desktop-history-uid text-[15px]">{`UID ${entry.uid}`}</div>
           <div className="desktop-history-time mt-1.5 text-[12px] text-(--color-muted)">
             {formatDate(entry.exportedAt)}
           </div>
         </div>
-        <WTooltip text={t('desktop.achievements')}>
-          <span className="desktop-history-count inline-flex shrink-0 items-center gap-1.5 text-[13px] text-(--color-muted)">
-            <WSvg name="trophy" size={16} />
-            {`${entry.completedCount}/${entry.totalCount}`}
-          </span>
-        </WTooltip>
+        <div className="grid shrink-0 grid-cols-[16px_auto_auto] gap-y-1.5 font-mono text-[13px] whitespace-nowrap text-(--color-muted) tabular-nums">
+          <WTooltip text={t('desktop.achievements')}>
+            <span className="desktop-history-count col-span-3 grid grid-cols-subgrid items-center">
+              <img
+                src={achievementTabIcon}
+                alt=""
+                width={16}
+                height={16}
+                className="brightness-0"
+              />
+              <span className="ml-1.5 text-right">{entry.completedCount}</span>
+              <span>/{summary?.total ?? '—'}</span>
+            </span>
+          </WTooltip>
+          <WTooltip text={t('ui.astrite')}>
+            <span className="desktop-history-astrite col-span-3 grid grid-cols-subgrid items-center">
+              <img src={astriteIcon} alt="" width={16} height={16} />
+              <span className="ml-1.5 text-right">{summary?.completedAstrite ?? '—'}</span>
+              <span>/{summary?.astrite ?? '—'}</span>
+            </span>
+          </WTooltip>
+        </div>
       </div>
       <div className="flex shrink-0 flex-col gap-1">
         <WTooltip text={t('common.deleteArchive')}>

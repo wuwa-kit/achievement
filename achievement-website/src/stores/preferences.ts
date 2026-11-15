@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import i18n, { isLanguage, languageKey, type AppLanguage } from '../i18n'
+import i18n, { browserLanguage, isLanguage, languageKey, type AppLanguage } from '../i18n'
+import { defaultLanguage } from '../i18n/resources'
 import { isDesktop } from '../lib/environment'
 import { desktopBootstrap } from '../lib/bootstrap'
 import { wMessage } from './message'
@@ -21,7 +22,7 @@ let initialization: Promise<void> | undefined
 let writes = Promise.resolve()
 let revision = 0
 let persisted: Preferences = {
-  language: isLanguage(i18n.language) ? i18n.language : 'zh-CN',
+  language: isLanguage(i18n.language) ? i18n.language : defaultLanguage,
   mode: isTheme(desktopBootstrap?.theme)
     ? desktopBootstrap.theme
     : isTheme(document.documentElement.dataset.themeMode)
@@ -62,7 +63,7 @@ export const usePreferencesStore = create<PreferenceStore>((set, get) => ({
           const { getInitialDesktopSettings } = await import('../desktop/bridge')
           const settings = await getInitialDesktopSettings()
           persisted = {
-            language: isLanguage(settings.language) ? settings.language : 'zh-CN',
+            language: isLanguage(settings.language) ? settings.language : defaultLanguage,
             mode: isTheme(settings.theme) ? settings.theme : 'auto',
           }
           set({ ...persisted, ready: true })
@@ -111,7 +112,7 @@ const onStorage = (event: StorageEvent) => {
   if (isDesktop) return
   if (event.key === languageKey || event.key === null)
     usePreferencesStore.setState({
-      language: isLanguage(event.newValue) ? event.newValue : 'zh-CN',
+      language: isLanguage(event.newValue) ? event.newValue : browserLanguage(),
     })
   if (event.key === 'wuwa-theme' || event.key === null)
     usePreferencesStore.setState({ mode: isTheme(event.newValue) ? event.newValue : 'auto' })

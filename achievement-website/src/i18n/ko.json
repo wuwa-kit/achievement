@@ -22,6 +22,8 @@
     "home": "홈으로 돌아가기"
   },
   "desktop": {
+    "exportLogs": "로그 내보내기",
+    "logsSaved": "로그가 저장되었습니다",
     "exportOptions": "내보내기 옵션",
     "history": "기록",
     "noHistory": "내보내기가 완료되면 여기에 기록이 표시됩니다",
@@ -241,6 +243,8 @@
     "textLanguage": "업적 텍스트 언어"
   },
   "native": {
+    "zipFilter": "ZIP 압축 파일 (*.zip)|*.zip",
+    "logsSaveFailed": "로그 압축 파일을 저장할 수 없습니다",
     "startup": "데스크톱 화면을 시작하지 못했습니다. Microsoft Edge WebView2 Runtime을 설치해 주세요",
     "assetsMissing": "데스크톱 화면 리소스가 없습니다",
     "invalidSettings": "설정이 유효하지 않습니다",

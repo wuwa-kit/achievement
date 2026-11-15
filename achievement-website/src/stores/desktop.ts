@@ -9,13 +9,21 @@ import {
   type DesktopState,
   type HistoryExportFormat,
 } from '../desktop/bridge'
-import { tr, isLanguage } from '../i18n/index.ts'
+import { tr } from '../i18n/index.ts'
 import { desktopBootstrap } from '../lib/bootstrap'
 import { usePreferencesStore } from './preferences'
 import { wMessage } from './message'
+import type { summarize } from '../lib/data'
+
+export type HistorySummary = Pick<
+  ReturnType<typeof summarize>,
+  'total' | 'completedAstrite' | 'astrite'
+>
+
 interface DesktopStore {
   settings: DesktopSettings
   state: DesktopState
+  historySummaries: Partial<Record<string, HistorySummary | null>>
   loaded: boolean
   pending: boolean
   notice: CollectionNotice | null
@@ -24,6 +32,7 @@ interface DesktopStore {
   dismissNotice(): void
   openCollectionDiagnostics(): Promise<void>
   copyCollectionDiagnostics(): Promise<void>
+  exportLogs(): Promise<void>
   setGamePath(path: string): void
   detectPath(): Promise<void>
   choosePath(): Promise<void>
@@ -38,15 +47,38 @@ export const useDesktopStore = create<DesktopStore>()(
   immer((set, get) => ({
     settings: {
       gamePath: desktopBootstrap?.gamePath ?? '',
-      language: isLanguage(desktopBootstrap?.language) ? desktopBootstrap.language : 'zh-CN',
+      language: usePreferencesStore.getState().language,
     },
     state: { stage: 'ready', busy: false, transferUrl: null, error: null },
+    historySummaries: {},
     loaded: false,
     pending: false,
     notice: null,
     acceptState(state) {
-      const previous = get().state
-      set({ state: structuredClone(state) })
+      const { state: previous, historySummaries } = get()
+      const history = state.history ?? []
+      set({
+        state: structuredClone(state),
+        historySummaries: Object.fromEntries(
+          history.map(({ id }) => [id, historySummaries[id] ?? null]),
+        ),
+      })
+      for (const { id } of history) {
+        if (Object.hasOwn(historySummaries, id)) continue
+        void Promise.all([request('history.read', { id }), import('../lib/data')])
+          .then(([snapshot, { parseExport, summarize }]) => {
+            const { total, completedAstrite, astrite } = summarize(
+              parseExport(snapshot).achievements,
+            )
+            set((store) => {
+              if (Object.hasOwn(store.historySummaries, id))
+                store.historySummaries[id] = { total, completedAstrite, astrite }
+            })
+          })
+          .catch((error) => {
+            if (Object.hasOwn(get().historySummaries, id)) wMessage.error(String(error))
+          })
+      }
       if (state.error && state.error !== previous.error) wMessage.error(state.error)
       const diagnostic = state.collectionDiagnostic
       if (
@@ -74,6 +106,12 @@ export const useDesktopStore = create<DesktopStore>()(
       get().act(async () => {
         await request('collection.copyDiagnostics')
         wMessage.success(tr('desktop.captureDiagnostics.copied'))
+      }),
+    exportLogs: () =>
+      get().act(async () => {
+        if (get().state.busy) return
+        if (await request('collection.exportLogs', { gamePath: get().settings.gamePath }))
+          wMessage.success(tr('desktop.logsSaved'))
       }),
     connect() {
       let active = true

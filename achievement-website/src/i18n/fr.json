@@ -22,6 +22,8 @@
     "home": "Retour à l’accueil"
   },
   "desktop": {
+    "exportLogs": "Exporter les journaux",
+    "logsSaved": "Journaux enregistrés",
     "exportOptions": "Options d’exportation",
     "history": "Historique",
     "noHistory": "Les exportations terminées apparaîtront ici",
@@ -241,6 +243,8 @@
     "textLanguage": "Langue du texte des succès"
   },
   "native": {
+    "zipFilter": "Archive ZIP (*.zip)|*.zip",
+    "logsSaveFailed": "Impossible d’enregistrer l’archive des journaux",
     "startup": "Impossible de démarrer l’interface de bureau. Installez Microsoft Edge WebView2 Runtime",
     "assetsMissing": "Les ressources de l’interface de bureau sont manquantes",
     "invalidSettings": "Paramètres non valides",

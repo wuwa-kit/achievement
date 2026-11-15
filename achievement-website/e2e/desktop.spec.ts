@@ -1,5 +1,7 @@
 import { selectValue } from './select-helpers'
 import { expect, test } from '@playwright/test'
+import { readFile } from 'node:fs/promises'
+import type { AccountData } from '../src/lib/account'
 
 test('desktop route supports browser preview and persists preview language', async ({ page }) => {
   await page.goto('/desktop')
@@ -49,6 +51,8 @@ test('desktop bridge preserves progress while switching language and supports ca
               state = { ...state, stage: 'starting', busy: true }
             if (message.method === 'export.cancel')
               state = { ...state, stage: 'cancelled', busy: false }
+            if (message.method === 'collection.exportLogs')
+              result = localStorage.getItem('save-logs-result') === 'saved'
             if (message.method.startsWith('collection.'))
               localStorage.setItem('collection-diagnostic-action', message.method)
             queueMicrotask(() => {
@@ -63,6 +67,14 @@ test('desktop bridge preserves progress while switching language and supports ca
   await page.goto('/desktop')
   const pathInput = page.getByTestId('游戏路径')
   await expect(pathInput).toHaveAttribute('placeholder', '请选择 Wuthering Waves.exe')
+  const logsButton = page.getByTestId('desktop-export-logs')
+  await logsButton.click()
+  await expect(logsButton).toBeEnabled()
+  await expect(page.locator('.w-message')).toHaveCount(0)
+  await page.evaluate(() => localStorage.setItem('save-logs-result', 'saved'))
+  await logsButton.click()
+  await expect(page.locator('.w-message[data-type="success"]')).toHaveText('日志已保存')
+  await page.locator('.w-message-close').click()
   const detect = page.getByTestId('自动检测游戏路径')
   await detect.focus()
   await expect(page.locator('.w-tooltip')).toHaveText('自动检测游戏路径')
@@ -90,6 +102,7 @@ test('desktop bridge preserves progress while switching language and supports ca
   await expect(page.getByTestId('停止采集')).toBeEnabled()
   await expect(page.locator('.desktop-export-toggle svg')).toHaveAttribute('data-icon', 'stop')
   await expect(page.getByTestId('游戏路径')).toBeDisabled()
+  await expect(logsButton).toBeDisabled()
   await selectValue(page, page.locator('.desktop-language'), 'en')
   await expect(body).toHaveText(
     'Sign in and enter the game. Capture starts automatically once achievements sync',
@@ -174,77 +187,113 @@ test('desktop bridge preserves progress while switching language and supports ca
 
 test('desktop history replaces the previous snapshot and confirms deletion', async ({ page }) => {
   const transferUrl = 'http://127.0.0.1:5173/#handoff=v1&port=51234&key=' + 'a'.repeat(64)
-  await page.addInitScript((transferUrl) => {
-    let listener: (event: { data: unknown }) => void
-    const history = [
-      {
-        id: 'old',
-        uid: '10001',
-        exportedAt: '2026-11-14T08:00:00+08:00',
-        completedCount: 10,
-        totalCount: 1306,
-      },
-    ]
-    const state = { stage: 'ready', busy: false, transferUrl: null as string | null, error: null, history }
-    window.addEventListener('test-transfer-received', () => {
-      state.stage = 'completed'
-      state.busy = false
-      state.transferUrl = null
-      listener({ data: { event: 'state', data: state } })
-    })
-    Object.defineProperty(window, 'chrome', {
-      configurable: true,
-      value: {
-        webview: {
-          addEventListener: (_: string, callback: typeof listener) => {
-            listener = callback
-          },
-          postMessage: (message: { id: string; method: string; params: unknown }) => {
-            let result: unknown = null
-            if (message.method === 'settings.get')
-              result = { gamePath: 'game.exe', language: 'zh-CN' }
-            if (message.method === 'state.get') result = state
-            if (message.method === 'export.start') {
-              state.stage = 'completed'
-              history[0] = { ...history[0], id: 'new', completedCount: 11 }
-            }
-            if (message.method === 'history.export') {
-              localStorage.setItem('last-history-export', JSON.stringify(message.params))
-              if ((message.params as { format: string }).format === 'web') {
-                state.stage = 'sending'
-                state.busy = true
-                state.transferUrl = transferUrl
+  const fixture = new URL(
+    '../../fixtures/local/session-24624/achievement-snapshot.json',
+    import.meta.url,
+  )
+  const capture = JSON.parse((await readFile(fixture, 'utf8')).replace(/^\uFEFF/, ''))
+  const account: AccountData = {
+    schemaVersion: 3,
+    kind: 'account-progress',
+    complete: true,
+    uid: '10001',
+    capturedAt: capture.at,
+    resourceFingerprint: 'test',
+    count: capture.count,
+    completedCount: capture.modelFinishCount,
+    starCount: capture.modelStarCount,
+    groupStates: capture.groupStates,
+    achievements: capture.achievements,
+  }
+  await page.addInitScript(
+    ({ transferUrl, account }) => {
+      let listener: (event: { data: unknown }) => void
+      const history = [
+        {
+          id: 'old',
+          uid: account.uid,
+          exportedAt: account.capturedAt,
+          completedCount: account.completedCount,
+          totalCount: account.count,
+        },
+      ]
+      const state = {
+        stage: 'ready',
+        busy: false,
+        transferUrl: null as string | null,
+        error: null,
+        history,
+      }
+      window.addEventListener('test-transfer-received', () => {
+        state.stage = 'completed'
+        state.busy = false
+        state.transferUrl = null
+        listener({ data: { event: 'state', data: state } })
+      })
+      Object.defineProperty(window, 'chrome', {
+        configurable: true,
+        value: {
+          webview: {
+            addEventListener: (_: string, callback: typeof listener) => {
+              listener = callback
+            },
+            postMessage: (message: { id: string; method: string; params: unknown }) => {
+              let result: unknown = null
+              if (message.method === 'settings.get')
+                result = { gamePath: 'game.exe', language: 'zh-CN' }
+              if (message.method === 'state.get') result = state
+              if (message.method === 'history.read') result = account
+              if (message.method === 'export.start') {
+                state.stage = 'completed'
+                account.completedCount++
+                const restored = account.achievements.find(({ id }) => id === 400205)!
+                restored.currentProgress = 1
+                restored.maxProgress = 1
+                restored.hasGetReward = true
+                history[0] = { ...history[0], id: 'new', completedCount: account.completedCount }
               }
-            }
-            if (message.method === 'transfer.copyLink') {
-              localStorage.setItem('copied-transfer-link', state.transferUrl ?? '')
-              result = !!state.transferUrl
-            }
-            if (message.method === 'export.cancel') {
-              state.stage = 'cancelled'
-              state.busy = false
-              state.transferUrl = null
-            }
-            if (message.method === 'history.delete') {
-              localStorage.setItem('last-history-delete', JSON.stringify(message.params))
-              history.splice(0, 1)
-              result = state
-            }
-            queueMicrotask(() => {
-              listener({ data: { id: message.id, result } })
-              listener({ data: { event: 'state', data: state } })
-            })
+              if (message.method === 'history.export') {
+                localStorage.setItem('last-history-export', JSON.stringify(message.params))
+                if ((message.params as { format: string }).format === 'web') {
+                  state.stage = 'sending'
+                  state.busy = true
+                  state.transferUrl = transferUrl
+                }
+              }
+              if (message.method === 'transfer.copyLink') {
+                localStorage.setItem('copied-transfer-link', state.transferUrl ?? '')
+                result = !!state.transferUrl
+              }
+              if (message.method === 'export.cancel') {
+                state.stage = 'cancelled'
+                state.busy = false
+                state.transferUrl = null
+              }
+              if (message.method === 'history.delete') {
+                localStorage.setItem('last-history-delete', JSON.stringify(message.params))
+                history.splice(0, 1)
+                result = state
+              }
+              queueMicrotask(() => {
+                listener({ data: { id: message.id, result } })
+                listener({ data: { event: 'state', data: state } })
+              })
+            },
           },
         },
-      },
-    })
-  }, transferUrl)
+      })
+    },
+    { transferUrl, account },
+  )
   await page.goto('/desktop')
   await expect(page.locator('.desktop-history-card')).toHaveCount(1)
+  const card = page.locator('.desktop-history-card').first()
+  await expect(card.locator('.desktop-history-count')).toHaveText('55/1305')
+  await expect(card.locator('.desktop-history-astrite')).toHaveText('450/8800')
   await page.getByTestId('开始采集').click()
   await expect(page.locator('.desktop-history-card')).toHaveCount(1)
-  const card = page.locator('.desktop-history-card').first()
-  await expect(card.locator('.desktop-history-count')).toHaveText('11/1306')
+  await expect(card.locator('.desktop-history-count')).toHaveText('56/1306')
+  await expect(card.locator('.desktop-history-astrite')).toHaveText('455/8805')
   const exportButton = card.getByTestId('历史记录导出')
   const deleteButton = card.getByTestId('删除档案')
   for (const [label, format] of [

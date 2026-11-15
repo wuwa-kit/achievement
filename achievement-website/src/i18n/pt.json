@@ -22,6 +22,8 @@
     "home": "Voltar à página inicial"
   },
   "desktop": {
+    "exportLogs": "Exportar logs",
+    "logsSaved": "Logs salvos",
     "exportOptions": "Opções de exportação",
     "history": "Histórico",
     "noHistory": "As exportações concluídas aparecerão aqui",
@@ -241,6 +243,8 @@
     "textLanguage": "Idioma do texto das conquistas"
   },
   "native": {
+    "zipFilter": "Arquivo ZIP (*.zip)|*.zip",
+    "logsSaveFailed": "Não foi possível salvar o arquivo de logs",
     "startup": "Não foi possível iniciar a interface do desktop. Instale o Microsoft Edge WebView2 Runtime",
     "assetsMissing": "Os recursos da interface do desktop estão ausentes",
     "invalidSettings": "Configurações inválidas",

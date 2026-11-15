@@ -166,8 +166,9 @@ test('real export, category browsing, filters and detail', async ({ page }, test
   await list.evaluate((element) => {
     element.scrollTop = element.scrollHeight
   })
-  await expect(list.locator('[data-index="74"]')).toBeInViewport()
-  expect(await list.locator('.achievement-row').count()).toBeLessThan(30)
+  const groupRows = list.locator('.achievement-row')
+  await expect(groupRows).toHaveCount(75)
+  await expect(groupRows.last()).toBeInViewport()
   await expect(page.getByTestId('搜索成就')).toBeInViewport()
   if (testInfo.project.name === 'mobile') await page.getByTestId('打开导航').click()
   await expect(page.getByRole('button', { name: /其他玩法/ })).toHaveCount(0)
@@ -175,7 +176,7 @@ test('real export, category browsing, filters and detail', async ({ page }, test
   await expect(group).toHaveAttribute('data-selected', 'true')
   await expect(allAchievements).toHaveAttribute('data-selected', 'false')
   await expect(list).toHaveAttribute('data-count', '75')
-  await expect(list.locator('[data-index="74"]')).toBeInViewport()
+  await expect(groupRows.last()).toBeInViewport()
   if (testInfo.project.name === 'mobile') await page.getByTestId('打开导航').click()
   await allAchievements.click()
   await expect(group).toHaveAttribute('data-selected', 'false')
@@ -504,6 +505,7 @@ test('archive actions tolerate brief mouse passes and exits', async ({ page }) =
   const menu = page.locator('.archive-actions-menu')
   await expect(trigger).toBeEnabled()
   await page.clock.install()
+  await page.clock.pauseAt(Date.now() + 60_000)
   const box = (await trigger.boundingBox())!
   const hover = () => page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
   await hover()

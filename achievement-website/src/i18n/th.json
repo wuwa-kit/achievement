@@ -22,6 +22,8 @@
     "home": "กลับหน้าหลัก"
   },
   "desktop": {
+    "exportLogs": "ส่งออกบันทึก",
+    "logsSaved": "บันทึกไฟล์เรียบร้อยแล้ว",
     "exportOptions": "ตัวเลือกการส่งออก",
     "history": "ประวัติ",
     "noHistory": "รายการที่ส่งออกสำเร็จจะแสดงที่นี่",
@@ -241,6 +243,8 @@
     "textLanguage": "ภาษาข้อความความสำเร็จ"
   },
   "native": {
+    "zipFilter": "ไฟล์ ZIP (*.zip)|*.zip",
+    "logsSaveFailed": "ไม่สามารถบันทึกไฟล์บันทึกได้",
     "startup": "เริ่มหน้าจอเดสก์ท็อปไม่สำเร็จ โปรดติดตั้ง Microsoft Edge WebView2 Runtime",
     "assetsMissing": "ไม่พบทรัพยากรหน้าจอเดสก์ท็อป",
     "invalidSettings": "การตั้งค่าไม่ถูกต้อง",

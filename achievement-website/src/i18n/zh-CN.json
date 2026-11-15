@@ -22,6 +22,8 @@
     "home": "返回首页"
   },
   "desktop": {
+    "exportLogs": "导出日志",
+    "logsSaved": "日志已保存",
     "exportOptions": "导出选项",
     "history": "历史记录",
     "noHistory": "完成导出后，记录将显示在这里",
@@ -241,6 +243,8 @@
     "textLanguage": "成就文本语言"
   },
   "native": {
+    "zipFilter": "ZIP 压缩包 (*.zip)|*.zip",
+    "logsSaveFailed": "无法保存日志压缩包",
     "startup": "桌面界面启动失败。请确认已安装 Microsoft Edge WebView2 Runtime",
     "assetsMissing": "桌面界面资源缺失",
     "invalidSettings": "设置无效",

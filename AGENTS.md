@@ -4,6 +4,8 @@
 
 使用 `mise exec --` 调用仓库固定版本的工具。改动后验证受影响端的构建；不要为纯样式调整添加重复实现的测试。
 
+本地打包桌面 EXE 时，除非明确要求其他版本，默认只构建 Lite 版，以缩短测试等待时间。
+
 业务状态和异步业务动作统一由 src/stores 下的 Zustand Store 管理。React 组件只保留临时 UI 状态；嵌套更新使用 Immer，通用 UI Hook 优先复用 ahooks。
 
 界面文案使用 i18next/react-i18next 和 src/i18n 中的中英文资源；语言状态由 useLanguageStore 统一管理和持久化，禁止新增硬编码用户文案及独立语言状态。

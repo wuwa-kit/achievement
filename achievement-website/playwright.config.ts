@@ -3,7 +3,12 @@ import { defineConfig, devices } from '@playwright/test'
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
-  use: { baseURL: 'http://127.0.0.1:5173', channel: 'msedge', trace: 'retain-on-failure' },
+  use: {
+    baseURL: 'http://127.0.0.1:5173',
+    channel: 'msedge',
+    locale: 'zh-CN',
+    trace: 'retain-on-failure',
+  },
   projects: [
     {
       name: 'desktop',

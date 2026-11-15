@@ -32,23 +32,40 @@ test('scrollbar thumb follows the scroll event without ScrollTimeline', async ({
 })
 
 test('custom scrollbar supports wheel, drag and dialog dismissal', async ({ page }) => {
+  await page.route('**/data/achievements.json', async (route) => {
+    const response = await route.fetch()
+    const data = await response.json()
+    const item = data.achievements.find(({ id }: { id: number }) => id === 100101)
+    item.texts['zh-Hans'].title = '成就名称'.repeat(40)
+    item.texts['zh-Hans'].description = '成就描述'.repeat(160)
+    await route.fulfill({ response, json: data })
+  })
   await page.setViewportSize({ width: 900, height: 500 })
   await page.goto('/')
   await expect(page.locator('.achievement-row').first()).toBeVisible()
   const list = page.getByTestId('成就列表')
   const scrollbar = list.locator(':scope > .os-scrollbar-vertical')
   await expect(scrollbar).toHaveCount(1)
+  const content = list.locator('.achievement-list-content')
+  const longCard = content.locator('.achievement-card', {
+    has: page.getByTestId('成就卡片 100101'),
+  })
+  await expect(longCard.locator('.achievement-title-text')).toHaveText('成就名称'.repeat(40))
+  await expect(longCard.locator('.achievement-description')).toHaveText('成就描述'.repeat(160))
+  const lineCount = (element: Element) =>
+    element.getBoundingClientRect().height / parseFloat(getComputedStyle(element).lineHeight)
+  expect(await longCard.locator('.achievement-title button').evaluate(lineCount)).toBeGreaterThan(1)
+  expect(await longCard.locator('.achievement-description').evaluate(lineCount)).toBeGreaterThan(2)
+  const card = await longCard.boundingBox()
+  const regularCard = await content
+    .locator('.achievement-card', { hasNot: page.getByTestId('成就卡片 100101') })
+    .first()
+    .boundingBox()
+  expect(card!.height).toBeGreaterThan(regularCard!.height)
   const scrollHeight = await list.evaluate((element) => element.scrollHeight)
-  const expectEqualSlots = async () => {
-    const heights = await list
-      .locator('.achievement-list-item')
-      .evaluateAll((slots) => slots.map((slot) => slot.getBoundingClientRect().height))
-    expect(heights.length).toBeGreaterThan(1)
-    expect(new Set(heights).size).toBe(1)
-    const count = Number(await list.getAttribute('data-count'))
-    expect(scrollHeight).toBe(count * heights[0])
-  }
-  await expectEqualSlots()
+  expect(scrollHeight).toBe(
+    await content.evaluate((element) => Math.round(element.getBoundingClientRect().height)),
+  )
   await page.mouse.move(800, 350)
   await page.mouse.wheel(0, 450)
   const scrollTop = () => list.evaluate((element) => element.scrollTop)
@@ -64,7 +81,6 @@ test('custom scrollbar supports wheel, drag and dialog dismissal', async ({ page
   await page.mouse.up()
   await expect.poll(scrollTop).toBeGreaterThan(beforeDrag)
   expect(await list.evaluate((element) => element.scrollHeight)).toBe(scrollHeight)
-  await expectEqualSlots()
   const track = scrollbar.locator('.os-scrollbar-track')
   await expect
     .poll(async () => {
@@ -80,8 +96,8 @@ test('custom scrollbar supports wheel, drag and dialog dismissal', async ({ page
     element.scrollTop = 0
   })
   await list
-    .locator('[data-index="0"]')
     .getByTestId(/^查看成就详情 /)
+    .first()
     .click()
   const details = page.getByTestId('成就详情内容')
   await expect(details).toBeVisible()

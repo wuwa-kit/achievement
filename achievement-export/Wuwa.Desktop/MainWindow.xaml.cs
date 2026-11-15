@@ -1,10 +1,10 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using System.Windows;
-using System.Windows.Threading;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Win32;
 using Wuwa.Export;
@@ -27,7 +27,6 @@ public partial class MainWindow : Window
     private static readonly string SettingsPath = Path.Combine(DataPath, "settings.json");
     private static readonly string AccountsPath = Path.Combine(DataPath, "accounts");
     private static readonly string DiagnosticsPath = Path.Combine(DataPath, "diagnostics");
-    private readonly DispatcherTimer gameMonitor = new() { Interval = TimeSpan.FromSeconds(1) };
     private CancellationTokenSource? operation;
     private TransferSession? transfer;
     private bool closeRequested;
@@ -37,7 +36,7 @@ public partial class MainWindow : Window
     private CollectionDiagnostic? collectionDiagnostic;
     private Settings settings = new(Options.DefaultGame);
     private readonly ExportHistory history = new(AccountsPath);
-    private sealed record Settings(string GamePath, string Language = "zh-CN", string Theme = "auto");
+    private sealed record Settings(string GamePath, string Language = "", string Theme = "auto");
     private static readonly Dictionary<string, JsonElement> Locales = Assembly.GetExecutingAssembly().GetManifestResourceNames()
         .Where(name => name.StartsWith("Locale.", StringComparison.Ordinal) && name.EndsWith(".json", StringComparison.Ordinal))
         .ToDictionary(name => name["Locale.".Length..^".json".Length], name =>
@@ -46,18 +45,29 @@ public partial class MainWindow : Window
         using var document = JsonDocument.Parse(stream);
         return document.RootElement.Clone();
     });
+    private static string SystemLanguage()
+    {
+        var subtags = CultureInfo.CurrentUICulture.Name.ToLowerInvariant().Split('-');
+        var language = subtags[0];
+        if (language == "zh")
+            language = subtags.Length > 1 && subtags[1] is "hant" or "tw" or "hk" or "mo" ? "zh-TW" : "zh-CN";
+        return Locales.ContainsKey(language) ? language : "en";
+    }
     private string Text(string key, string group = "native") => Locales[settings.Language].GetProperty(group).GetProperty(key).GetString()!;
     public MainWindow()
     {
         InitializeComponent();
         try { if (File.Exists(SettingsPath)) settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(SettingsPath), JsonOptions) ?? settings; }
         catch (Exception e) when (e is IOException or JsonException) { error = e.Message; }
-        settings = settings with { Language = settings.Language is not null && Locales.ContainsKey(settings.Language) ? settings.Language : "zh-CN", GamePath = settings.GamePath ?? Options.DefaultGame };
+        settings = settings with
+        {
+            Language = settings.Language is not null && Locales.ContainsKey(settings.Language) ? settings.Language : SystemLanguage(),
+            GamePath = settings.GamePath ?? Options.DefaultGame
+        };
         Title = Text("desktopTitle", "common");
         settings = settings with { Theme = settings.Theme is "light" or "dark" ? settings.Theme : "auto" };
-        gameMonitor.Tick += UpdateGameTopmost;
         Loaded += InitializeBrowser;
-        Closed += (_, _) => { gameMonitor.Stop(); Browser.Dispose(); };
+        Closed += (_, _) => Browser.Dispose();
     }
     private async void InitializeBrowser(object sender, RoutedEventArgs args)
     {
@@ -84,7 +94,6 @@ public partial class MainWindow : Window
             core.WebMessageReceived += OnMessage;
             await RegisterBootstrap();
             core.Navigate(Origin + DesktopEntryPath);
-            UpdateGameTopmost(this, EventArgs.Empty); gameMonitor.Start();
         }
         catch (Exception e)
         {
@@ -129,6 +138,7 @@ public partial class MainWindow : Window
     private void Emit(string? next = null)
     {
         if (next is not null) stage = next;
+        Topmost = operation is not null && stage != "sending";
         Browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { @event = "state", data = State() }, JsonOptions));
     }
     private async void OnMessage(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
@@ -169,6 +179,10 @@ public partial class MainWindow : Window
                     if (gameDialog.ShowDialog(this) == true) result = gameDialog.FileName;
                     break;
                 case "export.start": EnsureIdle(); _ = RunExport(); break;
+                case "history.read":
+                    var readId = message.GetProperty("params").GetProperty("id").GetString()!;
+                    result = JsonSerializer.Deserialize<JsonElement>(history.Read(readId).Bytes);
+                    break;
                 case "history.export":
                     EnsureIdle();
                     var parameters = message.GetProperty("params");
@@ -223,6 +237,11 @@ public partial class MainWindow : Window
                 case "collection.copyDiagnostics":
                     if (collectionDiagnostic is { } diagnostic) Clipboard.SetText(JsonSerializer.Serialize(diagnostic, Json.Options));
                     break;
+                case "collection.exportLogs":
+                    EnsureIdle();
+                    var logGamePath = message.GetProperty("params").GetProperty("gamePath").GetString() ?? "";
+                    result = await ExportLogs(logGamePath);
+                    break;
                 default: throw new ArgumentException(Text("unknownCommand"));
             }
             Reply(new { id, result });
@@ -246,6 +265,22 @@ public partial class MainWindow : Window
         await RegisterBootstrap();
     }
     private void EnsureIdle() { if (operation is not null) throw new InvalidOperationException(Text("running")); }
+    private async Task<bool> ExportLogs(string gamePath)
+    {
+        var dialog = new SaveFileDialog
+        {
+            Title = Text("exportLogs", "desktop"), Filter = Text("zipFilter"),
+            DefaultExt = ".zip", AddExtension = true, OverwritePrompt = true,
+            FileName = DiagnosticArchive.FileName(DateTimeOffset.UtcNow)
+        };
+        if (dialog.ShowDialog(this) != true) return false;
+        try { await Task.Run(() => DiagnosticArchive.Save(dialog.FileName, DiagnosticsPath, gamePath)); }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            throw new InvalidOperationException(Text("logsSaveFailed"));
+        }
+        return true;
+    }
     private Task RunExport() => Execute(async token =>
     {
         var options = new Options("export", DataPath, settings.GamePath.Trim(), DiagnosticsPath, "auto", 900, new());
@@ -259,9 +294,13 @@ public partial class MainWindow : Window
     });
     private async Task Execute(Func<CancellationToken, Task> action, string initialStage = "preparing")
     {
-        operation = new(); error = null; collectionDiagnostic = null; Emit(initialStage);
+        operation = new(); error = null; collectionDiagnostic = null;
         string result = "completed";
-        try { await action(operation.Token); }
+        try
+        {
+            Emit(initialStage);
+            await action(operation.Token);
+        }
         catch (OperationCanceledException) { result = "cancelled"; }
         catch (CollectionException exception) when (exception.Diagnostic is { } diagnostic)
         {
@@ -310,11 +349,6 @@ public partial class MainWindow : Window
         error = null;
     }
     private void OpenBrowser() { if (transfer is not null) Process.Start(new ProcessStartInfo(transfer.BrowserUrl.AbsoluteUri) { UseShellExecute = true }); }
-    private void UpdateGameTopmost(object? sender, EventArgs e)
-    {
-        var games = Process.GetProcessesByName("Client-Win64-Shipping");
-        try { Topmost = games.Length > 0; } finally { foreach (var game in games) game.Dispose(); }
-    }
     private void Window_Closing(object? sender, CancelEventArgs e)
     {
         if (operation is null) return;

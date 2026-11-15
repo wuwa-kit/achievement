@@ -116,18 +116,18 @@ function AchievementSummary({
 
   return (
     <span
-      className="achievement-info pointer-events-none z-10 col-start-2 row-start-1 flex min-w-0 flex-col gap-1 data-[waiting=true]:text-(--color-muted) narrow:gap-0.5"
+      className="achievement-info pointer-events-none z-10 col-start-2 flex min-w-0 flex-col gap-1 data-[waiting=true]:text-(--color-muted) narrow:gap-0.5"
       data-waiting={waiting}
     >
       <span className="achievement-title flex items-center gap-2 text-[14px] leading-[1.6] font-[550] narrow:text-[12px]">
         <WButton
-          className="pointer-events-auto min-w-0 rounded-sm text-left underline-offset-3 hover:underline focus-visible:underline"
+          className="pointer-events-auto min-w-0 rounded-sm text-left wrap-anywhere whitespace-pre-line underline-offset-3 hover:underline focus-visible:underline"
           data-testid={`查看成就详情 ${item.id}`}
           onClick={onOpenDetails}
         >
-          <WEllipsis ref={titleRef} className="achievement-title-text">
+          <span ref={titleRef} className="achievement-title-text">
             {title || t('ui.missingTitle')}
-          </WEllipsis>
+          </span>
         </WButton>
         {item.hidden && (
           <span className="hidden-badge inline-flex flex-none items-center gap-[3px] rounded-[3px] border border-(--color-border) px-[5px] text-[11px] font-normal whitespace-nowrap text-(--color-muted)">
@@ -138,7 +138,7 @@ function AchievementSummary({
       </span>
       <span
         ref={descriptionRef}
-        className="achievement-description line-clamp-2 text-[12px] leading-[1.5] text-(--color-muted) narrow:text-[11px]"
+        className="achievement-description text-[12px] leading-[1.5] wrap-anywhere whitespace-pre-line text-(--color-muted) narrow:text-[11px]"
       >
         {description || t('ui.missingDescription')}
       </span>
@@ -684,7 +684,7 @@ export default function App() {
                     currentProgress !== maxProgress &&
                     !(currentProgress === 0 && maxProgress === 1)
                   return (
-                    <div className="achievement-card relative isolate my-[3px] grid h-[calc(100%_-_6px)] grid-cols-[64px_minmax(0,1fr)_100px_max-content] items-center gap-5 px-[25px] py-1.5 compact:grid-cols-[52px_minmax(0,1fr)_76px_max-content] compact:gap-[13px] compact:px-5 narrow:grid-cols-[44px_minmax(0,1fr)_max-content] narrow:gap-x-[9px] narrow:gap-y-0.5 narrow:px-3.5 narrow:py-1">
+                    <div className="achievement-card relative isolate grid min-h-20 grid-cols-[64px_minmax(0,1fr)_max-content] items-center gap-5 px-[25px] py-1.5 compact:grid-cols-[52px_minmax(0,1fr)_max-content] compact:gap-[13px] compact:px-5 narrow:grid-cols-[44px_minmax(0,1fr)_max-content] narrow:gap-[9px] narrow:px-3.5 narrow:py-1">
                       <WTooltip text={waiting ? tr('ui.completePreviousStage') : undefined}>
                         <WButton
                           className="achievement-row absolute inset-0 isolate rounded-lg focus-visible:outline-offset-[-3px] disabled:opacity-100"
@@ -713,23 +713,24 @@ export default function App() {
                           setDetailOpen(true)
                         }}
                       />
-                      {showProgress && (
-                        <span className="row-progress pointer-events-none z-10 col-start-3 row-start-1 font-mono text-[11px] text-(--color-muted) narrow:col-start-2 narrow:row-start-2 narrow:leading-tight">
-                          {currentProgress}/{maxProgress}
+                      <span className="pointer-events-none z-10 col-start-3 flex items-center gap-3 whitespace-nowrap narrow:flex-col-reverse narrow:items-end narrow:gap-1">
+                        {showProgress && (
+                          <span className="row-progress font-mono text-[11px] text-(--color-muted) narrow:leading-tight">
+                            {currentProgress}/{maxProgress}
+                          </span>
+                        )}
+                        <span className="row-reward flex items-center gap-[7px] text-[12px] text-(--color-gold) narrow:text-[11px]">
+                          <img
+                            src={astriteIcon}
+                            width={16}
+                            height={16}
+                            className="size-4 shrink-0 object-contain"
+                            alt=""
+                          />
+                          <span className="w-[2ch] shrink-0 text-left tabular-nums">
+                            {item.astrite}
+                          </span>
                         </span>
-                      )}
-                      <span
-                        className="row-reward pointer-events-none z-10 col-start-4 row-start-1 flex items-center gap-[7px] text-[12px] text-(--color-gold) narrow:col-start-3 narrow:text-[11px] narrow:data-[has-progress=true]:row-span-2"
-                        data-has-progress={showProgress}
-                      >
-                        <img
-                          src={astriteIcon}
-                          width={16}
-                          height={16}
-                          className="size-4 shrink-0 object-contain"
-                          alt=""
-                        />
-                        {item.astrite}
                       </span>
                     </div>
                   )

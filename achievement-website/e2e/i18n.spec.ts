@@ -10,6 +10,27 @@ import { readFileSync } from 'node:fs'
 const catalog = JSON.parse(
   readFileSync(new URL('../../data/achievement-catalog.json', import.meta.url), 'utf8'),
 )
+
+for (const { route, locales, expected } of [
+  { route: '/', locales: ['ja-JP', 'en-US'], expected: 'ja' },
+  { route: '/desktop', locales: ['ru-RU', 'zh-HK'], expected: 'zh-TW' },
+  { route: '/', locales: ['zh-Hans-HK'], expected: 'zh-CN' },
+  { route: '/', locales: ['ru-RU', 'vi-VN'], expected: 'en' },
+]) {
+  test(`detects ${locales.join(', ')} as ${expected} on ${route}`, async ({ page }) => {
+    await page.addInitScript((languages) => {
+      Object.defineProperty(navigator, 'languages', { value: languages })
+    }, locales)
+    await page.goto(route)
+    await expect(page.locator('html')).toHaveAttribute('lang', expected)
+    await expect(page.locator('.w-language-switch')).toBeVisible()
+
+    await selectValue(page, page.locator('.w-language-switch'), 'ko')
+    await page.reload()
+    await expect(page.locator('html')).toHaveAttribute('lang', 'ko')
+  })
+}
+
 for (const route of ['/', '/desktop']) {
   test(`shared language persists and translates UI on ${route}`, async ({
     page,

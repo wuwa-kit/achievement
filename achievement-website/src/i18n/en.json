@@ -22,6 +22,8 @@
     "home": "Back to home"
   },
   "desktop": {
+    "exportLogs": "Export logs",
+    "logsSaved": "Logs saved",
     "exportOptions": "Export options",
     "history": "History",
     "noHistory": "Completed exports will appear here",
@@ -241,6 +243,8 @@
     "textLanguage": "Achievement text language"
   },
   "native": {
+    "zipFilter": "ZIP archive (*.zip)|*.zip",
+    "logsSaveFailed": "Could not save the log archive",
     "startup": "Desktop UI failed to start. Please install Microsoft Edge WebView2 Runtime",
     "assetsMissing": "Desktop UI assets are missing",
     "invalidSettings": "Invalid settings",

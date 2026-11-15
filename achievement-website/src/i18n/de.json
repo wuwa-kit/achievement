@@ -22,6 +22,8 @@
     "home": "Zur Startseite"
   },
   "desktop": {
+    "exportLogs": "Protokolle exportieren",
+    "logsSaved": "Protokolle gespeichert",
     "exportOptions": "Exportoptionen",
     "history": "Verlauf",
     "noHistory": "Abgeschlossene Exporte erscheinen hier",
@@ -241,6 +243,8 @@
     "textLanguage": "Sprache der Erfolgstexte"
   },
   "native": {
+    "zipFilter": "ZIP-Archiv (*.zip)|*.zip",
+    "logsSaveFailed": "Das Protokollarchiv konnte nicht gespeichert werden",
     "startup": "Die Desktop-Oberfläche konnte nicht gestartet werden. Bitte Microsoft Edge WebView2 Runtime installieren",
     "assetsMissing": "Ressourcen der Desktop-Oberfläche fehlen",
     "invalidSettings": "Ungültige Einstellungen",

@@ -1,12 +1,12 @@
 # Wuthering Waves Achievement Exporter
 
-[简体中文](README.md) | English
+[简体中文](README.md) | English | [日本語](README-ja.md) | [한국어](README-ko.md)
 
 The Windows desktop app reads your Wuthering Waves achievement progress directly from game memory and exports it as JSON with one click. Use the web app to browse, filter, and manage your achievement profiles.
 
 [Online preview](https://wu.songe.li)
 
-Download the [Standard edition](https://github.com/wuwa-kit/achievement/releases/download/v0.1.0/WuwaAchievementExport-v0.1.0.exe) or the [Lite edition](https://github.com/wuwa-kit/achievement/releases/download/v0.1.0/WuwaAchievementExport-Lite-v0.1.0.exe) for Windows x64. The Standard edition includes .NET. The Lite edition requires .NET 10 Desktop Runtime (x64).
+Download the [Standard edition](https://github.com/wuwa-kit/achievement/releases/download/v0.1.2/WuwaAchievementExport-v0.1.2.exe) or the [Lite edition](https://github.com/wuwa-kit/achievement/releases/download/v0.1.2/WuwaAchievementExport-Lite-v0.1.2.exe) for Windows x64. The Standard edition includes .NET. For the Lite edition, download and install the [.NET 10 Desktop Runtime (x64)](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe) separately.
 
 ## Quick start
 
@@ -26,7 +26,7 @@ The exporter uses heap diagnostics to locate achievement data, reads it from the
 
 ## Documentation
 
-The following documentation is currently in Chinese:
+The guides below are in Chinese. The changelog is in English.
 
 - [Web app guide](achievement-website/README.md)
 - [Desktop exporter guide](achievement-export/README.md)

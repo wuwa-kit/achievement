@@ -22,6 +22,8 @@
     "home": "Volver al inicio"
   },
   "desktop": {
+    "exportLogs": "Exportar registros",
+    "logsSaved": "Registros guardados",
     "exportOptions": "Opciones de exportación",
     "history": "Historial",
     "noHistory": "Las exportaciones completadas aparecerán aquí",
@@ -241,6 +243,8 @@
     "textLanguage": "Idioma del texto de los logros"
   },
   "native": {
+    "zipFilter": "Archivo ZIP (*.zip)|*.zip",
+    "logsSaveFailed": "No se pudo guardar el archivo de registros",
     "startup": "No se pudo iniciar la interfaz de escritorio. Instala Microsoft Edge WebView2 Runtime",
     "assetsMissing": "Faltan recursos de la interfaz de escritorio",
     "invalidSettings": "Ajustes no válidos",

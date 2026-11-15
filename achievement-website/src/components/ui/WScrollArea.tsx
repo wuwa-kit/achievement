@@ -46,7 +46,7 @@ export function WScrollArea({
         },
       },
       // OverlayScrollbars defers its JavaScript fallback by a frame. Apply the
-      // offset in the scroll event so the thumb and virtual rows paint together.
+      // offset in the scroll event so the thumb and content paint together.
       typeof ScrollTimeline === 'undefined' ? { scroll: syncScrollbarPosition } : undefined,
     )
     return () => instance.destroy()

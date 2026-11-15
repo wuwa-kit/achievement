@@ -1,4 +1,5 @@
 import { tr, isLanguage, type AppLanguage } from '../i18n/index.ts'
+import { defaultLanguage } from '../i18n/resources'
 import { desktopBootstrap } from '../lib/bootstrap'
 export interface DesktopSettings {
   gamePath: string
@@ -40,6 +41,7 @@ type Methods = {
     result: DesktopSettings
   }
   'theme.set': { params: { dark: boolean }; result: null }
+  'history.read': { params: { id: string }; result: unknown }
   'history.export': { params: { id: string; format: HistoryExportFormat }; result: null }
   'history.delete': { params: { id: string }; result: DesktopState }
   'settings.get': { params: undefined; result: DesktopSettings }
@@ -54,6 +56,7 @@ type Methods = {
   'folder.open': { params: undefined; result: null }
   'collection.openDiagnostics': { params: undefined; result: null }
   'collection.copyDiagnostics': { params: undefined; result: null }
+  'collection.exportLogs': { params: { gamePath: string }; result: boolean }
   'state.get': { params: undefined; result: DesktopState }
 }
 type Message = {
@@ -112,7 +115,7 @@ export function request<K extends keyof Methods>(
         pending.delete(id)
         reject(new Error(tr('common.requestTimeout')))
       },
-      method === 'history.export' ? 3600000 : 30000,
+      method === 'history.export' || method === 'collection.exportLogs' ? 3600000 : 30000,
     )
     pending.set(id, {
       resolve: (value) => {
@@ -135,7 +138,7 @@ export function subscribe(listener: (state: DesktopState) => void) {
 }
 
 const previewKey = 'wuwa-desktop-preview-settings'
-let previewSettings: DesktopSettings = { gamePath: '', language: 'zh-CN' }
+let previewSettings: DesktopSettings = { gamePath: '', language: defaultLanguage }
 function browserRequest(method: keyof Methods, params?: Methods[keyof Methods]['params']) {
   if (method === 'settings.get') {
     try {
@@ -150,7 +153,7 @@ function browserRequest(method: keyof Methods, params?: Methods[keyof Methods]['
     }
     return { ...previewSettings }
   }
-  if (method === 'settings.save' && params && 'gamePath' in params) {
+  if (method === 'settings.save' && params && 'gamePath' in params && 'language' in params) {
     previewSettings = { ...params }
     try {
       sessionStorage.setItem(previewKey, JSON.stringify(previewSettings))

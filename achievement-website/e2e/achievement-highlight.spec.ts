@@ -43,7 +43,7 @@ test('achievement matches are painted without changing layout', async ({ page })
     )
     .toEqual(
       expect.arrayContaining([
-        ['w-ellipsis', '激光'],
+        ['achievement-title-text', '激光'],
         ['achievement-description', '激光'],
       ]),
     )

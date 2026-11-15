@@ -1,12 +1,12 @@
 # 鸣潮成就导出工具
 
-简体中文 | [English](README-en.md)
+简体中文 | [English](README-en.md) | [日本語](README-ja.md) | [한국어](README-ko.md)
 
 使用 Windows 桌面工具从《鸣潮》游戏进程内存中读取账号成就进度，一键导出为 JSON。导出后可在网页中查看、筛选和管理成就档案。
 
 [在线预览](https://wu.songe.li)
 
-下载 Windows x64 [标准版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.0/WuwaAchievementExport-v0.1.0.exe)或 [Lite 版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.0/WuwaAchievementExport-Lite-v0.1.0.exe)。标准版内置 .NET，Lite 版需要安装 .NET 10 Desktop Runtime（x64）。
+下载 Windows x64 [标准版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.2/WuwaAchievementExport-v0.1.2.exe)或 [Lite 版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.2/WuwaAchievementExport-Lite-v0.1.2.exe)。标准版内置 .NET，Lite 版需要另行下载并安装 [.NET 10 Desktop Runtime（x64）](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe)。
 
 ## 快速开始
 
