@@ -2,6 +2,7 @@ name: deloy
 
 on:
   push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -13,6 +14,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -20,16 +22,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          persist-credentials: ${{ github.ref == 'refs/heads/main' && github.event.repository.private == false }}
+          persist-credentials: ${{ github.event.repository.private == false }}
       - uses: jdx/mise-action@v5
         with:
           cache: false
       - run: mise exec -- pnpm install --frozen-lockfile
       - name: Initialize jsDelivr deployment
-        if: github.ref == 'refs/heads/main' && github.event.repository.private == false
+        if: github.event.repository.private == false
         run: mise exec -- node scripts/deploy.ts init
       - run: mise exec -- pnpm --filter achievement-website build
       - name: Publish website to the CDN branch
+        if: github.event.repository.private == false
         run: mise exec -- node scripts/deploy.ts publish
       - uses: actions/upload-artifact@v6
         with:
@@ -40,7 +43,7 @@ jobs:
       # Like deploy-inspect: deploy main to either configured hosting provider.
       # Build/artifact upload works even when no hosting credentials are configured.
       - name: Deploy Cloudflare Pages
-        if: github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
         run: >-
           mise exec -- pnpm dlx --allow-build=esbuild --allow-build=workerd wrangler@4
           pages deploy achievement-website/dist --project-name=wuwa-achievement-export
@@ -49,4 +52,5 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Keep the latest three CDN branches
+        if: github.event.repository.private == false
         run: mise exec -- node scripts/deploy.ts cleanup
