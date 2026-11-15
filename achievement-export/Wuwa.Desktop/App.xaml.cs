@@ -19,5 +19,12 @@ public partial class App : Application
         var window = new MainWindow();
         MainWindow = window;
         window.Show();
+
+        if (!window.IsActive && !window.Activate())
+        {
+            // Raise the window in the normal z-order if Windows denies activation.
+            window.Topmost = true;
+            window.Topmost = false;
+        }
     }
 }
