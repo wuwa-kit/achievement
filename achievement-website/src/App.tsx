@@ -16,12 +16,14 @@ import { WCheckBox } from './components/ui/WCheckBox'
 import { WDialog } from './components/ui/WDialog'
 import { WConfirmDialog } from './components/ui/WConfirmDialog'
 import { ArchiveActions } from './components/ArchiveActions'
+import { CatalogStatistics } from './components/CatalogStatistics'
 import { OpenSourceLink } from './components/OpenSourceLink'
 import { ViewerLayout } from './components/ViewerLayout'
 import { AchievementEmblem } from './components/AchievementEmblem'
 import { AchievementList } from './components/AchievementList'
 import { useAchievementHighlight } from './components/useAchievementHighlight'
 import { defaultArchiveKey } from './lib/archives'
+import { catalogExclusions, exclusiveAchievementGroups } from './lib/catalog'
 import { exclusionReason } from './lib/exclusions'
 import { WEllipsis } from './components/ui/WEllipsis'
 import {
@@ -35,6 +37,8 @@ import {
   filterAchievements,
   getAchievementStars,
   getAchievementStages,
+  getAchievementUnits,
+  getExclusiveAchievements,
   isFinished,
   isStageWaiting,
   plainText,
@@ -67,17 +71,19 @@ function NavProgress({
   countClass,
   finished,
   total,
+  alwaysShowCount,
 }: {
   countClass: string
   finished?: number
   total?: number
+  alwaysShowCount?: boolean
 }) {
   const { t } = useTranslation()
   const completed = total !== undefined && total > 0 && finished === total
 
   return (
     <span className="nav-progress inline-flex flex-none items-center">
-      {completed ? (
+      {completed && !alwaysShowCount ? (
         <WTooltip text={t('ui.finished')}>
           <WSvg
             className="nav-completion-icon text-(--color-nav-gold)"
@@ -100,12 +106,14 @@ function AchievementSummary({
   language,
   query,
   waiting,
+  exclusiveAlternative,
   onOpenDetails,
 }: {
   item: Achievement
   language: string
   query: string
   waiting: boolean
+  exclusiveAlternative: boolean
   onOpenDetails: () => void
 }) {
   const { t } = useTranslation()
@@ -117,7 +125,7 @@ function AchievementSummary({
   return (
     <span
       className="achievement-info pointer-events-none z-10 col-start-2 flex min-w-0 flex-col gap-1 data-[waiting=true]:text-(--color-muted) narrow:gap-0.5"
-      data-waiting={waiting}
+      data-waiting={waiting || exclusiveAlternative}
     >
       <span className="achievement-title flex items-center gap-2 text-[14px] leading-[1.6] font-[550] narrow:text-[12px]">
         <WButton
@@ -283,6 +291,7 @@ export default function App() {
     archives,
     activeKey,
     pendingImport,
+    pendingExclusiveId,
     busy,
     setAchievementCompleted,
     filters: storedFilters,
@@ -294,6 +303,7 @@ export default function App() {
     cancelReceive,
     switchAccount,
     confirmImport,
+    confirmExclusiveAchievement,
     connect,
   } = useViewerStore()
   const language = usePreferencesStore((state) => state.language)
@@ -305,6 +315,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
   const selected = data?.achievements.find((item) => item.id === selectedId) ?? null
+  const pendingExclusive = data?.achievements.find((item) => item.id === pendingExclusiveId)
   const fileInput = useRef<HTMLInputElement>(null)
   const deferredQuery = useDeferredValue(filters.query)
   const highlightQuery = deferredQuery.trim().toLocaleLowerCase()
@@ -322,17 +333,36 @@ export default function App() {
     [data],
   )
   const stagesById = useMemo(() => getAchievementStages(mainItems), [mainItems])
-  const summary = useMemo(() => summarize(mainItems), [mainItems])
-  const groupCounts = useMemo(() => {
-    const counts = new Map<number, { finished: number; total: number }>()
-    for (const item of mainItems) {
-      const count = counts.get(item.groupId) ?? { finished: 0, total: 0 }
-      count.total++
-      if (isFinished(item)) count.finished++
-      counts.set(item.groupId, count)
+  const exclusiveById = useMemo(
+    () => getExclusiveAchievements(mainItems, exclusiveAchievementGroups),
+    [mainItems],
+  )
+  const excludedItems = useMemo(
+    () => catalogExclusions.filter(({ id }) => !mainItems.some((item) => item.id === id)),
+    [mainItems],
+  )
+  const exclusiveGroups = useMemo(() => [...new Set(exclusiveById.values())], [exclusiveById])
+  const units = useMemo(
+    () => getAchievementUnits(mainItems, exclusiveById),
+    [mainItems, exclusiveById],
+  )
+  const summary = useMemo(() => summarize(mainItems, exclusiveById), [mainItems, exclusiveById])
+  const { categoryCounts, groupCounts } = useMemo(() => {
+    function countBy(key: 'categoryId' | 'groupId') {
+      const counts = new Map<number, { finished: number; total: number }>()
+      for (const members of units) {
+        const finished = Number(members.some(isFinished))
+        for (const id of new Set(members.map((item) => item[key]))) {
+          const count = counts.get(id) ?? { finished: 0, total: 0 }
+          count.total++
+          count.finished += finished
+          counts.set(id, count)
+        }
+      }
+      return counts
     }
-    return counts
-  }, [mainItems])
+    return { categoryCounts: countBy('categoryId'), groupCounts: countBy('groupId') }
+  }, [units])
   const defaultArchive = archives.find((archive) => archive.key === defaultArchiveKey)
   const matches = useMemo(
     () =>
@@ -341,27 +371,10 @@ export default function App() {
         { ...filters, query: deferredQuery },
         stagesById,
         hiddenCompletedIds,
+        exclusiveById,
       ),
-    [mainItems, filters, deferredQuery, stagesById, hiddenCompletedIds],
+    [mainItems, filters, deferredQuery, stagesById, hiddenCompletedIds, exclusiveById],
   )
-  const stageGroups = useMemo(() => {
-    let groupIndex = -1
-    return matches.map((item, index) => {
-      const stages = stagesById.get(item.id)
-      if (!stages) return
-
-      const joinsPrevious = stagesById.get(matches[index - 1]?.id) === stages
-      const joinsNext = stagesById.get(matches[index + 1]?.id) === stages
-      if (!joinsPrevious && !joinsNext) return
-      if (!joinsPrevious) groupIndex++
-
-      return {
-        position: joinsPrevious ? (joinsNext ? 'middle' : 'end') : 'start',
-        tone: groupIndex % 2 === 0 ? 'cool' : 'warm',
-      }
-    })
-  }, [matches, stagesById])
-
   return (
     <ViewerLayout>
       {navigationOpen && (
@@ -376,22 +389,34 @@ export default function App() {
         data-open={navigationOpen}
         data-testid="成就分类导航"
       >
-        <a
-          className="brand mx-2 mt-[3px] mb-7 flex items-center gap-(--nav-gap) text-[20px] font-semibold tracking-[1px] text-(--color-nav-text) no-underline"
-          href="#"
-          onClick={(event) => {
-            event.preventDefault()
-            navigate(null)
-          }}
-        >
-          <Mark />
-          <span className="brand-text min-w-0">
-            <WEllipsis>{tr('ui.brand')}</WEllipsis>
-            <WEllipsis className="brand-sub mt-1 text-[11px] font-normal tracking-[1px] text-(--color-nav-muted)">
-              {tr('ui.brandSub')}
-            </WEllipsis>
-          </span>
-        </a>
+        <div className="mx-2 mt-[3px] mb-7 flex items-center gap-2">
+          <a
+            className="brand flex min-w-0 flex-1 items-center gap-(--nav-gap) text-[20px] font-semibold tracking-[1px] text-(--color-nav-text) no-underline"
+            href="#"
+            onClick={(event) => {
+              event.preventDefault()
+              navigate(null)
+            }}
+          >
+            <Mark />
+            <span className="brand-text min-w-0">
+              <WEllipsis>{tr('ui.brand')}</WEllipsis>
+              <WEllipsis className="brand-sub mt-1 text-[11px] font-normal tracking-[1px] text-(--color-nav-muted)">
+                {tr('ui.brandSub')}
+              </WEllipsis>
+            </span>
+          </a>
+          {data && (
+            <CatalogStatistics
+              language={filters.language}
+              includedTotal={mainItems.length}
+              excludedItems={excludedItems}
+              exclusiveGroups={exclusiveGroups}
+              achievableTotal={summary.total}
+              astrite={summary.astrite}
+            />
+          )}
+        </div>
         <div className="nav-overview rounded-lg border border-(--color-nav-border) bg-(--color-nav-surface) p-1 pl-[calc(var(--overview-frame)-1px)] [--overview-frame:3px] [--overview-inset:calc(var(--nav-inset)-4px)] [--overview-start:calc(var(--category-inset)-var(--overview-frame))]">
           <WButton
             className={`nav-overview-heading ${sidebarNavColumns} w-full rounded-sm py-[9px] pr-(--overview-inset) pl-(--overview-start) text-start text-[13px] font-semibold text-(--color-nav-muted) hover:bg-(--color-nav-hover) data-[selected=true]:bg-(--color-nav-selection) data-[selected=true]:text-(--color-nav-gold) data-[selected=true]:shadow-[inset_3px_0_var(--color-nav-gold)]`}
@@ -404,6 +429,7 @@ export default function App() {
               countClass="text-inherit"
               finished={data ? summary.finished : undefined}
               total={data ? summary.total : undefined}
+              alwaysShowCount
             />
           </WButton>
           {data && (
@@ -421,7 +447,9 @@ export default function App() {
                 },
                 {
                   label: tr('ui.hidden'),
-                  current: mainItems.filter((item) => item.hidden && isFinished(item)).length,
+                  current: units.filter(
+                    (members) => members.some((item) => item.hidden) && members.some(isFinished),
+                  ).length,
                   total: summary.hidden,
                   testId: 'completed-hidden',
                 },
@@ -458,13 +486,7 @@ export default function App() {
         <div className="category-navigation mt-3">
           {data?.categories.map((category) => {
             const icon = achievementCategoryIcons[category.id]
-            let finished = 0
-            let total = 0
-            for (const group of category.groups) {
-              const count = groupCounts.get(group.id)
-              finished += count?.finished ?? 0
-              total += count?.total ?? 0
-            }
+            const { finished = 0, total = 0 } = categoryCounts.get(category.id) ?? {}
             return (
               <div key={category.id}>
                 <div
@@ -659,6 +681,8 @@ export default function App() {
               </div>
               <AchievementList
                 items={matches}
+                exclusiveById={exclusiveById}
+                stagesById={stagesById}
                 resetKey={JSON.stringify([
                   revision,
                   deferredQuery,
@@ -666,17 +690,12 @@ export default function App() {
                   filters.hideCompleted,
                   filters.visibility,
                 ])}
-                renderItem={(item, index) => {
+                renderItem={(item) => {
                   const stages = stagesById.get(item.id)
                   const waiting = isStageWaiting(item, stages)
                   const completed = isFinished(item)
-                  const stageGroup = stageGroups[index]
-                  const fillTop =
-                    stageGroup !== undefined &&
-                    (stageGroup.position !== 'start' || stageGroups[index - 1]?.position === 'end')
-                  const fillBottom =
-                    stageGroup !== undefined &&
-                    (stageGroup.position !== 'end' || stageGroups[index + 1]?.position === 'start')
+                  const exclusiveAlternative =
+                    !completed && (exclusiveById.get(item.id)?.some(isFinished) ?? false)
                   const { currentProgress, maxProgress } = item
                   const showProgress =
                     currentProgress !== null &&
@@ -690,11 +709,8 @@ export default function App() {
                           className="achievement-row absolute inset-0 isolate rounded-lg focus-visible:outline-offset-[-3px] disabled:opacity-100"
                           data-testid={`成就卡片 ${item.id}`}
                           data-completed={completed}
-                          data-stage-group={stageGroup?.position}
-                          data-stage-tone={stageGroup?.tone}
-                          data-fill-top={fillTop || undefined}
-                          data-fill-bottom={fillBottom || undefined}
                           data-waiting={waiting}
+                          data-exclusive-alternative={exclusiveAlternative || undefined}
                           disabled={waiting || receiving || !!pendingImport || busy}
                           onClick={() => void setAchievementCompleted(item.id, !completed)}
                         >
@@ -708,12 +724,16 @@ export default function App() {
                         language={filters.language}
                         query={highlightQuery}
                         waiting={waiting}
+                        exclusiveAlternative={exclusiveAlternative}
                         onOpenDetails={() => {
                           setSelectedId(item.id)
                           setDetailOpen(true)
                         }}
                       />
-                      <span className="pointer-events-none z-10 col-start-3 flex items-center gap-3 whitespace-nowrap narrow:flex-col-reverse narrow:items-end narrow:gap-1">
+                      <span
+                        className="pointer-events-none z-10 col-start-3 flex items-center gap-3 whitespace-nowrap data-[exclusive-alternative]:opacity-60 narrow:flex-col-reverse narrow:items-end narrow:gap-1"
+                        data-exclusive-alternative={exclusiveAlternative || undefined}
+                      >
                         {showProgress && (
                           <span className="row-progress font-mono text-[11px] text-(--color-muted) narrow:leading-tight">
                             {currentProgress}/{maxProgress}
@@ -770,6 +790,23 @@ export default function App() {
           />
         )}
       </WDialog>
+      <WConfirmDialog
+        open={!!pendingExclusive}
+        heading={tr('ui.exclusiveChange')}
+        message={tr('ui.exclusiveChangePrompt', {
+          value0: pendingExclusive
+            ? titleOf(pendingExclusive, filters.language, tr('ui.missingTitle'))
+            : '',
+        })}
+        cancelLabel={tr('common.cancel')}
+        confirmLabel={tr('ui.exclusiveChange')}
+        testId="confirm-exclusive-achievement"
+        confirmTestId="change-exclusive-achievement"
+        onOpenChange={(open) => {
+          if (!open) confirmExclusiveAchievement(false)
+        }}
+        onConfirm={() => confirmExclusiveAchievement(true)}
+      />
       <WConfirmDialog
         open={!!ticket && !receipt && !pendingImport}
         heading={tr('ui.receiveDesktop')}

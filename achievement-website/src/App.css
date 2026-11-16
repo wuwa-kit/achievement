@@ -3,7 +3,6 @@
     color: var(--color-search-match);
   }
 
-  /* Paint joined edges into the reserved margins without moving the card contents. */
   .achievement-row::before {
     content: '';
     position: absolute;
@@ -33,37 +32,14 @@
     opacity: 0.43;
   }
 
-  .achievement-row[data-stage-tone='cool'] {
+  .achievement-row:is([data-exclusive-alternative], [data-waiting='true']) {
     --card-background: var(--color-surface-soft);
-  }
-
-  .achievement-row[data-stage-tone='warm'] {
-    --card-background: var(--color-stage-warm);
-    --card-hover: var(--color-stage-warm-hover);
   }
 
   @media (hover: hover) {
     .achievement-row:hover::before {
-      background-color: var(--card-hover, var(--color-surface-hover));
+      background-color: var(--color-surface-hover);
     }
-  }
-
-  .achievement-row[data-fill-top]::before,
-  .achievement-row[data-fill-top]::after {
-    inset-block-start: -3px;
-    border-start-start-radius: 0;
-    border-start-end-radius: 0;
-  }
-
-  .achievement-row[data-fill-bottom]::before,
-  .achievement-row[data-fill-bottom]::after {
-    inset-block-end: -3px;
-    border-end-start-radius: 0;
-    border-end-end-radius: 0;
-  }
-
-  .achievement-row:is([data-stage-group='start'], [data-stage-group='middle'])::before {
-    border-block-end: 1px solid var(--line);
   }
 
   .workspace {

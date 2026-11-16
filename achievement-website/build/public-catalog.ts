@@ -24,10 +24,13 @@ interface Catalog {
   groups: { id: number; categoryId: number; sort: number; enabled: boolean; texts: Texts }[]
   achievements: Item[]
 }
-export async function publicPreview() {
-  const c: Catalog = JSON.parse(
+export async function readCatalog(): Promise<Catalog> {
+  return JSON.parse(
     await readFile(new URL('../../data/achievement-catalog.json', import.meta.url), 'utf8'),
   )
+}
+
+export function buildPublicPreview(c: Catalog) {
   const previous = new Map<number, number>()
   for (const { id, nextLink } of c.achievements)
     if (nextLink > 0 && !previous.has(nextLink)) previous.set(nextLink, id)
@@ -52,7 +55,7 @@ export async function publicPreview() {
     maxProgress: null,
     hasGetReward: null,
     finishTimeRaw: null,
-    status: 'unknown',
+    status: 'unknown' as const,
     progressSource: 'catalog-only',
   }))
   const preview = {
@@ -87,5 +90,9 @@ export async function publicPreview() {
     achievements,
   }
   readExport(preview)
-  return JSON.stringify(preview)
+  return preview
+}
+
+export async function publicPreview() {
+  return JSON.stringify(buildPublicPreview(await readCatalog()))
 }

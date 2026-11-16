@@ -57,6 +57,9 @@ for (const language of appLanguages)
       const rendered = instance.t(key, {
         count: 2,
         value0: 'VALUE',
+        groups: 7,
+        entries: 14,
+        reason: 'REASON',
         time: 'TIME',
         astrite: 10,
         from: 1,

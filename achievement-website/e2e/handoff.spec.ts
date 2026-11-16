@@ -46,7 +46,7 @@ test('real HTTP handoff persists before acknowledgement and survives refresh', a
       .toBe(true)
     await page.goto('/')
     await expect(page.getByTestId('completed-astrite')).toHaveText('0')
-    await expect(page.locator('.nav-overview .nav-count')).toHaveText('0/1305')
+    await expect(page.locator('.nav-overview .nav-count')).toHaveText('0/1297')
     // Desktop can reuse an existing tab: a fragment-only navigation must be handled.
     await page.goto(url)
     const dialog = page.getByTestId('desktop-import-dialog')
@@ -54,7 +54,7 @@ test('real HTTP handoff persists before acknowledgement and survives refresh', a
     expect(new URL(page.url()).hash).toBe('')
     await dialog.getByTestId('cancel-desktop-import').click()
     await expect(dialog).toHaveCount(0)
-    await expect(page.locator('.nav-overview .nav-count')).toHaveText('0/1305')
+    await expect(page.locator('.nav-overview .nav-count')).toHaveText('0/1297')
     expect(output).not.toContain('Received')
     await page.goto(url)
     // Lost acknowledgement must preserve the saved data and permit retry without refetching.
@@ -74,12 +74,12 @@ test('real HTTP handoff persists before acknowledgement and survives refresh', a
     await expect.poll(() => output).toContain('Received')
     await expect(retry).toHaveCount(0)
     await expect(page.getByTestId('completed-astrite')).toHaveText('450')
-    await expect(page.locator('.nav-overview .nav-count')).toHaveText('55/1305')
+    await expect(page.locator('.nav-overview .nav-count')).toHaveText('55/1297')
     await page.reload()
     await expect(page.getByTestId('completed-astrite')).toHaveText('450')
-    await expect(page.locator('.nav-overview .nav-count')).toHaveText('55/1305')
+    await expect(page.locator('.nav-overview .nav-count')).toHaveText('55/1297')
     await page.getByTestId('隐藏已完成').click()
-    await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1250')
+    await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1249')
     await page.screenshot({ path: info.outputPath('received.png'), fullPage: false })
   } finally {
     child.kill()
@@ -90,7 +90,12 @@ test('public preview has no account progress and malformed ticket is cleared', a
   const response = await page.request.get('/data/achievement-catalog.png')
   const data = await readPreviewResponse(response)
   expect(data.preview).toBe(true)
-  expect(data.achievements).toHaveLength(1305)
+  expect(data.achievements).toHaveLength(1304)
+  expect(
+    data.achievements
+      .filter((item) => item.texts['zh-Hans']?.title === '行于未明')
+      .map(({ id }) => id),
+  ).toEqual([200141])
   expect(
     data.achievements.every(
       (a: { status: string; currentProgress: unknown; hasGetReward: unknown }) =>
@@ -125,7 +130,7 @@ test('late catalog response cannot replace an imported account', async ({ page }
     release()
     await response
     await expect(page.getByTestId('completed-astrite')).toHaveText('450')
-    await expect(page.locator('.nav-overview .nav-count')).toHaveText('55/1305')
+    await expect(page.locator('.nav-overview .nav-count')).toHaveText('55/1297')
   } finally {
     release()
   }
@@ -193,7 +198,7 @@ test('sequential v3 desktop handoffs select the new UID and download its data', 
       await expect.poll(() => output).toContain('Received')
       await expect(page.getByTestId('账号档案')).toHaveAttribute('data-value', 'uid:' + payload.uid)
       await expect(page.locator('.nav-overview .nav-count')).toHaveText(
-        `${payload.completedCount}/1305`,
+        `${payload.completedCount}/1297`,
       )
       await expectOptions(page, '账号档案', index === 0 ? 2 : 3)
     } finally {
@@ -202,7 +207,7 @@ test('sequential v3 desktop handoffs select the new UID and download its data', 
   }
   await page.reload()
   await expect(page.getByTestId('账号档案')).toHaveAttribute('data-value', 'uid:10002')
-  await expect(page.locator('.nav-overview .nav-count')).toHaveText('1200/1305')
+  await expect(page.locator('.nav-overview .nav-count')).toHaveText('1200/1297')
   const downloaded = page.waitForEvent('download')
   await page.getByTestId('档案更多操作').click()
   await page.getByTestId('export-achievement-file').click()
@@ -211,6 +216,6 @@ test('sequential v3 desktop handoffs select the new UID and download its data', 
   expect(payload).toEqual(accountB)
   await selectValue(page, page.getByTestId('账号档案'), 'uid:10001')
   await expect(page.locator('.nav-overview .nav-count')).toHaveText(
-    `${accountA.completedCount}/1305`,
+    `${accountA.completedCount}/1297`,
   )
 })

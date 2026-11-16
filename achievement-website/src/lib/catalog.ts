@@ -1,9 +1,19 @@
 import { isAccountExport } from './account.ts'
 import { cachePreview, readCachedPreview } from './archives.ts'
 import { readCatalogPng } from './catalog-png.ts'
-import { parseExport, readExport, type ExportData } from './data.ts'
+import { parseExport, readExport, type Achievement, type ExportData } from './data.ts'
 import { isDesktop } from './environment.ts'
+import type { ExclusionReason } from './exclusions.ts'
 import { tr } from '../i18n/index.ts'
+
+export type ExcludedCatalogAchievement = Pick<Achievement, 'id' | 'texts'> & {
+  reason: ExclusionReason
+}
+
+export const exclusiveAchievementGroups: readonly (readonly number[])[] = import.meta.env
+  .VITE_EXCLUSIVE_ACHIEVEMENT_GROUPS
+export const catalogExclusions: readonly ExcludedCatalogAchievement[] = import.meta.env
+  .VITE_CATALOG_EXCLUSIONS
 
 let catalog: ExportData | undefined
 let pending: Promise<ExportData> | undefined

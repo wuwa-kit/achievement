@@ -2,11 +2,14 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
   editAchievement,
+  filterAchievements,
+  getExclusiveAchievements,
   isFinished,
   parseExport,
   readExport,
   exportPayload,
   summarize,
+  type Filters,
 } from './data.ts'
 import { accountSchema } from './account.ts'
 import { publicPreview } from '../../build/public-catalog.ts'
@@ -18,6 +21,88 @@ const catalog = readExport(
   await readCatalogPng(Uint8Array.from(catalogPng(await publicPreview())).buffer),
 )
 const parseCompact = (input: unknown) => parseExport(input, catalog)
+
+test('exclusive options stay adjacent through sorting, searching, and filtering', () => {
+  const ids = [200710, 200711]
+  const first = catalog.achievements.find((item) => item.id === ids[0])!
+  const second = {
+    ...catalog.achievements.find((item) => item.id === ids[1])!,
+    astrite: 10,
+    visibleForAccount: true,
+    status: 'completed' as const,
+  }
+  const unrelated = {
+    ...catalog.achievements.find((item) => item.id === 200712)!,
+    astrite: 7,
+    hidden: true,
+  }
+  const items = [second, unrelated, first]
+  const groups = getExclusiveAchievements(items, [ids])
+  const filter = (patch: Partial<Filters> = {}) =>
+    filterAchievements(
+      items,
+      { group: null, language: 'zh-Hans', query: '', ...patch },
+      undefined,
+      undefined,
+      groups,
+    ).map((item) => item.id)
+
+  assert.deepEqual(filter({ sort: 'reward' }), [...ids, unrelated.id])
+  assert.deepEqual(filter({ query: '200711', visibility: 'visible' }), ids)
+  assert.deepEqual(filter({ query: '独自凝望的星海' }), ids)
+  assert.deepEqual(filter({ status: 'finished' }), ids)
+  assert.deepEqual(filter({ hideCompleted: true }), [unrelated.id])
+  const summary = summarize(items, groups)
+  assert.equal(summary.total, 2)
+  assert.equal(summary.finished, 1)
+  assert.equal(summary.hidden, 2)
+  assert.equal(summary.astrite, 17)
+})
+
+test('switching an exclusive option updates a compact archive together', () => {
+  const ids = [200710, 200711]
+  const data = parseCompact({
+    schemaVersion: 3,
+    kind: 'account-progress',
+    complete: true,
+    uid: null,
+    capturedAt: '2020-01-02T00:00:00Z',
+    resourceFingerprint: 'test',
+    count: 1,
+    completedCount: 1,
+    starCount: 5,
+    groupStates: [{ id: 2007, unlocked: true }],
+    achievements: [
+      {
+        id: ids[0],
+        previousId: -1,
+        nextId: -1,
+        currentProgress: 1,
+        maxProgress: 1,
+        hasGetReward: true,
+        finishTimeRaw: null,
+      },
+    ],
+  })
+  assert.equal(editAchievement(data, ids[1], true, catalog, { ids, replace: false }), data)
+  const switched = editAchievement(data, ids[1], true, catalog, { ids, replace: true })
+  const snapshot = accountSchema.parse(exportPayload(switched))
+  assert.equal(snapshot.completedCount, 1)
+  assert.equal(snapshot.starCount, 5)
+  assert.deepEqual(
+    snapshot.achievements.map(({ id, currentProgress }) => [id, currentProgress]),
+    [
+      [ids[1], 1],
+      [ids[0], 0],
+    ],
+  )
+  assert.deepEqual(
+    parseCompact(snapshot)
+      .achievements.filter((item) => ids.includes(item.id) && isFinished(item))
+      .map((item) => item.id),
+    [ids[1]],
+  )
+})
 
 const snapshotFile = 'session-24624/achievement-snapshot.json'
 const archiveFile = 'achievements.json'

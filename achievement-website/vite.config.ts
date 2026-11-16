@@ -5,10 +5,30 @@ import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { Features } from 'lightningcss'
-import { publicPreview } from './build/public-catalog.ts'
+import { z } from 'zod'
+import { buildPublicPreview, readCatalog } from './build/public-catalog.ts'
 import { catalogPng } from './build/catalog-png.ts'
+import exclusiveAchievementGroups from '../data/achievement-exclusive-groups.json' with { type: 'json' }
 import websiteCatalog from './website-catalog.json' with { type: 'json' }
 import websiteImages from './website-images.json' with { type: 'json' }
+import { exclusionReason } from './src/lib/exclusions.ts'
+
+const exclusiveGroupsSchema = z.array(z.array(z.number().int().positive()).min(2))
+
+function validatedExclusiveGroups(achievementIds: ReadonlySet<number>) {
+  const result = exclusiveGroupsSchema.safeParse(exclusiveAchievementGroups)
+  if (!result.success)
+    throw new Error('Invalid achievement-exclusive-groups.json', { cause: result.error })
+
+  const seen = new Set<number>()
+  for (const group of result.data)
+    for (const id of group) {
+      if (!achievementIds.has(id)) throw new Error(`Unknown exclusive achievement ID ${id}`)
+      if (seen.has(id)) throw new Error(`Duplicate exclusive achievement ID ${id}`)
+      seen.add(id)
+    }
+  return result.data
+}
 
 function catalogPreview(path: string, png: Buffer): Plugin {
   return {
@@ -74,7 +94,16 @@ function removeExternalAssets(): Plugin {
 
 export default defineConfig(async ({ command, mode }) => {
   const websiteBuild = command === 'build' && mode !== 'desktop'
-  const preview = await publicPreview()
+  const catalog = await readCatalog()
+  const exclusiveGroups = validatedExclusiveGroups(
+    new Set(catalog.achievements.map(({ id }) => id)),
+  )
+  const data = buildPublicPreview(catalog)
+  const catalogExclusions = data.achievements.flatMap((item) => {
+    const reason = item.inMainMenu ? exclusionReason(item) : null
+    return reason ? [{ id: item.id, texts: item.texts, reason }] : []
+  })
+  const preview = JSON.stringify(data)
   const png = websiteBuild ? undefined : catalogPng(preview)
   const version = createHash('sha256')
     .update(png ?? preview)
@@ -87,6 +116,8 @@ export default defineConfig(async ({ command, mode }) => {
       : `assets/achievement-catalog-${version}.png`
   return {
     define: {
+      'import.meta.env.VITE_EXCLUSIVE_ACHIEVEMENT_GROUPS': JSON.stringify(exclusiveGroups),
+      'import.meta.env.VITE_CATALOG_EXCLUSIONS': JSON.stringify(catalogExclusions),
       'import.meta.env.VITE_CATALOG_VERSION': JSON.stringify(version),
       'import.meta.env.VITE_CATALOG_URL': JSON.stringify(
         websiteBuild ? websiteCatalog.url : '/' + catalogPath,

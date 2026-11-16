@@ -11,7 +11,12 @@ import {
   saveArchive,
   selectArchive,
 } from '../lib/archives'
-import { getLoadedCatalog, loadCatalog, parseAccountOrExport } from '../lib/catalog'
+import {
+  exclusiveAchievementGroups,
+  getLoadedCatalog,
+  loadCatalog,
+  parseAccountOrExport,
+} from '../lib/catalog'
 import {
   editAchievement,
   exportPayload,
@@ -42,6 +47,7 @@ interface ViewerStore {
   archives: Awaited<ReturnType<typeof readArchives>>['archives']
   activeKey: string
   pendingImport: (ArchiveImport & { existingTime: string }) | null
+  pendingExclusiveId: number | null
   busy: boolean
   filters: ViewerFilters
   hiddenCompletedIds?: ReadonlySet<number>
@@ -56,15 +62,25 @@ interface ViewerStore {
   finishReceive(ticket: Ticket, receipt: string): Promise<void>
   switchAccount(id: string): Promise<void>
   deleteAccount(key: string): Promise<void>
-  setAchievementCompleted(id: number, completed: boolean): Promise<void>
+  setAchievementCompleted(id: number, completed: boolean, replaceExclusive?: boolean): Promise<void>
+  confirmExclusiveAchievement(accept: boolean): void
   download(): void
   connect(): () => void
 }
 type ArchiveImport =
   { data: ExportData; ticket?: never } | { data: ExportData; ticket: Ticket; transferId: string }
 let initialLoad: AbortController | undefined
-const completionQueue: { id: number; completed: boolean }[] = []
+type CompletionEdit = {
+  id: number
+  completed: boolean
+  exclusive?: { ids: readonly number[]; replace: boolean }
+}
+const completionQueue: CompletionEdit[] = []
 let completionSave: Promise<void> | undefined
+
+function applyCompletion(data: ExportData, { id, completed, exclusive }: CompletionEdit) {
+  return editAchievement(data, id, completed, getLoadedCatalog(), exclusive)
+}
 
 function getCompletedIds(data: ExportData | null) {
   return new Set(data?.achievements.filter(isFinished).map((item) => item.id))
@@ -79,6 +95,7 @@ export const useViewerStore = create<ViewerStore>()(
     archives: [],
     activeKey: defaultArchiveKey,
     pendingImport: null,
+    pendingExclusiveId: null,
     busy: true,
     filters: initialFilters,
     revision: 0,
@@ -106,6 +123,7 @@ export const useViewerStore = create<ViewerStore>()(
         state.activeKey = activeKey
         state.data = next
         if (reset) {
+          state.pendingExclusiveId = null
           state.revision++
           state.filters = { ...initialFilters }
           state.hiddenCompletedIds = undefined
@@ -232,24 +250,42 @@ export const useViewerStore = create<ViewerStore>()(
         set({ busy: false })
       }
     },
-    async setAchievementCompleted(id, completed) {
+    confirmExclusiveAchievement(accept) {
+      const id = get().pendingExclusiveId
+      set({ pendingExclusiveId: null })
+      if (accept && id !== null) void get().setAchievementCompleted(id, true, true)
+    },
+    async setAchievementCompleted(id, completed, replaceExclusive = false) {
       const { data, activeKey, busy, receiving, pendingImport } = get()
       if (!data || activeKey !== archiveKey(data.uid) || busy || receiving || pendingImport) return
-      const optimistic = editAchievement(data, id, completed, getLoadedCatalog())
+      const ids = exclusiveAchievementGroups.find((group) => group.includes(id))
+      if (
+        completed &&
+        ids &&
+        !replaceExclusive &&
+        data.achievements.some(
+          (item) => item.id !== id && ids.includes(item.id) && isFinished(item),
+        )
+      ) {
+        set({ pendingExclusiveId: id })
+        return
+      }
+      const edit: CompletionEdit = {
+        id,
+        completed,
+        exclusive: ids ? { ids, replace: replaceExclusive } : undefined,
+      }
+      const optimistic = applyCompletion(data, edit)
       if (optimistic === data) return
 
-      completionQueue.push({ id, completed })
+      completionQueue.push(edit)
       completionSave ??= Promise.resolve().then(() => saveCompletions(data))
       set({ data: optimistic })
       await completionSave
 
       async function saveCompletions(initial: ExportData) {
         const applyEdits = (initial: ExportData, edits: typeof completionQueue) =>
-          edits.reduce(
-            (archive, edit) =>
-              editAchievement(archive, edit.id, edit.completed, getLoadedCatalog()),
-            initial,
-          )
+          edits.reduce(applyCompletion, initial)
         let committed = initial
         try {
           while (completionQueue.length) {
@@ -270,6 +306,7 @@ export const useViewerStore = create<ViewerStore>()(
                 completionQueue.length = 0
                 set({
                   ...snapshot,
+                  pendingExclusiveId: null,
                   hiddenCompletedIds: get().filters.hideCompleted
                     ? getCompletedIds(snapshot.data)
                     : undefined,

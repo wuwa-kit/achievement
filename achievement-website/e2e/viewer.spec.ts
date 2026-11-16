@@ -111,7 +111,7 @@ test('real export, category browsing, filters and detail', async ({ page }, test
   page.on('pageerror', (error) => errors.push(error.message))
   await page.goto('/')
   const list = page.getByTestId('成就列表')
-  await expect(list).toHaveAttribute('data-count', '1305')
+  await expect(list).toHaveAttribute('data-count', '1304')
   await expect(page.locator('.achievement-row').first()).toBeVisible()
   await page.screenshot({ path: testInfo.outputPath('overview.png'), fullPage: false })
   expect(
@@ -120,7 +120,7 @@ test('real export, category browsing, filters and detail', async ({ page }, test
   const hideCompleted = page.getByTestId('隐藏已完成')
   await page.locator('.hide-completed .w-checkbox-label').click()
   await expect(hideCompleted).toBeChecked()
-  await expect(list).toHaveAttribute('data-count', '1250')
+  await expect(list).toHaveAttribute('data-count', '1249')
   await hideCompleted.press('Space')
   await expect(hideCompleted).not.toBeChecked()
   const search = page.getByTestId('搜索成就')
@@ -170,7 +170,7 @@ test('real export, category browsing, filters and detail', async ({ page }, test
   await list.evaluate((element) => {
     element.scrollTop = element.scrollHeight
   })
-  const lastGroupRow = list.locator('[data-index="74"] .achievement-row')
+  const lastGroupRow = list.locator('[data-card-index="74"] .achievement-row')
   await expect(lastGroupRow).toBeInViewport()
   await expect(page.getByTestId('搜索成就')).toBeInViewport()
   if (testInfo.project.name === 'mobile') await page.getByTestId('打开导航').click()
@@ -184,7 +184,7 @@ test('real export, category browsing, filters and detail', async ({ page }, test
   await allAchievements.click()
   await expect(group).toHaveAttribute('data-selected', 'false')
   await expect(allAchievements).toHaveAttribute('data-selected', 'true')
-  await expect(list).toHaveAttribute('data-count', '1305')
+  await expect(list).toHaveAttribute('data-count', '1304')
   await expect.poll(() => list.evaluate((element) => element.scrollTop)).toBe(0)
   await page.getByTestId('搜索成就').fill('no-such-achievement-99999')
   await expect(page.getByText('没有找到匹配的成就', { exact: true })).toBeVisible()
@@ -234,7 +234,7 @@ test('card stars and progress text match standalone and linked achievements', as
 
 test('JSON import is validated and errors preserve the previous snapshot', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1305')
+  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1304')
   const input = page.getByTestId('导入成就 JSON 文件')
   const fileChooser = page.waitForEvent('filechooser')
   await page.getByTestId('import-achievement-file').click()
@@ -246,7 +246,7 @@ test('JSON import is validated and errors preserve the previous snapshot', async
     buffer: Buffer.from('{bad'),
   })
   await expect(page.locator('.w-message[data-type="error"]')).toContainText('JSON 格式错误')
-  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1305')
+  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1304')
   await input.setInputFiles(fileURLToPath(fixture))
   await expect(page.locator('.w-message[data-type="error"]')).toHaveCount(0)
   await page.getByTestId('档案更多操作').click()
@@ -262,11 +262,14 @@ test('JSON import is validated and errors preserve the previous snapshot', async
 test('linked achievements unlock after completing the previous one', async ({ page }, testInfo) => {
   await page.goto('/')
   await page.getByTestId('搜索成就').fill('100411')
-  const rows = page.locator('.achievement-row')
+  const group = page.getByTestId('stage-achievements-100402')
+  const rows = group.locator('.achievement-row')
   const details = page.getByTestId(/^查看成就详情 /)
   const firstToggle = rows.nth(0)
   const secondToggle = rows.nth(1)
   await expect(rows).toHaveCount(3)
+  await expect(group.getByText('阶段成就', { exact: true })).toBeVisible()
+  await expect(group.getByText('0/3', { exact: true })).toBeVisible()
   await expect(rows.nth(1)).toHaveAttribute('data-waiting', 'true')
   await expect(rows.nth(2)).toHaveAttribute('data-waiting', 'true')
   await expect(secondToggle.locator('.achievement-emblem')).toHaveAttribute('data-lit', '0')
@@ -282,6 +285,7 @@ test('linked achievements unlock after completing the previous one', async ({ pa
   await page.getByTestId('关闭详情').click()
   await firstToggle.press('Space')
   await expect(rows.nth(0)).toHaveAttribute('data-completed', 'true')
+  await expect(group.getByText('1/3', { exact: true })).toBeVisible()
   await expect(page.locator('dialog')).toHaveCount(0)
   await expect(secondToggle).toBeEnabled()
   await details.nth(1).click()
@@ -304,6 +308,12 @@ test('linked achievements unlock after completing the previous one', async ({ pa
     path: testInfo.outputPath('completed-card-dark.png'),
     animations: 'disabled',
   })
+  const hideCompleted = page.getByTestId('隐藏已完成')
+  await hideCompleted.check()
+  await expect(rows).toHaveCount(2)
+  await expect(group.getByText('1/3', { exact: true })).toBeVisible()
+  await hideCompleted.uncheck()
+  await expect(rows).toHaveCount(3)
   await firstToggle.click()
   await expect(rows.nth(0)).toHaveAttribute('data-completed', 'false')
   await expect(page.locator('dialog')).toHaveCount(0)
@@ -318,11 +328,11 @@ test('hidden achievements can be filtered with completion and search', async ({ 
 
   await expect(hiddenOnly).not.toBeChecked()
   await hiddenOnly.check()
-  await expect(list).toHaveAttribute('data-count', '268')
+  await expect(list).toHaveAttribute('data-count', '267')
   await hideCompleted.check()
-  await expect(list).toHaveAttribute('data-count', '264')
+  await expect(list).toHaveAttribute('data-count', '263')
   await hiddenOnly.uncheck()
-  await expect(list).toHaveAttribute('data-count', '1250')
+  await expect(list).toHaveAttribute('data-count', '1249')
 
   await hiddenOnly.check()
   await search.fill('100101')
@@ -331,7 +341,7 @@ test('hidden achievements can be filtered with completion and search', async ({ 
   await expect(hiddenOnly).not.toBeChecked()
   await expect(hideCompleted).not.toBeChecked()
   await expect(search).toHaveValue('')
-  await expect(list).toHaveAttribute('data-count', '1305')
+  await expect(list).toHaveAttribute('data-count', '1304')
 })
 
 test('hide completed keeps the current results until a filter is reapplied', async ({
@@ -607,6 +617,6 @@ test('missing default export can recover through local import', async ({ page })
   await page.goto('/')
   await expect(page.locator('.w-message[data-type="error"]')).toContainText('未找到本地导出')
   await page.getByTestId('导入成就 JSON 文件').setInputFiles(fileURLToPath(fixture))
-  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1305')
+  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1304')
   await expect(page.locator('.w-message[data-type="error"]')).toHaveCount(0)
 })

@@ -181,31 +181,55 @@ export function editAchievement(
   id: number,
   completed: boolean,
   catalog?: ExportData,
+  exclusive?: { ids: readonly number[]; replace: boolean },
 ): ExportData {
   const item = data.achievements.find((entry) => entry.id === id)
   if (!item || (item.status !== 'unknown' && isFinished(item) === completed)) return data
   if (completed && isStageWaiting(item, getAchievementStages(data.achievements).get(id)))
     return data
 
+  const replaced = completed
+    ? data.achievements.filter(
+        (entry) => entry.id !== id && exclusive?.ids.includes(entry.id) && isFinished(entry),
+      )
+    : []
+  if (replaced.length && !exclusive?.replace) return data
+
   const capturedAt = new Date(Math.max(Date.now(), Date.parse(data.capturedAt) + 1)).toISOString()
-  const progress = {
-    id,
-    previousId: item.previousId,
-    nextId: item.nextId,
-    currentProgress: completed ? Math.max(1, item.maxProgress ?? 0) : 0,
-    maxProgress: Math.max(1, item.maxProgress ?? 0),
-    hasGetReward: false,
-    finishTimeRaw: completed ? Math.floor(Date.parse(capturedAt) / 1000) : null,
+  function progressFor(entry: Achievement, finished: boolean) {
+    const maxProgress = Math.max(1, entry.maxProgress ?? 0)
+    return {
+      id: entry.id,
+      previousId: entry.previousId,
+      nextId: entry.nextId,
+      currentProgress: finished ? maxProgress : 0,
+      maxProgress,
+      hasGetReward: false,
+      finishTimeRaw: finished ? Math.floor(Date.parse(capturedAt) / 1000) : null,
+    }
   }
+  const changes = [
+    progressFor(item, completed),
+    ...replaced.map((entry) => progressFor(entry, false)),
+  ]
+  const byId = new Map(changes.map((progress) => [progress.id, progress]))
   const delta = Number(completed) - Number(isFinished(item))
   const totals = {
     capturedAt,
-    completedCount: Math.max(0, data.completedCount + delta),
-    starCount: Math.max(0, data.starCount + delta * item.astrite),
+    completedCount: Math.max(0, data.completedCount + delta - replaced.length),
+    starCount: Math.max(
+      0,
+      data.starCount +
+        delta * item.astrite -
+        replaced.reduce((sum, entry) => sum + entry.astrite, 0),
+    ),
   }
   const account = data.accountSnapshot as AccountData | undefined
   if (account?.schemaVersion === 3) {
-    const achievements = [...account.achievements.filter((entry) => entry.id !== id), progress]
+    const achievements = [
+      ...account.achievements.filter((entry) => !byId.has(entry.id)),
+      ...changes,
+    ]
     return parseExport({ ...account, ...totals, count: achievements.length, achievements }, catalog)
   }
 
@@ -213,17 +237,18 @@ export function editAchievement(
     ...data,
     ...totals,
     preview: false,
-    achievements: data.achievements.map((entry) =>
-      entry.id === id
-        ? {
-            ...entry,
-            ...progress,
-            status: completed ? 'completed' : 'in_progress',
-            clientState: completed ? 'CanGetReward' : 'UnFinished',
-            progressSource: 'manual',
-          }
-        : entry,
-    ),
+    achievements: data.achievements.map((entry) => {
+      const progress = byId.get(entry.id)
+      if (!progress) return entry
+      const finished = completed && entry.id === id
+      return {
+        ...entry,
+        ...progress,
+        status: finished ? 'completed' : 'in_progress',
+        clientState: finished ? 'CanGetReward' : 'UnFinished',
+        progressSource: 'manual',
+      }
+    }),
   }
 }
 
@@ -290,11 +315,42 @@ export function progressRatio(item: Achievement): number {
   if (item.currentProgress === null || item.maxProgress === null || item.maxProgress <= 0) return 0
   return Math.min(1, Math.max(0, item.currentProgress / item.maxProgress))
 }
+type ExclusiveAchievements = ReadonlyMap<number, readonly Achievement[]>
+
+export function getExclusiveAchievements(
+  items: Achievement[],
+  groups: readonly (readonly number[])[],
+): ExclusiveAchievements {
+  const byId = new Map(items.map((item) => [item.id, item]))
+  const exclusiveById = new Map<number, Achievement[]>()
+  for (const ids of groups) {
+    const members = ids.flatMap((id) => byId.get(id) ?? [])
+    if (members.length < 2) continue
+    for (const item of members) exclusiveById.set(item.id, members)
+  }
+  return exclusiveById
+}
+
+export function getAchievementUnits(items: Achievement[], exclusiveById?: ExclusiveAchievements) {
+  const remaining = new Map(items.map((item) => [item.id, item]))
+  return items.flatMap((item) => {
+    if (!remaining.has(item.id)) return []
+    return [
+      (exclusiveById?.get(item.id) ?? [item]).flatMap(({ id }) => {
+        const member = remaining.get(id)
+        remaining.delete(id)
+        return member ?? []
+      }),
+    ]
+  })
+}
+
 export function filterAchievements(
   items: Achievement[],
   filters: Filters,
   stagesById = getAchievementStages(items),
   hiddenCompletedIds?: ReadonlySet<number>,
+  exclusiveById?: ExclusiveAchievements,
 ): Achievement[] {
   const query = filters.query.trim().toLocaleLowerCase()
   function matchesQuery(item: Achievement) {
@@ -303,32 +359,45 @@ export function filterAchievements(
       `${item.id} ${plainText(translated?.title)} ${plainText(translated?.description)} ${plainText(item.texts['zh-Hans']?.title)} ${plainText(item.texts['zh-Hans']?.description)}`.toLocaleLowerCase()
     return searchable.includes(query)
   }
-  const matches = items
-    .filter((item) => {
-      if (!item.inMainMenu || exclusionReason(item)) return false
-      if (filters.category != null && item.categoryId !== filters.category) return false
-      if (filters.group !== null && item.groupId !== filters.group) return false
-      if (filters.hideCompleted && (hiddenCompletedIds?.has(item.id) ?? isFinished(item)))
-        return false
-      if (filters.status === 'finished' && !isFinished(item)) return false
-      if (
-        filters.status &&
-        !['all', 'finished'].includes(filters.status) &&
-        item.status !== filters.status
-      )
-        return false
-      if (
-        (filters.visibility === 'hidden' && !item.hidden) ||
-        (filters.visibility === 'normal' && item.hidden)
-      )
-        return false
-      if (
-        (filters.visibility === 'visible' && !item.visibleForAccount) ||
-        (filters.visibility === 'invisible' && item.visibleForAccount)
-      )
-        return false
-      return !query || (stagesById.get(item.id) ?? [item]).some(matchesQuery)
-    })
+  function matchesFilters(item: Achievement) {
+    if (filters.category != null && item.categoryId !== filters.category) return false
+    if (filters.group !== null && item.groupId !== filters.group) return false
+    if (filters.status === 'finished' && !isFinished(item)) return false
+    if (
+      filters.status &&
+      !['all', 'finished'].includes(filters.status) &&
+      item.status !== filters.status
+    )
+      return false
+    if (
+      (filters.visibility === 'hidden' && !item.hidden) ||
+      (filters.visibility === 'normal' && item.hidden)
+    )
+      return false
+    if (
+      (filters.visibility === 'visible' && !item.visibleForAccount) ||
+      (filters.visibility === 'invisible' && item.visibleForAccount)
+    )
+      return false
+    return (
+      !query ||
+      (exclusiveById?.has(item.id)
+        ? matchesQuery(item)
+        : (stagesById.get(item.id) ?? [item]).some(matchesQuery))
+    )
+  }
+  const eligible = items.filter((item) => item.inMainMenu && !exclusionReason(item))
+  const matches = getAchievementUnits(eligible, exclusiveById)
+    .filter(
+      (members) =>
+        !(
+          filters.hideCompleted &&
+          (members.length > 1
+            ? members.some(isFinished)
+            : (hiddenCompletedIds?.has(members[0].id) ?? isFinished(members[0])))
+        ) && members.some(matchesFilters),
+    )
+    .flat()
     .sort((a, b) =>
       filters.sort === 'reward'
         ? b.astrite - a.astrite || a.id - b.id
@@ -337,24 +406,44 @@ export function filterAchievements(
           : a.id - b.id,
     )
   const remaining = new Set(matches.map((item) => item.id))
-  return matches.flatMap((item) =>
-    (stagesById.get(item.id) ?? [item]).filter((stage) => remaining.delete(stage.id)),
-  )
+  return matches.flatMap((item) => {
+    if (!remaining.has(item.id)) return []
+    const members =
+      exclusiveById?.get(item.id) ??
+      (stagesById.get(item.id) ?? [item]).filter((stage) => !exclusiveById?.has(stage.id))
+    return members.filter((member) => remaining.delete(member.id))
+  })
 }
-export function summarize(items: Achievement[]) {
-  items = items.filter((a) => !exclusionReason(a))
-  return {
-    total: items.length,
-    finished: items.filter(isFinished).length,
-    hidden: items.filter((a) => a.hidden).length,
-    completedAstrite: items.filter(isFinished).reduce((sum, a) => sum + a.astrite, 0),
-    incompleteAstrite: items
-      .filter((a) => a.status === 'in_progress')
-      .reduce((sum, a) => sum + a.astrite, 0),
-    unknownAstrite: items
-      .filter((a) => a.status === 'unknown')
-      .reduce((sum, a) => sum + a.astrite, 0),
-    unknown: items.filter((a) => a.status === 'unknown').length,
-    astrite: items.reduce((sum, a) => sum + a.astrite, 0),
+
+export function summarize(items: Achievement[], exclusiveById?: ExclusiveAchievements) {
+  const units = getAchievementUnits(
+    items.filter((item) => !exclusionReason(item)),
+    exclusiveById,
+  )
+  const summary = {
+    total: units.length,
+    finished: 0,
+    hidden: 0,
+    completedAstrite: 0,
+    incompleteAstrite: 0,
+    unknownAstrite: 0,
+    unknown: 0,
+    astrite: 0,
   }
+  for (const members of units) {
+    const completed = members.filter(isFinished)
+    const reward = Math.max(...(completed.length ? completed : members).map((item) => item.astrite))
+    summary.astrite += reward
+    if (members.some((item) => item.hidden)) summary.hidden++
+    if (completed.length) {
+      summary.finished++
+      summary.completedAstrite += reward
+    } else if (members.some((item) => item.status === 'in_progress')) {
+      summary.incompleteAstrite += reward
+    } else {
+      summary.unknown++
+      summary.unknownAstrite += reward
+    }
+  }
+  return summary
 }

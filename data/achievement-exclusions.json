@@ -3,14 +3,21 @@
   "rules": [
     {
       "id": 201196,
-      "reason": "客户端明确标记为废弃，不参与成就统计。",
+      "reason": "deprecated",
       "condition": "titleEquals",
       "language": "zh-Hans",
       "title": "dnt/这是一个废弃的成就"
     },
     {
+      "id": 201541,
+      "reason": "duplicate",
+      "condition": "titleEquals",
+      "language": "zh-Hans",
+      "title": "行于未明"
+    },
+    {
       "id": 400205,
-      "reason": "当前客户端未显示，且未提供进度；暂不参与成就统计。",
+      "reason": "unavailableWithoutProgress",
       "condition": "missingProgress"
     }
   ]
