@@ -2,16 +2,18 @@ import { expect, test } from '@playwright/test'
 import { fileURLToPath } from 'node:url'
 import { readFile } from 'node:fs/promises'
 import { catalogPng } from '../build/catalog-png'
+import { localFixture } from '../test/local-fixtures'
+import { skipIfMissingLocalFixtures } from './local-fixtures'
+
+const fixtureName = 'achievements.json'
+const fixture = localFixture(fixtureName)
+skipIfMissingLocalFixtures(fixtureName)
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/data/achievement-catalog.png', async (route) =>
     route.fulfill({
       contentType: 'image/png',
-      body: catalogPng(
-        (
-          await readFile(new URL('../../fixtures/local/achievements.json', import.meta.url), 'utf8')
-        ).replace(/^\uFEFF/, ''),
-      ),
+      body: catalogPng((await readFile(fixture, 'utf8')).replace(/^\uFEFF/, '')),
     }),
   )
 })
@@ -168,9 +170,8 @@ test('real export, category browsing, filters and detail', async ({ page }, test
   await list.evaluate((element) => {
     element.scrollTop = element.scrollHeight
   })
-  const groupRows = list.locator('.achievement-row')
-  await expect(groupRows).toHaveCount(75)
-  await expect(groupRows.last()).toBeInViewport()
+  const lastGroupRow = list.locator('[data-index="74"] .achievement-row')
+  await expect(lastGroupRow).toBeInViewport()
   await expect(page.getByTestId('搜索成就')).toBeInViewport()
   if (testInfo.project.name === 'mobile') await page.getByTestId('打开导航').click()
   await expect(page.getByRole('button', { name: /其他玩法/ })).toHaveCount(0)
@@ -178,7 +179,7 @@ test('real export, category browsing, filters and detail', async ({ page }, test
   await expect(group).toHaveAttribute('data-selected', 'true')
   await expect(allAchievements).toHaveAttribute('data-selected', 'false')
   await expect(list).toHaveAttribute('data-count', '75')
-  await expect(groupRows.last()).toBeInViewport()
+  await expect(lastGroupRow).toBeInViewport()
   if (testInfo.project.name === 'mobile') await page.getByTestId('打开导航').click()
   await allAchievements.click()
   await expect(group).toHaveAttribute('data-selected', 'false')
@@ -246,9 +247,7 @@ test('JSON import is validated and errors preserve the previous snapshot', async
   })
   await expect(page.locator('.w-message[data-type="error"]')).toContainText('JSON 格式错误')
   await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1305')
-  await input.setInputFiles(
-    fileURLToPath(new URL('../../fixtures/local/achievements.json', import.meta.url)),
-  )
+  await input.setInputFiles(fileURLToPath(fixture))
   await expect(page.locator('.w-message[data-type="error"]')).toHaveCount(0)
   await page.getByTestId('档案更多操作').click()
   await page.getByTestId('export-achievement-file').hover()
@@ -539,9 +538,7 @@ test('archive actions tolerate brief mouse passes and exits', async ({ page }) =
 test('sidebar shows a check in place of counts for completed categories and groups', async ({
   page,
 }) => {
-  const data = JSON.parse(
-    await readFile(new URL('../../fixtures/local/achievements.json', import.meta.url), 'utf8'),
-  )
+  const data = JSON.parse(await readFile(fixture, 'utf8'))
   const categoryId = data.categories[0].id
   for (const item of data.achievements) {
     if (item.categoryId === categoryId) item.status = 'completed'
@@ -609,11 +606,7 @@ test('missing default export can recover through local import', async ({ page })
   await page.route('**/data/achievement-catalog.png', (route) => route.fulfill({ status: 404 }))
   await page.goto('/')
   await expect(page.locator('.w-message[data-type="error"]')).toContainText('未找到本地导出')
-  await page
-    .getByTestId('导入成就 JSON 文件')
-    .setInputFiles(
-      fileURLToPath(new URL('../../fixtures/local/achievements.json', import.meta.url)),
-    )
+  await page.getByTestId('导入成就 JSON 文件').setInputFiles(fileURLToPath(fixture))
   await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1305')
   await expect(page.locator('.w-message[data-type="error"]')).toHaveCount(0)
 })

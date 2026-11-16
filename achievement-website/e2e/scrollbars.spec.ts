@@ -49,6 +49,8 @@ test('custom scrollbar supports wheel, drag and dialog dismissal', async ({ page
   const scrollbar = list.locator(':scope > .os-scrollbar-vertical')
   await expect(scrollbar).toHaveCount(1)
   const content = list.locator('.achievement-list-content')
+  await expect(list).toHaveAttribute('data-count', '1305')
+  expect(await content.locator('.achievement-card').count()).toBeLessThan(30)
   const longCard = content.locator('.achievement-card', {
     has: page.getByTestId('成就卡片 100101'),
   })
@@ -64,10 +66,7 @@ test('custom scrollbar supports wheel, drag and dialog dismissal', async ({ page
     .first()
     .boundingBox()
   expect(card!.height).toBeGreaterThan(regularCard!.height)
-  const scrollHeight = await list.evaluate((element) => element.scrollHeight)
-  expect(scrollHeight).toBe(
-    await content.evaluate((element) => Math.round(element.getBoundingClientRect().height)),
-  )
+  expect(Math.abs(regularCard!.y - (card!.y + card!.height) - 6)).toBeLessThan(1)
   await page.mouse.move(800, 350)
   await page.mouse.wheel(0, 450)
   const scrollTop = () => list.evaluate((element) => element.scrollTop)
@@ -82,7 +81,6 @@ test('custom scrollbar supports wheel, drag and dialog dismissal', async ({ page
   await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2 + 70, { steps: 8 })
   await page.mouse.up()
   await expect.poll(scrollTop).toBeGreaterThan(beforeDrag)
-  expect(await list.evaluate((element) => element.scrollHeight)).toBe(scrollHeight)
   const track = scrollbar.locator('.os-scrollbar-track')
   await expect
     .poll(async () => {
@@ -94,6 +92,14 @@ test('custom scrollbar supports wheel, drag and dialog dismissal', async ({ page
       return Math.abs(handleBox.y - trackBox.y - ratio * (trackBox.height - handleBox.height))
     })
     .toBeLessThan(2)
+  const thumbBox = (await handle.boundingBox())!
+  const trackBox = (await track.boundingBox())!
+  const thumbX = thumbBox.x + thumbBox.width / 2
+  await page.mouse.move(thumbX, thumbBox.y + thumbBox.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(thumbX, trackBox.y + trackBox.height - 1, { steps: 3 })
+  await page.mouse.up()
+  await expect(content.locator('[data-index="1304"] .achievement-card')).toBeInViewport()
   await list.evaluate((element) => {
     element.scrollTop = 0
   })

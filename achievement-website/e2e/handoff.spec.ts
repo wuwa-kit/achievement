@@ -4,17 +4,22 @@ import { expect, test } from '@playwright/test'
 import { spawn } from 'node:child_process'
 import { readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
+import { localFixture } from '../test/local-fixtures'
+import { skipIfMissingLocalFixtures } from './local-fixtures'
+
+const archiveFixture = 'achievements.json'
 
 test('real HTTP handoff persists before acknowledgement and survives refresh', async ({
   page,
 }, info) => {
+  skipIfMissingLocalFixtures(archiveFixture)
   const executable = fileURLToPath(
     new URL(
       '../../achievement-export/artifacts/transfer-tests/Wuwa.Transfer.Tests.exe',
       import.meta.url,
     ),
   )
-  const fixture = fileURLToPath(new URL('../../fixtures/local/achievements.json', import.meta.url))
+  const fixture = fileURLToPath(localFixture(archiveFixture))
   const ticketFile = info.outputPath('ticket.txt')
   const child = spawn(executable, ['serve', fixture, ticketFile], {
     windowsHide: true,
@@ -98,6 +103,7 @@ test('public preview has no account progress and malformed ticket is cleared', a
 })
 
 test('late catalog response cannot replace an imported account', async ({ page }) => {
+  skipIfMissingLocalFixtures(archiveFixture)
   let release!: () => void
   const pending = new Promise<void>((resolve) => {
     release = resolve
@@ -110,9 +116,7 @@ test('late catalog response cannot replace an imported account', async ({ page }
     await page.goto('/')
     await page
       .getByTestId('导入成就 JSON 文件')
-      .setInputFiles(
-        fileURLToPath(new URL('../../fixtures/local/achievements.json', import.meta.url)),
-      )
+      .setInputFiles(fileURLToPath(localFixture(archiveFixture)))
     await expect(page.locator('.w-message[data-type="success"]')).toHaveText(
       '成就档案已导入并保存到此浏览器',
     )
@@ -130,6 +134,9 @@ test('late catalog response cannot replace an imported account', async ({ page }
 test('sequential v3 desktop handoffs select the new UID and download its data', async ({
   page,
 }, info) => {
+  const firstFixture = 'session-24624/achievement-snapshot.json'
+  const secondFixture = 'csharp-session-10324-20261114-071240/attempt-8-second.json'
+  skipIfMissingLocalFixtures(firstFixture, secondFixture)
   const executable = fileURLToPath(
     new URL(
       '../../achievement-export/artifacts/transfer-tests/Wuwa.Transfer.Tests.exe',
@@ -137,12 +144,7 @@ test('sequential v3 desktop handoffs select the new UID and download its data', 
     ),
   )
   async function readAccount(file: string, uid: string) {
-    const snapshot = JSON.parse(
-      (await readFile(new URL('../../fixtures/local/' + file, import.meta.url), 'utf8')).replace(
-        /^\uFEFF/,
-        '',
-      ),
-    )
+    const snapshot = JSON.parse((await readFile(localFixture(file), 'utf8')).replace(/^\uFEFF/, ''))
     return {
       schemaVersion: 3,
       kind: 'account-progress',
@@ -158,8 +160,8 @@ test('sequential v3 desktop handoffs select the new UID and download its data', 
     }
   }
   const [accountA, accountB] = await Promise.all([
-    readAccount('session-24624/achievement-snapshot.json', '10001'),
-    readAccount('csharp-session-10324-20261114-071240/attempt-8-second.json', '10002'),
+    readAccount(firstFixture, '10001'),
+    readAccount(secondFixture, '10002'),
   ])
   await page.goto('/')
   for (const [index, payload] of [accountA, accountB, accountB].entries()) {

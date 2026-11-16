@@ -2,6 +2,8 @@ import { selectValue } from './select-helpers'
 import { expect, test } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import type { AccountData } from '../src/lib/account'
+import { localFixture } from '../test/local-fixtures'
+import { skipIfMissingLocalFixtures } from './local-fixtures'
 
 test('desktop route supports browser preview and persists preview language', async ({ page }) => {
   await page.goto('/desktop')
@@ -186,11 +188,10 @@ test('desktop bridge preserves progress while switching language and supports ca
 })
 
 test('desktop history replaces the previous snapshot and confirms deletion', async ({ page }) => {
+  const fixtureName = 'session-24624/achievement-snapshot.json'
+  skipIfMissingLocalFixtures(fixtureName)
   const transferUrl = 'http://127.0.0.1:5173/#handoff=v1&port=51234&key=' + 'a'.repeat(64)
-  const fixture = new URL(
-    '../../fixtures/local/session-24624/achievement-snapshot.json',
-    import.meta.url,
-  )
+  const fixture = localFixture(fixtureName)
   const capture = JSON.parse((await readFile(fixture, 'utf8')).replace(/^\uFEFF/, ''))
   const account: AccountData = {
     schemaVersion: 3,
