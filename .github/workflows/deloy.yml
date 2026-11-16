@@ -31,7 +31,7 @@ jobs:
         if: github.event.repository.private == false
         run: mise exec -- node scripts/deploy.ts init
       - run: mise exec -- pnpm --filter achievement-website build
-      - name: Publish website to the CDN branch
+      - name: Publish website to the CDN tag
         if: github.event.repository.private == false
         run: mise exec -- node scripts/deploy.ts publish
       - uses: actions/upload-artifact@v6
@@ -49,6 +49,6 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Keep the latest three CDN branches
+      - name: Keep the latest three CDN tags
         if: github.event.repository.private == false
         run: mise exec -- node scripts/deploy.ts cleanup

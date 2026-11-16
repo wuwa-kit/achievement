@@ -2,8 +2,8 @@
 
 远程仓库为 `https://github.com/wuwa-kit/achievement`。
 
-- `deloy` 在推送 `main` 时构建网站，也可从 `main` 手动运行。工作流上传 `website` artifact，公开仓库还会更新 jsDelivr 的发布分支。
-- `release`：推送版本标签时构建 Windows x64 Full 版和 Lite 版，从 `achievement-export/CHANGELOG.md` 提取版本说明。Actions artifact 和 GitHub Release 中的文件名带版本标签，例如 `WuwaAchievementExport-Full-v0.1.4.exe` 和 `WuwaAchievementExport-Lite-v0.1.4.exe`。也可选择标签手动运行。带后缀的版本标记为预发布。缺少对应更新日志时停止发布。
+- `deloy` 在推送 `main` 时构建网站，也可从 `main` 手动运行。工作流上传 `website` artifact。公开仓库用精确的 `0.0.0-page.<时间戳>` 标签发布 jsDelivr 资源并保留最近三次的标签。
+- `release` 在推送桌面版本标签时构建 Windows x64 Full 版和 Lite 版，从 `achievement-export/CHANGELOG.md` 提取版本说明。Actions artifact 和 GitHub Release 中的文件名带版本标签，例如 `WuwaAchievementExport-Full-v0.1.4.exe` 和 `WuwaAchievementExport-Lite-v0.1.4.exe`。也可选择标签手动运行。带后缀的版本标记为预发布。缺少对应更新日志时停止发布。工作流跳过网页标签。
 
 配置 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID` 后，工作流会部署到已有的 Cloudflare Pages 项目 `wuwa-achievement-export`。缺少凭据时仍构建网站和上传 artifact。
 

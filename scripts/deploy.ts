@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const dist = join(root, 'achievement-website', 'dist')
-const branchPattern = /^page-\d+$/
+const tagPrefix = '0.0.0-page.'
+const tagPattern = /^0\.0\.0-page\.[1-9]\d*$/
 
 function requiredEnv(name: string) {
   const value = process.env[name]
@@ -24,19 +25,22 @@ function git(args: string[], env = process.env) {
 }
 
 async function initialize() {
-  const branch = `page-${Date.now()}`
-  const cdnBase = `https://cdn.jsdelivr.net/gh/${requiredEnv('GITHUB_REPOSITORY')}@${branch}/`
-  await appendFile(requiredEnv('GITHUB_ENV'), `PAGES_BRANCH=${branch}\nCDN_BASE=${cdnBase}\n`)
+  const tag = `${tagPrefix}${Date.now()}`
+  const cdnBase = `https://cdn.jsdelivr.net/gh/${requiredEnv('GITHUB_REPOSITORY')}@${tag}/`
+  await appendFile(
+    requiredEnv('GITHUB_ENV'),
+    `PAGES_TAG=${tag}\nCDN_BASE=${cdnBase}\n`,
+  )
 }
 
-function deploymentBranch() {
-  const branch = requiredEnv('PAGES_BRANCH')
-  if (!branchPattern.test(branch)) throw new Error(`Invalid CDN branch: ${branch}`)
-  return branch
+function deploymentTag() {
+  const tag = requiredEnv('PAGES_TAG')
+  if (!tagPattern.test(tag)) throw new Error(`Invalid CDN tag: ${tag}`)
+  return tag
 }
 
 async function publish() {
-  const branch = deploymentBranch()
+  const tag = deploymentTag()
   const indexDir = await mkdtemp(join(tmpdir(), 'wuwa-pages-'))
   const env = {
     ...process.env,
@@ -50,24 +54,41 @@ async function publish() {
     git(['read-tree', '--empty'], env)
     git([`--work-tree=${dist}`, 'add', '--all', '--force'], env)
     const tree = git(['write-tree'], env)
-    const commit = git(['commit-tree', tree, '-m', `Build ${branch}`], env)
-    git(['push', 'origin', `${commit}:refs/heads/${branch}`])
+    const commit = git(['commit-tree', tree, '-m', `Build ${tag}`], env)
+    git(['push', 'origin', `${commit}:refs/tags/${tag}`])
   } finally {
     await rm(indexDir, { recursive: true, force: true })
   }
 }
 
 function cleanup() {
-  const branch = deploymentBranch()
-  const refs = git(['ls-remote', '--heads', 'origin', 'refs/heads/page-*'])
-  const previousBranches = Array.from(
-    refs.matchAll(/\trefs\/heads\/(page-\d+)$/gm),
-    (match) => match[1],
-  )
-    .filter((previous) => Number(previous.slice(5)) < Number(branch.slice(5)))
-    .sort((a, b) => Number(b.slice(5)) - Number(a.slice(5)))
-  const expired = previousBranches.slice(2)
-  if (expired.length) git(['push', 'origin', '--delete', ...expired])
+  const tag = deploymentTag()
+  const timestamp = (value: string) => Number(value.slice(tagPrefix.length))
+  const refs = git([
+    'ls-remote',
+    '--tags',
+    '--refs',
+    'origin',
+    `refs/tags/${tagPrefix}*`,
+  ])
+  const previousTags = refs
+    .split('\n')
+    .map((line) => line.split('\trefs/tags/')[1])
+    .filter(
+      (previous) =>
+        previous &&
+        tagPattern.test(previous) &&
+        timestamp(previous) < timestamp(tag),
+    )
+    .sort((a, b) => timestamp(b) - timestamp(a))
+  const expired = previousTags.slice(2)
+  if (expired.length)
+    git([
+      'push',
+      'origin',
+      '--delete',
+      ...expired.map((tag) => `refs/tags/${tag}`),
+    ])
 }
 
 switch (process.argv[2]) {
