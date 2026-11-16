@@ -86,7 +86,6 @@ export default defineConfig(async ({ command, mode }) => {
       ? 'data/achievement-catalog.png'
       : `assets/achievement-catalog-${version}.png`
   return {
-    base: (websiteBuild && process.env.CDN_BASE) || '/',
     define: {
       'import.meta.env.VITE_CATALOG_VERSION': JSON.stringify(version),
       'import.meta.env.VITE_CATALOG_URL': JSON.stringify(
