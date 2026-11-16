@@ -135,12 +135,8 @@ function copyRoutePages(): Plugin {
 export default defineConfig(async ({ command }) => {
   const preview = await publicPreview()
   const version = createHash('sha256').update(preview).digest('hex')
-  const cdnBase = command === 'build' ? process.env.CDN_BASE : undefined
   return {
-    base: '/',
-    experimental: cdnBase
-      ? { renderBuiltUrl: (filename: string) => cdnBase + filename }
-      : undefined,
+    base: (command === 'build' && process.env.CDN_BASE) || '/',
     define: { 'import.meta.env.VITE_PREVIEW_VERSION': JSON.stringify(version) },
     plugins: [react(), tailwindcss(), catalogPreview(preview), copyRoutePages()],
     // The polyfill cannot see the color-scheme set by the app at runtime.

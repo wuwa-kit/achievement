@@ -31,22 +31,15 @@
 
 @font-face {
   font-family: 'mc-gamefont';
-  src: url('https://media-cdn-mingchao.kurogame.com/font/H7GBK-Heavy.ttf') format('truetype');
+  src: url('../../achievement-export/Wuwa.Desktop/Assets/Fonts/H7GBK-Heavy.ttf') format('truetype');
   font-style: normal;
-  font-weight: 900;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'desktop-gamefont';
-  src: url('/fonts/H7GBK-Heavy.ttf') format('truetype');
   font-weight: 900;
   font-display: swap;
 }
 
 @theme {
   --font-sans: 'mc-gamefont', Inter, 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
-  --font-desktop: 'desktop-gamefont', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-desktop: 'mc-gamefont', 'Microsoft YaHei', system-ui, sans-serif;
   --font-mono: 'Cascadia Code', Consolas, monospace;
 }
 
