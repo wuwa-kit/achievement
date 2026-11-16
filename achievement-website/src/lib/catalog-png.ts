@@ -2,6 +2,10 @@ export const pngSignature = Uint8Array.of(137, 80, 78, 71, 13, 10, 26, 10)
 export const catalogTextHeader = new TextEncoder().encode('AchievementCatalog\0\x01\0\0\0')
 
 export async function readCatalogPng(buffer: ArrayBuffer): Promise<unknown> {
+  return JSON.parse(await readCatalogPngJson(buffer))
+}
+
+export async function readCatalogPngJson(buffer: ArrayBuffer): Promise<string> {
   const bytes = new Uint8Array(buffer)
   const view = new DataView(buffer)
   if (!pngSignature.every((byte, index) => bytes[index] === byte))
@@ -20,7 +24,7 @@ export async function readCatalogPng(buffer: ArrayBuffer): Promise<unknown> {
     ) {
       const compressed = bytes.slice(start + catalogTextHeader.length, end)
       const json = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('deflate'))
-      return new Response(json).json()
+      return new Response(json).text()
     }
     offset = end + 4
   }

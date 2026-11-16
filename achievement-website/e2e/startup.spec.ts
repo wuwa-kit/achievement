@@ -63,23 +63,36 @@ test('the catalog is read from IndexedDB until its version changes', async ({ pa
     .poll(() =>
       page.evaluate(
         () =>
-          new Promise<string | null>((resolve, reject) => {
-            const open = indexedDB.open('wuwa-achievement-archive')
-            open.onerror = () => reject(open.error)
-            open.onsuccess = () => {
-              const db = open.result
-              const request = db
-                .transaction('exports')
-                .objectStore('exports')
-                .get('catalog-preview')
-              request.onsuccess = () => resolve(request.result?.version ?? null)
-              request.onerror = () => reject(request.error)
-              db.close()
-            }
-          }),
+          new Promise<{ version: string; format: number; schemaVersion: number } | null>(
+            (resolve, reject) => {
+              const open = indexedDB.open('wuwa-achievement-archive')
+              open.onerror = () => reject(open.error)
+              open.onsuccess = () => {
+                const db = open.result
+                const request = db
+                  .transaction('exports')
+                  .objectStore('exports')
+                  .get('catalog-preview')
+                request.onsuccess = () => {
+                  const cached = request.result
+                  resolve(
+                    cached
+                      ? {
+                          version: cached.version,
+                          format: cached.format,
+                          schemaVersion: cached.data.schemaVersion,
+                        }
+                      : null,
+                  )
+                }
+                request.onerror = () => reject(request.error)
+                db.close()
+              }
+            },
+          ),
       ),
     )
-    .toMatch(/^[a-f0-9]{64}$/)
+    .toEqual({ version: expect.stringMatching(/^[a-f0-9]{64}$/), format: 1, schemaVersion: 2 })
   await page.route('**/data/achievement-catalog.png', (route) => {
     requests++
     return route.abort()

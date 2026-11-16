@@ -4,9 +4,11 @@ import { isAccountExport, parseAccount, type AccountData } from './account.ts'
 
 export const defaultArchiveKey = 'default'
 const previewCacheKey = 'catalog-preview'
+const catalogCacheFormat = 1
 
 type Archive = { key: string; uid: string | null; capturedAt: string }
 type StoredArchive = Pick<Archive, 'capturedAt'>
+type CachedCatalog = { version: string; format?: number; data: ExportData }
 
 export function archiveKey(uid: string | null) {
   return uid ? `uid:${uid}` : defaultArchiveKey
@@ -120,11 +122,17 @@ export function readArchives() {
 
 export async function readCachedPreview(version: string): Promise<ExportData | null> {
   try {
-    return await withArchives('readonly', async (_, meta) => {
-      const cached = (await read(meta.get(previewCacheKey))) as
-        { version: string; data: unknown } | undefined
-      return cached?.version === version ? readExport(cached.data) : null
-    })
+    const cached = await withArchives(
+      'readonly',
+      (_, meta) => read(meta.get(previewCacheKey)) as Promise<CachedCatalog | undefined>,
+    )
+    if (cached?.version !== version) return null
+    if (cached.format === catalogCacheFormat) return cached.data
+    if (cached.format !== undefined) return null
+
+    const data = readExport(cached.data)
+    void cachePreview(version, data)
+    return data
   } catch {
     // The preview is disposable. Fetch a fresh copy if the cache cannot be read.
     return null
@@ -134,7 +142,7 @@ export async function readCachedPreview(version: string): Promise<ExportData | n
 export async function cachePreview(version: string, data: ExportData): Promise<void> {
   try {
     await withArchives('readwrite', async (_, meta) => {
-      await read(meta.put({ version, data }, previewCacheKey))
+      await read(meta.put({ version, format: catalogCacheFormat, data }, previewCacheKey))
     })
   } catch {
     // A storage failure must not prevent the downloaded preview from displaying.

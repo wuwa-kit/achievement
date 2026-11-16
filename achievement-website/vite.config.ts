@@ -80,9 +80,7 @@ export default defineConfig(async ({ command, mode }) => {
     .update(png ?? preview)
     .digest('hex')
   if (websiteBuild && version !== websiteCatalog.sourceSha256)
-    throw new Error(
-      `Upload the current catalog PNG and update website-catalog.json with sourceSha256 ${version}`,
-    )
+    throw new Error('Run mise exec -- pnpm upload:catalog to update website-catalog.json')
   const catalogPath =
     command === 'serve'
       ? 'data/achievement-catalog.png'
