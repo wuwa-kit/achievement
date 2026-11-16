@@ -22,8 +22,9 @@
     inset: 0;
     border-radius: inherit;
     pointer-events: none;
-    background: url('./assets/achievement-icons/achievement-completed-background.png') right
-      center / auto 100% no-repeat;
+    /* Crop the transparent edges baked into the image. */
+    background: url('./assets/achievement-icons/achievement-completed-background.png') right -3px
+      center / auto 103% no-repeat;
     mask-image: linear-gradient(to left, #000 10%, transparent min(100%, 275px));
     opacity: 0.85;
   }
