@@ -27,7 +27,7 @@ test('desktop preview does not load viewer data or initialize account storage', 
           '/src/stores/viewer.ts',
           '/src/lib/data.ts',
           '/src/lib/handoff.ts',
-          '/data/achievements.json',
+          '/data/achievement-catalog.png',
         ].includes(path) || path.includes('achievement-catalog.json'),
     ),
   ).toEqual([])
@@ -52,7 +52,7 @@ test('404 routes load independently and link back to the viewer', async ({ page 
       (path) =>
         path === '/src/App.tsx' ||
         path === '/src/stores/viewer.ts' ||
-        path === '/data/achievements.json' ||
+        path === '/data/achievement-catalog.png' ||
         path.startsWith('/src/desktop/'),
     ),
   ).toEqual([])

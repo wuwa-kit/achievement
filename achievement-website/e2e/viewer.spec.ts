@@ -1,14 +1,16 @@
 import { expect, test } from '@playwright/test'
 import { fileURLToPath } from 'node:url'
 import { readFile } from 'node:fs/promises'
+import { catalogPng } from '../build/catalog-png'
 
 test.beforeEach(async ({ page }) => {
-  await page.route('**/data/achievements.json', async (route) =>
+  await page.route('**/data/achievement-catalog.png', async (route) =>
     route.fulfill({
-      contentType: 'application/json',
-      body: await readFile(
-        new URL('../../fixtures/local/achievements.json', import.meta.url),
-        'utf8',
+      contentType: 'image/png',
+      body: catalogPng(
+        (
+          await readFile(new URL('../../fixtures/local/achievements.json', import.meta.url), 'utf8')
+        ).replace(/^\uFEFF/, ''),
       ),
     }),
   )
@@ -604,7 +606,7 @@ test('detail dialog completes its exit and can reopen during it', async ({ page 
 })
 
 test('missing default export can recover through local import', async ({ page }) => {
-  await page.route('**/data/achievements.json', (route) => route.fulfill({ status: 404 }))
+  await page.route('**/data/achievement-catalog.png', (route) => route.fulfill({ status: 404 }))
   await page.goto('/')
   await expect(page.locator('.w-message[data-type="error"]')).toContainText('未找到本地导出')
   await page

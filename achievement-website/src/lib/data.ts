@@ -1,7 +1,7 @@
 import { tr } from '../i18n/index.ts'
 import { z } from 'zod'
 import { exclusionReason } from './exclusions.ts'
-import { mergeAccount, type AccountData } from './account.ts'
+import { isAccountExport, mergeAccount, parseAccount, type AccountData } from './account.ts'
 
 const textSchema = z.object({
   title: z.string().nullable(),
@@ -97,9 +97,7 @@ export type Filters = {
   sort?: 'id' | 'reward' | 'progress'
 }
 
-export function parseExport(input: unknown): ExportData {
-  if (input && typeof input === 'object' && 'schemaVersion' in input && input.schemaVersion === 3)
-    input = mergeAccount(input)
+export function readExport(input: unknown): ExportData {
   const result = exportSchema.safeParse(input)
   if (!result.success) throw new Error(tr('ui.invalidExport'))
   const data = result.data
@@ -130,6 +128,20 @@ export function parseExport(input: unknown): ExportData {
       }
     }
   if (referenced.size !== main.length) throw new Error(tr('ui.incompleteCatalog'))
+  return data
+}
+
+export function parseExport(input: unknown, catalog?: ExportData): ExportData {
+  if (isAccountExport(input)) {
+    const account = parseAccount(input)
+    if (!catalog) throw new Error(tr('ui.noExport'))
+    input = mergeAccount(account, catalog)
+  }
+  return normalizeExport(readExport(input))
+}
+
+export function normalizeExport(data: ExportData): ExportData {
+  const main = data.achievements.filter((a) => a.inMainMenu)
   // Validate old full exports before narrowing them; also applies to IndexedDB restoration.
   const retained = main.filter((a) => !exclusionReason(a))
   const retainedIds = new Set(retained.map((a) => a.id))
@@ -164,7 +176,12 @@ export function exportPayload(data: ExportData): unknown {
   return data.accountSnapshot ?? data
 }
 
-export function editAchievement(data: ExportData, id: number, completed: boolean): ExportData {
+export function editAchievement(
+  data: ExportData,
+  id: number,
+  completed: boolean,
+  catalog?: ExportData,
+): ExportData {
   const item = data.achievements.find((entry) => entry.id === id)
   if (!item || (item.status !== 'unknown' && isFinished(item) === completed)) return data
   if (completed && isStageWaiting(item, getAchievementStages(data.achievements).get(id)))
@@ -189,7 +206,7 @@ export function editAchievement(data: ExportData, id: number, completed: boolean
   const account = data.accountSnapshot as AccountData | undefined
   if (account?.schemaVersion === 3) {
     const achievements = [...account.achievements.filter((entry) => entry.id !== id), progress]
-    return parseExport({ ...account, ...totals, count: achievements.length, achievements })
+    return parseExport({ ...account, ...totals, count: achievements.length, achievements }, catalog)
   }
 
   return {

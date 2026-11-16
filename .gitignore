@@ -1,4 +1,5 @@
 /artifacts/
 /.tools/
+/.env
 /fixtures/local/
 node_modules/

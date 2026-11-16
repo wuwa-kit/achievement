@@ -1,3 +1,4 @@
+import { readPreviewResponse } from './catalog-helpers'
 import { selectValue, expectOptions } from './select-helpers'
 import { expect, test } from '@playwright/test'
 import { spawn } from 'node:child_process'
@@ -81,8 +82,8 @@ test('real HTTP handoff persists before acknowledgement and survives refresh', a
 })
 
 test('public preview has no account progress and malformed ticket is cleared', async ({ page }) => {
-  const response = await page.request.get('/data/achievements.json')
-  const data = await response.json()
+  const response = await page.request.get('/data/achievement-catalog.png')
+  const data = await readPreviewResponse(response)
   expect(data.preview).toBe(true)
   expect(data.achievements).toHaveLength(1305)
   expect(
@@ -101,7 +102,7 @@ test('late catalog response cannot replace an imported account', async ({ page }
   const pending = new Promise<void>((resolve) => {
     release = resolve
   })
-  await page.route('**/data/achievements.json', async (route) => {
+  await page.route('**/data/achievement-catalog.png', async (route) => {
     await pending
     await route.continue()
   })
@@ -116,7 +117,7 @@ test('late catalog response cannot replace an imported account', async ({ page }
       '成就档案已导入并保存到此浏览器',
     )
     await expect(page.getByTestId('completed-astrite')).toHaveText('450')
-    const response = page.waitForResponse('**/data/achievements.json')
+    const response = page.waitForResponse('**/data/achievement-catalog.png')
     release()
     await response
     await expect(page.getByTestId('completed-astrite')).toHaveText('450')

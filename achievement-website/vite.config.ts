@@ -1,116 +1,34 @@
-import { copyFile, mkdir, readFile } from 'node:fs/promises'
+import { copyFile, mkdir } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { Features } from 'lightningcss'
-import { parseExport } from './src/lib/data.ts'
+import { publicPreview } from './build/public-catalog.ts'
+import { catalogPng } from './build/catalog-png.ts'
+import websiteCatalog from './website-catalog.json' with { type: 'json' }
+import websiteImages from './website-images.json' with { type: 'json' }
 
-type Texts = Record<string, { title: string | null; description?: string | null }>
-interface Item {
-  id: number
-  groupId: number
-  categoryId: number
-  inMainMenu: boolean
-  hidden: boolean
-  nextLink: number
-  titleKey: string
-  descriptionKey: string
-  level: number
-  astrite: number
-  rewards: { itemId: number; quantity: number }[]
-  texts: Texts
-}
-interface Catalog {
-  collectedAt: string
-  languages: string[]
-  languageCoverage: unknown[]
-  categories: { id: number; inMainMenu: boolean; texts: Texts }[]
-  groups: { id: number; categoryId: number; sort: number; enabled: boolean; texts: Texts }[]
-  achievements: Item[]
-}
-async function publicPreview() {
-  const c: Catalog = JSON.parse(
-    await readFile(new URL('../data/achievement-catalog.json', import.meta.url), 'utf8'),
-  )
-  const achievements = c.achievements.map((a) => ({
-    id: a.id,
-    groupId: a.groupId,
-    categoryId: a.categoryId,
-    inMainMenu: a.inMainMenu,
-    hidden: a.hidden,
-    titleKey: a.titleKey,
-    descriptionKey: a.descriptionKey,
-    level: a.level,
-    astrite: a.astrite,
-    rewards: a.rewards,
-    texts: a.texts,
-    previousId: c.achievements.find((p) => p.nextLink === a.id)?.id ?? -1,
-    nextId: a.nextLink,
-    visibleForAccount: false,
-    visibilityReason: 'catalog-preview',
-    clientState: 'unknown',
-    currentProgress: null,
-    maxProgress: null,
-    hasGetReward: null,
-    finishTimeRaw: null,
-    status: 'unknown',
-    progressSource: 'catalog-only',
-  }))
-  return JSON.stringify(
-    parseExport({
-      schemaVersion: 2,
-      complete: true,
-      preview: true,
-      capturedAt: c.collectedAt,
-      count: achievements.length,
-      completedCount: 0,
-      starCount: 0,
-      mainMenuCount: achievements.filter((a) => a.inMainMenu).length,
-      otherGameplayCount: achievements.filter((a) => !a.inMainMenu).length,
-      languages: c.languages,
-      languageCoverage: c.languageCoverage,
-      categories: c.categories
-        .filter((c) => c.inMainMenu)
-        .map((category) => ({
-          id: category.id,
-          texts: category.texts,
-          groups: c.groups
-            .filter((g) => g.categoryId === category.id)
-            .map((g) => ({
-              id: g.id,
-              categoryId: g.categoryId,
-              sort: g.sort,
-              enabled: g.enabled,
-              texts: g.texts,
-              unlocked: false,
-              achievementIds: achievements.filter((a) => a.groupId === g.id).map((a) => a.id),
-            })),
-        })),
-      achievements,
-    }),
-  )
-}
-function catalogPreview(preview: string): Plugin {
+function catalogPreview(path: string, png: Buffer): Plugin {
   return {
     name: 'public-achievement-catalog',
     configureServer(server) {
-      server.middlewares.use('/data/achievements.json', async (request, response) => {
+      server.middlewares.use('/' + path, (request, response) => {
         if (request.method !== 'GET') {
           response.writeHead(405).end()
           return
         }
         response
-          .writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
-          .end(preview)
+          .writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-store' })
+          .end(png)
       })
     },
     generateBundle() {
       this.emitFile({
         type: 'asset',
-        fileName: 'data/achievements.json',
-        source: preview,
+        fileName: path,
+        source: png,
       })
     },
   }
@@ -132,16 +50,65 @@ function copyRoutePages(): Plugin {
   }
 }
 
-export default defineConfig(async ({ command }) => {
-  const preview = await publicPreview()
-  const version = createHash('sha256').update(preview).digest('hex')
+const imageLinks: Partial<Record<string, string>> = websiteImages
+function externalAssetUrl(filename: string) {
+  if (/^assets\/H7GBK-Heavy-[\w-]{8}\.ttf$/.test(filename))
+    return 'https://media-cdn-mingchao.kurogame.com/font/H7GBK-Heavy.ttf'
+  const name = filename.match(/^assets\/(.+)-[\w-]{8}\.png$/)?.[1]
+  return name ? imageLinks[name + '.png'] : undefined
+}
+
+function removeExternalAssets(): Plugin {
   return {
-    base: (command === 'build' && process.env.CDN_BASE) || '/',
-    define: { 'import.meta.env.VITE_PREVIEW_VERSION': JSON.stringify(version) },
-    plugins: [react(), tailwindcss(), catalogPreview(preview), copyRoutePages()],
+    name: 'remove-external-website-assets',
+    generateBundle: {
+      order: 'post',
+      handler(_, bundle) {
+        for (const fileName of Object.keys(bundle)) {
+          if (externalAssetUrl(fileName)) delete bundle[fileName]
+        }
+      },
+    },
+  }
+}
+
+export default defineConfig(async ({ command, mode }) => {
+  const websiteBuild = command === 'build' && mode !== 'desktop'
+  const preview = await publicPreview()
+  const png = websiteBuild ? undefined : catalogPng(preview)
+  const version = createHash('sha256')
+    .update(png ?? preview)
+    .digest('hex')
+  if (websiteBuild && version !== websiteCatalog.sourceSha256)
+    throw new Error(
+      `Upload the current catalog PNG and update website-catalog.json with sourceSha256 ${version}`,
+    )
+  const catalogPath =
+    command === 'serve'
+      ? 'data/achievement-catalog.png'
+      : `assets/achievement-catalog-${version}.png`
+  return {
+    base: (websiteBuild && process.env.CDN_BASE) || '/',
+    define: {
+      'import.meta.env.VITE_CATALOG_VERSION': JSON.stringify(version),
+      'import.meta.env.VITE_CATALOG_URL': JSON.stringify(
+        websiteBuild ? websiteCatalog.url : '/' + catalogPath,
+      ),
+    },
+    experimental: websiteBuild ? { renderBuiltUrl: externalAssetUrl } : undefined,
+    plugins: [
+      react(),
+      tailwindcss(),
+      ...(png ? [catalogPreview(catalogPath, png)] : []),
+      copyRoutePages(),
+      ...(websiteBuild ? [removeExternalAssets()] : []),
+    ],
     // The polyfill cannot see the color-scheme set by the app at runtime.
     css: { lightningcss: { exclude: Features.LightDark } },
-    build: { modulePreload: false },
+    build: {
+      modulePreload: false,
+      rolldownOptions: { output: { assetFileNames: 'assets/[name]-[hash:8][extname]' } },
+    },
     server: { host: '127.0.0.1', port: 5173, strictPort: true },
     preview: { host: '127.0.0.1', port: 4173, strictPort: true },
   }

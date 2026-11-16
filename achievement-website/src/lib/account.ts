@@ -1,6 +1,6 @@
 import { tr } from '../i18n/index.ts'
 import { z } from 'zod'
-import catalog from '../../../data/achievement-catalog.json' with { type: 'json' }
+import type { ExportData } from './data.ts'
 
 const progress = z
   .object({
@@ -44,15 +44,24 @@ export const accountSchema = z
   })
 export type AccountData = z.infer<typeof accountSchema>
 
-export function mergeAccount(input: unknown) {
+export function isAccountExport(input: unknown) {
+  return (
+    !!input && typeof input === 'object' && 'schemaVersion' in input && input.schemaVersion === 3
+  )
+}
+
+export function parseAccount(input: unknown): AccountData {
   const parsed = accountSchema.safeParse(input)
   if (!parsed.success) throw new Error(tr('ui.invalidAccount') + parsed.error.issues[0].message)
-  const account = parsed.data
+  return parsed.data
+}
+
+export function mergeAccount(account: AccountData, catalog: ExportData) {
   const states = new Map(account.achievements.map((a) => [a.id, a]))
   const unlocked = new Map(account.groupStates.map((g) => [g.id, g.unlocked]))
   const knownIds = new Set(catalog.achievements.map((a) => a.id))
   const unknownIds = account.achievements.filter((a) => !knownIds.has(a.id)).map((a) => a.id)
-  const groups = new Map(catalog.groups.map((g) => [g.id, g]))
+  const groups = new Map(catalog.categories.flatMap((c) => c.groups.map((g) => [g.id, g])))
   const achievements = catalog.achievements
     .filter((c) => c.inMainMenu)
     .map((c) => {
@@ -69,9 +78,8 @@ export function mergeAccount(input: unknown) {
             : currentProgress === null || maxProgress === null
               ? 'unknown'
               : 'in_progress'
-      const previousId =
-        p?.previousId ?? catalog.achievements.find((a) => a.nextLink === c.id)?.id ?? -1
-      const nextId = p?.nextId ?? c.nextLink
+      const previousId = p?.previousId ?? c.previousId
+      const nextId = p?.nextId ?? c.nextId
       const reason =
         !p || maxProgress === null
           ? 'progress_unavailable'
@@ -116,20 +124,16 @@ export function mergeAccount(input: unknown) {
     starCount: account.starCount,
     languages: catalog.languages,
     languageCoverage: catalog.languageCoverage,
-    categories: catalog.categories
-      .filter((c) => c.inMainMenu)
-      .map((c) => ({
-        id: c.id,
-        texts: c.texts,
-        groups: catalog.groups
-          .filter((g) => g.categoryId === c.id)
-          .sort((a, b) => a.sort - b.sort || a.id - b.id)
-          .map((g) => ({
-            ...g,
-            unlocked: unlocked.get(g.id) === true,
-            achievementIds: achievements.filter((a) => a.groupId === g.id).map((a) => a.id),
-          })),
-      })),
+    categories: catalog.categories.map((c) => ({
+      id: c.id,
+      texts: c.texts,
+      groups: [...c.groups]
+        .sort((a, b) => a.sort - b.sort || a.id - b.id)
+        .map((g) => ({
+          ...g,
+          unlocked: unlocked.get(g.id) === true,
+        })),
+    })),
     achievements,
     // Persist the unmodified account input so future catalogs can resolve new IDs.
     accountSnapshot: account,

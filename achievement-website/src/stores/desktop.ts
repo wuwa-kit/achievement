@@ -65,10 +65,14 @@ export const useDesktopStore = create<DesktopStore>()(
       })
       for (const { id } of history) {
         if (Object.hasOwn(historySummaries, id)) continue
-        void Promise.all([request('history.read', { id }), import('../lib/data')])
-          .then(([snapshot, { parseExport, summarize }]) => {
+        void Promise.all([
+          request('history.read', { id }),
+          import('../lib/data'),
+          import('../lib/catalog'),
+        ])
+          .then(async ([snapshot, { summarize }, { parseAccountOrExport }]) => {
             const { total, completedAstrite, astrite } = summarize(
-              parseExport(snapshot).achievements,
+              (await parseAccountOrExport(snapshot)).achievements,
             )
             set((store) => {
               if (Object.hasOwn(store.historySummaries, id))

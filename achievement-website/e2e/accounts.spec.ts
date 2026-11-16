@@ -1,12 +1,61 @@
+import { readPreviewResponse } from './catalog-helpers'
 import { selectValue, expectOptions } from './select-helpers'
 import { test, expect } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
+
+test('compact account uses the same cached PNG as the public catalog', async ({ page }) => {
+  const path = '/data/achievement-catalog.png'
+  const catalog = await readPreviewResponse(await page.request.get(path))
+  const item = catalog.achievements.find((entry) => entry.astrite > 0)!
+  let downloads = 0
+  await page.route('**' + path, (route) => {
+    downloads++
+    return route.continue()
+  })
+  await page.goto('/')
+  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', String(catalog.count))
+  await page.getByTestId('导入成就 JSON 文件').setInputFiles({
+    name: 'achievements.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(
+      JSON.stringify({
+        schemaVersion: 3,
+        kind: 'account-progress',
+        complete: true,
+        uid: '10001',
+        capturedAt: '2020-01-02T00:00:00Z',
+        resourceFingerprint: 'test',
+        count: 1,
+        completedCount: 1,
+        starCount: item.astrite,
+        groupStates: [{ id: item.groupId, unlocked: true }],
+        achievements: [
+          {
+            id: item.id,
+            previousId: item.previousId,
+            nextId: item.nextId,
+            currentProgress: 1,
+            maxProgress: 1,
+            hasGetReward: true,
+            finishTimeRaw: null,
+          },
+        ],
+      }),
+    ),
+  })
+  await expect(page.getByTestId('completed-astrite')).toHaveText(String(item.astrite))
+  await expect(page.getByTestId('账号档案')).toHaveAttribute('data-value', 'uid:10001')
+  expect(downloads).toBe(1)
+  await page.route('**' + path, (route) => route.abort())
+  await page.reload()
+  await expect(page.getByTestId('completed-astrite')).toHaveText(String(item.astrite))
+})
 
 test('UID archives replace matching accounts and anonymous imports share the default account', async ({
   page,
 }) => {
   await page.goto('/')
-  const data = await (await page.request.get('/data/achievements.json')).json()
+  const data = await readPreviewResponse(await page.request.get('/data/achievement-catalog.png'))
   async function upload(uid: string | null, stars: number, capturedAt: string) {
     await page.getByTestId('导入成就 JSON 文件').setInputFiles({
       name: 'achievements.json',
@@ -46,7 +95,7 @@ test('UID archives replace matching accounts and anonymous imports share the def
 test('legacy current archive survives migration', async ({ page }) => {
   // Seed before loading the archive app, which holds an IndexedDB connection.
   await page.goto('/desktop')
-  const data = await (await page.request.get('/data/achievements.json')).json()
+  const data = await readPreviewResponse(await page.request.get('/data/achievement-catalog.png'))
   await page.evaluate(async (data) => {
     await new Promise<void>((resolve, reject) => {
       const request = indexedDB.deleteDatabase('wuwa-achievement-archive')
@@ -88,7 +137,7 @@ test('legacy current archive survives migration', async ({ page }) => {
 
 test('migration keeps the newest anonymous archive as the default account', async ({ page }) => {
   await page.goto('/desktop')
-  const catalog = await (await page.request.get('/data/achievements.json')).json()
+  const catalog = await readPreviewResponse(await page.request.get('/data/achievement-catalog.png'))
   await page.evaluate(async (catalog) => {
     await new Promise<void>((resolve, reject) => {
       const request = indexedDB.open('wuwa-achievement-archive', 2)
@@ -120,7 +169,7 @@ test('edits advance the archive timestamp, older imports need approval, and dele
   page,
 }, testInfo) => {
   await page.goto('/')
-  const catalog = await (await page.request.get('/data/achievements.json')).json()
+  const catalog = await readPreviewResponse(await page.request.get('/data/achievement-catalog.png'))
   const capturedAt = '2020-01-02T00:00:00.000Z'
   const snapshot = { ...catalog, preview: false, uid: '10001', capturedAt }
   const account = page.getByTestId('账号档案')

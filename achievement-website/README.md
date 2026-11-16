@@ -35,7 +35,9 @@ mise exec -- pnpm test
 mise exec -- pnpm format:check
 ```
 
-`build` 先运行 TypeScript 严格检查，再输出 `dist/`。构建从静态配置生成 `dist/data/achievements.json` 图鉴，显式排除所有账号进度。将 `dist/` 部署到任意 HTTPS 静态托管服务即可，不需要网站后端。更新公开配置后需重新构建。生产预览地址为 <http://127.0.0.1:4173>。
+`build` 先运行 TypeScript 严格检查，再输出 `dist/`。生产网页通过 `website-catalog.json` 中的库街区直链加载公开图鉴，解压 PNG 的 `iTXt` 块供预览和 v3 账号档案共用。游戏图片直链记录在 `website-images.json`，字体使用库洛 CDN。将 `dist/` 部署到任意 HTTPS 静态托管服务即可。生产预览地址为 <http://127.0.0.1:4173>。
+
+桌面构建以 `--mode desktop` 生成并打包本地图鉴 `dist/assets/achievement-catalog-<哈希>.png`、图片与字体。图鉴数据更新后，将桌面构建生成的 PNG 上传到库街区，再用原图 URL 和网页构建提示的 `sourceSha256` 更新 `website-catalog.json`。
 
 逻辑和浏览器测试使用 [固定样本](../fixtures/README.md)。从仓库根目录运行 `mise exec -- pnpm test:e2e`，命令会先发布本机交接测试服务，再使用 Edge 验证桌面和移动端。仅运行本目录交接测试时，可先从根目录运行 `mise exec -- pnpm --filter achievement-export publish:test-host`。
 

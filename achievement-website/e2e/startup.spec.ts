@@ -47,7 +47,7 @@ test('the inline script applies the saved background before the entry module run
 
 test('the catalog is read from IndexedDB until its version changes', async ({ page }) => {
   let requests = 0
-  await page.route('**/data/achievements.json', (route) => {
+  await page.route('**/data/achievement-catalog.png', (route) => {
     requests++
     return route.continue()
   })
@@ -80,7 +80,7 @@ test('the catalog is read from IndexedDB until its version changes', async ({ pa
       ),
     )
     .toMatch(/^[a-f0-9]{64}$/)
-  await page.route('**/data/achievements.json', (route) => {
+  await page.route('**/data/achievement-catalog.png', (route) => {
     requests++
     return route.abort()
   })
@@ -106,8 +106,8 @@ test('the catalog is read from IndexedDB until its version changes', async ({ pa
         }
       }),
   )
-  await page.unroute('**/data/achievements.json')
-  const refreshed = page.waitForResponse('**/data/achievements.json')
+  await page.unroute('**/data/achievement-catalog.png')
+  const refreshed = page.waitForResponse('**/data/achievement-catalog.png')
   await page.reload()
   expect((await refreshed).ok()).toBe(true)
   await expect(list).toHaveAttribute('data-count', '1305')

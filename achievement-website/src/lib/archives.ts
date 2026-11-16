@@ -1,5 +1,6 @@
 import { tr } from '../i18n/index.ts'
-import { exportPayload, parseExport, type ExportData } from './data.ts'
+import { exportPayload, parseExport, readExport, type ExportData } from './data.ts'
+import { isAccountExport, parseAccount, type AccountData } from './account.ts'
 
 export const defaultArchiveKey = 'default'
 const previewCacheKey = 'catalog-preview'
@@ -37,9 +38,9 @@ function openDatabase(): Promise<IDBDatabase> {
     const recordsRequest = accounts.getAll()
     recordsRequest.onsuccess = () => {
       try {
-        const migrated = new Map<string, ExportData>()
+        const migrated = new Map<string, AccountData | ExportData>()
         function collect(raw: unknown) {
-          const data = parseExport(raw)
+          const data = isAccountExport(raw) ? parseAccount(raw) : parseExport(raw)
           const key = archiveKey(data.uid)
           const existing = migrated.get(key)
           if (!existing || Date.parse(data.capturedAt) >= Date.parse(existing.capturedAt))
@@ -53,7 +54,8 @@ function openDatabase(): Promise<IDBDatabase> {
         })
         if (currentRequest.result !== undefined) active = collect(currentRequest.result)
         accounts.clear()
-        for (const [key, data] of migrated) accounts.put(exportPayload(data), key)
+        for (const [key, data] of migrated)
+          accounts.put(data.schemaVersion === 3 ? data : exportPayload(data), key)
         meta.delete('current')
         meta.put(active, 'active')
       } catch {
@@ -108,7 +110,7 @@ async function readArchiveState(accounts: IDBObjectStore, meta: IDBObjectStore) 
   return {
     archives,
     activeKey: raw === undefined ? defaultArchiveKey : activeKey,
-    data: raw === undefined ? null : parseExport(raw),
+    raw,
   }
 }
 
@@ -121,7 +123,7 @@ export async function readCachedPreview(version: string): Promise<ExportData | n
     return await withArchives('readonly', async (_, meta) => {
       const cached = (await read(meta.get(previewCacheKey))) as
         { version: string; data: unknown } | undefined
-      return cached?.version === version ? parseExport(cached.data) : null
+      return cached?.version === version ? readExport(cached.data) : null
     })
   } catch {
     // The preview is disposable. Fetch a fresh copy if the cache cannot be read.
@@ -177,11 +179,12 @@ export function editArchive(
   key: string,
   initial: ExportData,
   edit: (data: ExportData) => ExportData,
+  catalog?: ExportData,
 ) {
   return withArchives('readwrite', async (accounts, meta) => {
     const raw = await read(accounts.get(key))
     if (raw === undefined && key !== defaultArchiveKey) throw new Error(tr('ui.archiveSwitchError'))
-    const data = edit(raw === undefined ? initial : parseExport(raw))
+    const data = edit(raw === undefined ? initial : parseExport(raw, catalog))
     accounts.put(exportPayload(data), key)
     return readArchiveState(accounts, meta)
   })

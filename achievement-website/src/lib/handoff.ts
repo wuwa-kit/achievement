@@ -1,5 +1,6 @@
 import { tr } from '../i18n/index.ts'
-import { parseExport, type ExportData } from './data.ts'
+import { parseAccountOrExport } from './catalog.ts'
+import type { ExportData } from './data.ts'
 
 export interface Ticket {
   port: number
@@ -49,7 +50,7 @@ export async function receiveExport(
     !('payload' in raw)
   )
     throw new Error(tr('ui.invalidTransfer'))
-  return { data: parseExport(raw.payload), transferId: raw.transferId }
+  return { data: await parseAccountOrExport(raw.payload), transferId: raw.transferId }
 }
 export async function acknowledge(ticket: Ticket, transferId: string): Promise<void> {
   const response = await request(ticket, 'ack', {

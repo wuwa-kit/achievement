@@ -4,20 +4,19 @@ import { immer } from 'zustand/middleware/immer'
 import { acknowledge, parseTicket, receiveExport, type Ticket } from '../lib/handoff'
 import {
   archiveKey,
-  cachePreview,
   defaultArchiveKey,
   deleteArchive,
   editArchive,
   readArchives,
-  readCachedPreview,
   saveArchive,
   selectArchive,
 } from '../lib/archives'
+import { getLoadedCatalog, loadCatalog, parseAccountOrExport } from '../lib/catalog'
 import {
   editAchievement,
   exportPayload,
   isFinished,
-  parseExport,
+  normalizeExport,
   type ExportData,
   type Filters,
 } from '../lib/data'
@@ -93,25 +92,14 @@ export const useViewerStore = create<ViewerStore>()(
     },
     async refreshArchives({ signal, reset = true } = {}) {
       const current = () => !signal || (!signal.aborted && initialLoad?.signal === signal)
-      const { archives, activeKey, data } = await readArchives()
+      const { archives, activeKey, raw } = await readArchives()
       if (!current()) return
-      let next = data
-      if (!next) {
+      if (raw === undefined) {
         // Keep the archive selection usable even if the static catalog is temporarily unavailable.
         set({ archives, activeKey, data: null })
-        const version = import.meta.env.VITE_PREVIEW_VERSION
-        next = await readCachedPreview(version)
-        if (!current()) return
-        if (!next) {
-          const response = await fetch(`${import.meta.env.BASE_URL}data/achievements.json`, {
-            cache: 'no-store',
-            signal,
-          })
-          if (!response.ok) throw new Error(tr('ui.noExport'))
-          next = parseExport(await response.json())
-          if (current()) void cachePreview(version, next)
-        }
       }
+      const next =
+        raw === undefined ? normalizeExport(await loadCatalog()) : await parseAccountOrExport(raw)
       if (!current()) return
       set((state) => {
         state.archives = archives
@@ -146,7 +134,9 @@ export const useViewerStore = create<ViewerStore>()(
       try {
         if (completionSave) await completionSave
         if (file.size > 32 * 1024 * 1024) throw new Error(tr('ui.fileTooLarge'))
-        const imported = parseExport(JSON.parse((await file.text()).replace(/^\uFEFF/, '')))
+        const imported = await parseAccountOrExport(
+          JSON.parse((await file.text()).replace(/^\uFEFF/, '')),
+        )
         await get().saveImport({ data: imported })
       } catch (error) {
         wMessage.error(
@@ -245,7 +235,7 @@ export const useViewerStore = create<ViewerStore>()(
     async setAchievementCompleted(id, completed) {
       const { data, activeKey, busy, receiving, pendingImport } = get()
       if (!data || activeKey !== archiveKey(data.uid) || busy || receiving || pendingImport) return
-      const optimistic = editAchievement(data, id, completed)
+      const optimistic = editAchievement(data, id, completed, getLoadedCatalog())
       if (optimistic === data) return
 
       completionQueue.push({ id, completed })
@@ -256,7 +246,8 @@ export const useViewerStore = create<ViewerStore>()(
       async function saveCompletions(initial: ExportData) {
         const applyEdits = (initial: ExportData, edits: typeof completionQueue) =>
           edits.reduce(
-            (archive, edit) => editAchievement(archive, edit.id, edit.completed),
+            (archive, edit) =>
+              editAchievement(archive, edit.id, edit.completed, getLoadedCatalog()),
             initial,
           )
         let committed = initial
@@ -264,9 +255,16 @@ export const useViewerStore = create<ViewerStore>()(
           while (completionQueue.length) {
             const edits = completionQueue.splice(0)
             try {
-              const snapshot = await editArchive(activeKey, committed, (stored) =>
-                applyEdits(stored, edits),
+              const { raw, ...state } = await editArchive(
+                activeKey,
+                committed,
+                (stored) => applyEdits(stored, edits),
+                getLoadedCatalog(),
               )
+              const snapshot = {
+                ...state,
+                data: raw === undefined ? null : await parseAccountOrExport(raw),
+              }
               if (snapshot.activeKey !== activeKey || !snapshot.data) {
                 if (completionQueue.length) wMessage.error(tr('ui.storageSaveError'))
                 completionQueue.length = 0

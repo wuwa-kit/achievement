@@ -1,8 +1,23 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
-import { editAchievement, isFinished, parseExport, exportPayload, summarize } from './data.ts'
+import {
+  editAchievement,
+  isFinished,
+  parseExport,
+  readExport,
+  exportPayload,
+  summarize,
+} from './data.ts'
 import { accountSchema } from './account.ts'
+import { publicPreview } from '../../build/public-catalog.ts'
+import { catalogPng } from '../../build/catalog-png.ts'
+import { readCatalogPng } from './catalog-png.ts'
+
+const catalog = readExport(
+  await readCatalogPng(Uint8Array.from(catalogPng(await publicPreview())).buffer),
+)
+const parseCompact = (input: unknown) => parseExport(input, catalog)
 
 const read = (file: string) =>
   JSON.parse(
@@ -27,7 +42,7 @@ const account = {
 }
 
 test('compact account merges static resources with parity to legacy export', () => {
-  const merged = parseExport(account)
+  const merged = parseCompact(account)
   const legacy = parseExport(read('achievements.json'))
   assert.equal(merged.uid, '10001')
   assert.deepEqual(summarize(merged.achievements), summarize(legacy.achievements))
@@ -45,7 +60,7 @@ test('compact account merges static resources with parity to legacy export', () 
       assert.deepEqual(item[key], old[key], `${item.id}: ${key}`)
   }
   assert.deepEqual(exportPayload(merged), account)
-  assert.deepEqual(parseExport(exportPayload(merged)), merged)
+  assert.deepEqual(parseCompact(exportPayload(merged)), merged)
 })
 
 test('absent progress is unknown, excluded IDs stay filtered and new IDs survive export', () => {
@@ -62,7 +77,7 @@ test('absent progress is unknown, excluded IDs stay filtered and new IDs survive
     hasGetReward: false,
     finishTimeRaw: 0,
   })
-  const merged = parseExport(future)
+  const merged = parseCompact(future)
   assert.equal(merged.achievements.find((a) => a.id === 100101)!.status, 'unknown')
   assert.ok(!merged.achievements.some((a) => [201196, 400205, 999999].includes(a.id)))
   assert.deepEqual(merged.unknownCatalogIds, [999999])
@@ -72,19 +87,19 @@ test('absent progress is unknown, excluded IDs stay filtered and new IDs survive
 })
 
 test('compact validation rejects duplicate IDs, incomplete captures and bad progress', () => {
-  assert.throws(() => parseExport({ ...account, complete: false }))
-  assert.throws(() => parseExport({ ...account, count: 1 }))
+  assert.throws(() => parseCompact({ ...account, complete: false }))
+  assert.throws(() => parseCompact({ ...account, count: 1 }))
   assert.throws(() =>
-    parseExport({
+    parseCompact({
       ...account,
       achievements: account.achievements.map(() => account.achievements[0]),
     }),
   )
   assert.throws(() =>
-    parseExport({ ...account, groupStates: [account.groupStates[0], account.groupStates[0]] }),
+    parseCompact({ ...account, groupStates: [account.groupStates[0], account.groupStates[0]] }),
   )
   assert.throws(() =>
-    parseExport({
+    parseCompact({
       ...account,
       achievements: [
         { ...account.achievements[0], currentProgress: -1 },
@@ -100,15 +115,15 @@ test('editing compact progress updates its timestamp and preserves unrecognized 
     count: account.count + 1,
     achievements: [...account.achievements, { ...account.achievements[0], id: 999999 }],
   }
-  const data = parseExport(input)
+  const data = parseCompact(input)
   const item = data.achievements.find((entry) => !isFinished(entry))!
-  const edited = editAchievement(data, item.id, true)
+  const edited = editAchievement(data, item.id, true, catalog)
   const payload = accountSchema.parse(exportPayload(edited))
   assert.ok(Date.parse(payload.capturedAt) > Date.parse(data.capturedAt))
   assert.equal(payload.achievements.length, input.achievements.length)
   assert.ok(payload.achievements.some((entry) => entry.id === 999999))
   assert.equal(
-    parseExport(payload).achievements.find((entry) => entry.id === item.id)?.status,
+    parseCompact(payload).achievements.find((entry) => entry.id === item.id)?.status,
     'completed',
   )
 })

@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test'
+import { catalogPng } from '../build/catalog-png'
+import { readCatalogResponse } from './catalog-helpers'
 
 test('scrollbar thumb follows the scroll event without ScrollTimeline', async ({ page }) => {
   await page.addInitScript(() => {
@@ -32,13 +34,13 @@ test('scrollbar thumb follows the scroll event without ScrollTimeline', async ({
 })
 
 test('custom scrollbar supports wheel, drag and dialog dismissal', async ({ page }) => {
-  await page.route('**/data/achievements.json', async (route) => {
+  await page.route('**/data/achievement-catalog.png', async (route) => {
     const response = await route.fetch()
-    const data = await response.json()
-    const item = data.achievements.find(({ id }: { id: number }) => id === 100101)
+    const data = await readCatalogResponse(response)
+    const item = data.achievements.find(({ id }) => id === 100101)!
     item.texts['zh-Hans'].title = '成就名称'.repeat(40)
     item.texts['zh-Hans'].description = '成就描述'.repeat(160)
-    await route.fulfill({ response, json: data })
+    await route.fulfill({ contentType: 'image/png', body: catalogPng(JSON.stringify(data)) })
   })
   await page.setViewportSize({ width: 900, height: 500 })
   await page.goto('/')

@@ -34,7 +34,7 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
   </ItemGroup>
   <Target Name="BuildDesktopUi" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true'">
-    <Exec WorkingDirectory="$(MSBuildProjectDirectory)/../.." Command="pnpm --filter achievement-website build" />
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)/../.." Command="pnpm --filter achievement-website build --mode desktop" />
     <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)/../scripts/package-ui.ps1&quot;" />
     <ItemGroup>
       <_DesktopUiFile Include="obj/desktop-ui/**/*" />
