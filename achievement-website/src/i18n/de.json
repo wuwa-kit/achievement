@@ -172,6 +172,7 @@
     "loading": "Verbindung zur Desktop-App wird hergestellt…"
   },
   "ui": {
+    "allVersions": "Alle Versionen",
     "searchAchievementOn": "Diesen Erfolg auf {{site}} suchen",
     "hideCompleted": "Nur offene Erfolge",
     "hiddenOnly": "Nur versteckte Erfolge anzeigen",

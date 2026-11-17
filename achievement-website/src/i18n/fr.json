@@ -172,6 +172,7 @@
     "loading": "Connexion à l’application de bureau…"
   },
   "ui": {
+    "allVersions": "Toutes les versions",
     "searchAchievementOn": "Rechercher ce succès sur {{site}}",
     "hideCompleted": "Succès non accomplis uniquement",
     "hiddenOnly": "Succès cachés uniquement",

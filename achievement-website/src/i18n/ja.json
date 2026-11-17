@@ -172,6 +172,7 @@
     "loading": "デスクトップに接続中…"
   },
   "ui": {
+    "allVersions": "すべてのバージョン",
     "searchAchievementOn": "{{site}} でこの実績を検索",
     "hideCompleted": "未達成のみ表示",
     "hiddenOnly": "隠し実績のみ表示",

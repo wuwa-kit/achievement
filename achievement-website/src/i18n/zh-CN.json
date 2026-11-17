@@ -172,6 +172,7 @@
     "loading": "正在连接客户端…"
   },
   "ui": {
+    "allVersions": "全部版本",
     "searchAchievementOn": "在 {{site}} 搜索此成就",
     "hideCompleted": "只看未完成",
     "hiddenOnly": "只看隐藏成就",

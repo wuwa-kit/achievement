@@ -14,6 +14,15 @@
     transition: var(--w-color-transition);
   }
 
+  .achievement-row[data-completed='true'] {
+    --card-background: color-mix(in srgb, var(--color-surface) 76%, transparent);
+    --card-hover-background: color-mix(in srgb, var(--color-surface-hover) 70%, transparent);
+  }
+
+  .achievement-row[data-completed='true']::before {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-border) 36%, transparent);
+  }
+
   .achievement-row[data-completed='true']::after {
     content: '';
     position: absolute;
@@ -25,11 +34,11 @@
     background: url('./assets/achievement-icons/achievement-completed-background.png') right -3px
       center / auto 103% no-repeat;
     mask-image: linear-gradient(to left, #000 10%, transparent min(100%, 275px));
-    opacity: 0.85;
+    opacity: 0.24;
   }
 
   :root[data-theme='dark'] .achievement-row[data-completed='true']::after {
-    opacity: 0.43;
+    opacity: 0.14;
   }
 
   .achievement-row:is([data-exclusive-alternative], [data-waiting='true']) {
@@ -38,7 +47,7 @@
 
   @media (hover: hover) {
     .achievement-row:hover::before {
-      background-color: var(--color-surface-hover);
+      background-color: var(--card-hover-background, var(--color-surface-hover));
     }
   }
 

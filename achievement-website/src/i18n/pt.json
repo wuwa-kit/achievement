@@ -172,6 +172,7 @@
     "loading": "Conectando ao desktop…"
   },
   "ui": {
+    "allVersions": "Todas as versões",
     "searchAchievementOn": "Pesquisar esta conquista no {{site}}",
     "hideCompleted": "Apenas conquistas pendentes",
     "hiddenOnly": "Apenas conquistas ocultas",

@@ -172,6 +172,7 @@
     "loading": "데스크톱에 연결 중…"
   },
   "ui": {
+    "allVersions": "모든 버전",
     "searchAchievementOn": "{{site}}에서 이 업적 검색",
     "hideCompleted": "미완료 업적만 보기",
     "hiddenOnly": "숨겨진 업적만 보기",

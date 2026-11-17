@@ -27,12 +27,15 @@ import {
 } from '../lib/data'
 import { wMessage } from './message'
 
-type ViewerFilters = Required<Pick<Filters, 'query' | 'group' | 'hideCompleted' | 'visibility'>>
+type ViewerFilters = Required<Pick<Filters, 'query' | 'group' | 'hideCompleted' | 'visibility'>> & {
+  versions: string[]
+}
 const initialFilters: ViewerFilters = {
   query: '',
   group: null,
   hideCompleted: false,
   visibility: 'all',
+  versions: [],
 }
 // Consume bearer keys before React renders, including StrictMode remounts.
 const incomingTicket = parseTicket(location.hash)

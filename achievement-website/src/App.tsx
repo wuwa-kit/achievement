@@ -21,8 +21,10 @@ import { OpenSourceLink } from './components/OpenSourceLink'
 import { ViewerLayout } from './components/ViewerLayout'
 import { AchievementEmblem } from './components/AchievementEmblem'
 import { AchievementList } from './components/AchievementList'
+import { AchievementVersionFilter } from './components/AchievementVersionFilter'
 import { useAchievementHighlight } from './components/useAchievementHighlight'
 import { defaultArchiveKey } from './lib/archives'
+import { achievementVersionById } from './lib/achievement-versions'
 import { catalogExclusions, exclusiveAchievementGroups } from './lib/catalog'
 import { exclusionReason } from './lib/exclusions'
 import { WEllipsis } from './components/ui/WEllipsis'
@@ -119,22 +121,30 @@ function AchievementSummary({
   const { t } = useTranslation()
   const title = plainText(item.texts[language]?.title)
   const description = plainText(item.texts[language]?.description)
+  const version = achievementVersionById.get(item.id)
   const titleRef = useAchievementHighlight(title, query)
   const descriptionRef = useAchievementHighlight(description, query)
 
   return (
     <span
-      className="achievement-info pointer-events-none z-10 col-start-2 flex min-w-0 flex-col gap-1 data-[waiting=true]:text-(--color-muted) narrow:gap-0.5"
+      className="achievement-info pointer-events-none z-10 col-start-2 flex min-w-0 flex-col gap-1 data-[waiting=true]:text-(--color-muted) group-data-[completed=true]/card:text-(--color-muted)/85 narrow:gap-0.5"
       data-waiting={waiting || exclusiveAlternative}
     >
       <span className="achievement-title flex items-center gap-2 text-[14px] leading-[1.6] font-[550] narrow:text-[12px]">
         <WButton
-          className="pointer-events-auto min-w-0 rounded-sm text-left wrap-anywhere whitespace-pre-line underline-offset-3 hover:underline focus-visible:underline"
+          className="group/title pointer-events-auto min-w-0 rounded-sm text-left wrap-anywhere whitespace-pre-line"
           data-testid={`查看成就详情 ${item.id}`}
           onClick={onOpenDetails}
         >
-          <span ref={titleRef} className="achievement-title-text">
-            {title || t('ui.missingTitle')}
+          <span className="box-decoration-clone border-b border-transparent pb-0.5 group-hover/title:border-current group-focus-visible/title:border-current">
+            <span ref={titleRef} className="achievement-title-text">
+              {title || t('ui.missingTitle')}
+            </span>
+            {version && (
+              <span className="achievement-version ms-0.5 align-super text-[0.72em] leading-none font-semibold whitespace-nowrap text-(--color-search-match) group-data-[completed=true]/card:text-(--color-accent-muted)/85">
+                {version}
+              </span>
+            )}
           </span>
         </WButton>
         {item.hidden && (
@@ -146,7 +156,7 @@ function AchievementSummary({
       </span>
       <span
         ref={descriptionRef}
-        className="achievement-description text-[12px] leading-[1.5] wrap-anywhere whitespace-pre-line text-(--color-muted) narrow:text-[11px]"
+        className="achievement-description text-[12px] leading-[1.5] wrap-anywhere whitespace-pre-line text-(--color-muted) group-data-[completed=true]/card:text-(--color-muted)/85 narrow:text-[11px]"
       >
         {description || t('ui.missingDescription')}
       </span>
@@ -364,16 +374,21 @@ export default function App() {
     return { categoryCounts: countBy('categoryId'), groupCounts: countBy('groupId') }
   }, [units])
   const defaultArchive = archives.find((archive) => archive.key === defaultArchiveKey)
+  const versionItems = useMemo(() => {
+    if (!filters.versions.length) return mainItems
+    const versions = new Set(filters.versions)
+    return mainItems.filter(({ id }) => versions.has(achievementVersionById.get(id) ?? ''))
+  }, [mainItems, filters.versions])
   const matches = useMemo(
     () =>
       filterAchievements(
-        mainItems,
+        versionItems,
         { ...filters, query: deferredQuery },
         stagesById,
         hiddenCompletedIds,
         exclusiveById,
       ),
-    [mainItems, filters, deferredQuery, stagesById, hiddenCompletedIds, exclusiveById],
+    [versionItems, filters, deferredQuery, stagesById, hiddenCompletedIds, exclusiveById],
   )
   return (
     <ViewerLayout>
@@ -639,25 +654,31 @@ export default function App() {
           ) : (
             <div className="ui-section achievement-panel flex min-h-0 flex-1 flex-col">
               <div className="filter-bar flex flex-none items-center gap-2.5 py-3.5 narrow:flex-wrap narrow:gap-[7px] narrow:py-3">
-                <div className="search-field flex h-[38px] min-w-0 flex-1 items-center gap-[9px] rounded-sm border border-(--line) bg-(--color-surface) px-3 text-(--color-muted) focus-within:border-(--input-focus) focus-within:shadow-[0_0_0_3px_var(--input-focus-ring)] motion-safe:w-transition-colors narrow:basis-full">
-                  <WSvg name="search" size={17} />
-                  <WInput
-                    variant="embedded"
-                    className="flex-1 text-[11px] text-(--color-text) placeholder:text-(--color-muted)"
-                    data-testid="搜索成就"
-                    placeholder={tr('ui.search')}
-                    value={filters.query}
-                    onChange={(event) => update({ query: event.target.value })}
+                <div className="flex min-w-0 flex-1 items-center gap-2.5 narrow:basis-full narrow:gap-[7px]">
+                  <div className="search-field flex h-[38px] min-w-0 flex-1 items-center gap-[9px] rounded-sm border border-(--line) bg-(--color-surface) px-3 text-(--color-muted) focus-within:border-(--input-focus) focus-within:shadow-[0_0_0_3px_var(--input-focus-ring)] motion-safe:w-transition-colors">
+                    <WSvg name="search" size={17} />
+                    <WInput
+                      variant="embedded"
+                      className="flex-1 text-[11px] text-(--color-text) placeholder:text-(--color-muted)"
+                      data-testid="搜索成就"
+                      placeholder={tr('ui.search')}
+                      value={filters.query}
+                      onChange={(event) => update({ query: event.target.value })}
+                    />
+                    {filters.query && (
+                      <WButton
+                        className="icon-button search-clear inline-grid size-6 flex-none place-items-center rounded-[5px] text-(--color-muted) hover:bg-(--color-surface-soft) hover:text-(--color-text)"
+                        data-testid="清空搜索"
+                        onClick={() => update({ query: '' })}
+                      >
+                        <WSvg name="x" size={14} />
+                      </WButton>
+                    )}
+                  </div>
+                  <AchievementVersionFilter
+                    versions={filters.versions}
+                    onVersionsChange={(versions) => update({ versions })}
                   />
-                  {filters.query && (
-                    <WButton
-                      className="icon-button search-clear inline-grid size-6 flex-none place-items-center rounded-[5px] text-(--color-muted) hover:bg-(--color-surface-soft) hover:text-(--color-text)"
-                      data-testid="清空搜索"
-                      onClick={() => update({ query: '' })}
-                    >
-                      <WSvg name="x" size={14} />
-                    </WButton>
-                  )}
                 </div>
                 <div className="flex items-center gap-2.5 narrow:ml-auto narrow:max-w-full narrow:gap-[7px] narrow:[--checkbox-px:4px] narrow:[--checkbox-text:11px]">
                   <WCheckBox
@@ -689,6 +710,7 @@ export default function App() {
                   filters.group,
                   filters.hideCompleted,
                   filters.visibility,
+                  filters.versions,
                 ])}
                 renderItem={(item) => {
                   const stages = stagesById.get(item.id)
@@ -703,7 +725,10 @@ export default function App() {
                     currentProgress !== maxProgress &&
                     !(currentProgress === 0 && maxProgress === 1)
                   return (
-                    <div className="achievement-card relative isolate grid min-h-20 grid-cols-[64px_minmax(0,1fr)_max-content] items-center gap-5 px-[25px] py-1.5 compact:grid-cols-[52px_minmax(0,1fr)_max-content] compact:gap-[13px] compact:px-5 narrow:grid-cols-[44px_minmax(0,1fr)_max-content] narrow:gap-[9px] narrow:px-3.5 narrow:py-1">
+                    <div
+                      className="achievement-card group/card relative isolate grid min-h-20 grid-cols-[64px_minmax(0,1fr)_max-content] items-center gap-5 px-[25px] py-1.5 compact:grid-cols-[52px_minmax(0,1fr)_max-content] compact:gap-[13px] compact:px-5 narrow:grid-cols-[44px_minmax(0,1fr)_max-content] narrow:gap-[9px] narrow:px-3.5 narrow:py-1"
+                      data-completed={completed}
+                    >
                       <WTooltip text={waiting ? tr('ui.completePreviousStage') : undefined}>
                         <WButton
                           className="achievement-row absolute inset-0 isolate rounded-lg focus-visible:outline-offset-[-3px] disabled:opacity-100"
@@ -714,8 +739,15 @@ export default function App() {
                           disabled={waiting || receiving || !!pendingImport || busy}
                           onClick={() => void setAchievementCompleted(item.id, !completed)}
                         >
-                          <span className="pointer-events-none absolute top-1/2 left-16 w-24 -translate-1/2 compact:left-[52px] compact:w-[92px] narrow:left-[47px] narrow:w-[88px]">
+                          <span className="pointer-events-none absolute top-1/2 left-16 w-24 -translate-1/2 compact:left-[52px] compact:w-[92px] narrow:left-[47px] narrow:w-[88px] group-data-[completed=true]/card:[&>.achievement-emblem]:opacity-35 group-data-[completed=true]/card:[&>.achievement-emblem]:saturate-45">
                             <AchievementEmblem {...getAchievementStars(item, stages)} />
+                            {completed && (
+                              <WTooltip text={tr('ui.finished')}>
+                                <span className="achievement-completed-mark pointer-events-auto absolute right-[28%] bottom-[15%] grid size-4 place-items-center text-(--color-muted)">
+                                  <WSvg name="check" size={14} strokeWidth={1.8} />
+                                </span>
+                              </WTooltip>
+                            )}
                           </span>
                         </WButton>
                       </WTooltip>
@@ -739,12 +771,12 @@ export default function App() {
                             {currentProgress}/{maxProgress}
                           </span>
                         )}
-                        <span className="row-reward flex items-center gap-[7px] text-[12px] text-(--color-gold) narrow:text-[11px]">
+                        <span className="row-reward flex items-center gap-[7px] text-[12px] text-(--color-gold) group-data-[completed=true]/card:text-(--color-muted)/85 narrow:text-[11px]">
                           <img
                             src={astriteIcon}
                             width={16}
                             height={16}
-                            className="size-4 shrink-0 object-contain"
+                            className="size-4 shrink-0 object-contain group-data-[completed=true]/card:opacity-35"
                             alt=""
                           />
                           <span className="w-[2ch] shrink-0 text-left tabular-nums">
@@ -762,7 +794,13 @@ export default function App() {
                   <WButton
                     className={`button subtle mt-3 ${subtleButtonClass}`}
                     onClick={() =>
-                      update({ query: '', group: null, hideCompleted: false, visibility: 'all' })
+                      update({
+                        query: '',
+                        group: null,
+                        hideCompleted: false,
+                        visibility: 'all',
+                        versions: [],
+                      })
                     }
                   >
                     {tr('ui.clearFilters')}{' '}

@@ -172,6 +172,7 @@
     "loading": "Connecting to desktop…"
   },
   "ui": {
+    "allVersions": "All versions",
     "searchAchievementOn": "Search for this achievement on {{site}}",
     "hideCompleted": "Incomplete only",
     "hiddenOnly": "Hidden achievements only",

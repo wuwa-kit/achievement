@@ -172,6 +172,7 @@
     "loading": "Conectando con el escritorio…"
   },
   "ui": {
+    "allVersions": "Todas las versiones",
     "searchAchievementOn": "Buscar este logro en {{site}}",
     "hideCompleted": "Solo logros pendientes",
     "hiddenOnly": "Solo logros ocultos",
