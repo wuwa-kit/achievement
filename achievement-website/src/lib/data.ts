@@ -353,7 +353,9 @@ export function filterAchievements(
   exclusiveById?: ExclusiveAchievements,
 ): Achievement[] {
   const query = filters.query.trim().toLocaleLowerCase()
+  const isIdQuery = /^\d+$/.test(query)
   function matchesQuery(item: Achievement) {
+    if (isIdQuery) return item.id.toString() === query
     const translated = item.texts[filters.language]
     const searchable =
       `${item.id} ${plainText(translated?.title)} ${plainText(translated?.description)} ${plainText(item.texts['zh-Hans']?.title)} ${plainText(item.texts['zh-Hans']?.description)}`.toLocaleLowerCase()

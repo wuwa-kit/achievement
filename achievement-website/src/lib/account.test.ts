@@ -48,7 +48,8 @@ test('exclusive options stay adjacent through sorting, searching, and filtering'
     ).map((item) => item.id)
 
   assert.deepEqual(filter({ sort: 'reward' }), [...ids, unrelated.id])
-  assert.deepEqual(filter({ query: '200711', visibility: 'visible' }), ids)
+  assert.deepEqual(filter({ query: '20071' }), [])
+  assert.deepEqual(filter({ query: ' 200711 ', visibility: 'visible' }), ids)
   assert.deepEqual(filter({ query: '独自凝望的星海' }), ids)
   assert.deepEqual(filter({ status: 'finished' }), ids)
   assert.deepEqual(filter({ hideCompleted: true }), [unrelated.id])
