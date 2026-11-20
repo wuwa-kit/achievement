@@ -54,6 +54,7 @@ public partial class MainWindow : Window
         return Locales.ContainsKey(language) ? language : "en";
     }
     private string Text(string key, string group = "native") => Locales[settings.Language].GetProperty(group).GetProperty(key).GetString()!;
+    private void UpdateWindowTitle() => Title = $"{Text("desktopTitle", "common")} {CurrentReleaseTag}";
     public MainWindow()
     {
         InitializeComponent();
@@ -64,7 +65,7 @@ public partial class MainWindow : Window
             Language = settings.Language is not null && Locales.ContainsKey(settings.Language) ? settings.Language : SystemLanguage(),
             GamePath = settings.GamePath ?? Options.DefaultGame
         };
-        Title = Text("desktopTitle", "common");
+        UpdateWindowTitle();
         settings = settings with { Theme = settings.Theme is "light" or "dark" ? settings.Theme : "auto" };
         Loaded += InitializeBrowser;
         Closed += (_, _) => { windowClosed = true; Browser.Dispose(); };
@@ -271,7 +272,7 @@ public partial class MainWindow : Window
     {
         Json.Save(SettingsPath, next);
         settings = next;
-        Title = Text("desktopTitle", "common");
+        UpdateWindowTitle();
         await RegisterBootstrap();
     }
     private void EnsureIdle() { if (operation is not null || updateRestarting) throw new InvalidOperationException(Text("running")); }

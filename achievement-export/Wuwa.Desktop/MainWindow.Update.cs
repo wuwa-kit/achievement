@@ -8,7 +8,7 @@ namespace Wuwa.Desktop;
 
 public partial class MainWindow
 {
-    private static readonly string UpdateTag = DesktopMetadata("DesktopReleaseTag");
+    private static readonly string CurrentReleaseTag = DesktopMetadata("DesktopReleaseTag");
     private static readonly string UpdateEdition = DesktopMetadata("DesktopEdition");
     private static readonly DesktopUpdater Updater = new(AppContext.BaseDirectory, DesktopUpdater.CreateClient());
     private Task<UpdateCheckResult>? updateCheck;
@@ -24,12 +24,12 @@ public partial class MainWindow
 
     private async Task<object> CheckUpdateAsync()
     {
-        var check = updateCheck ??= Updater.CheckAsync(UpdateTag);
+        var check = updateCheck ??= Updater.CheckAsync(CurrentReleaseTag);
         try
         {
             var result = await check;
             if (result.Status == "checked") offeredRelease = result.Release;
-            return new { currentVersion = UpdateTag, currentEdition = UpdateEdition, result.Status, result.Release, result.HttpStatus };
+            return new { currentVersion = CurrentReleaseTag, currentEdition = UpdateEdition, result.Status, result.Release, result.HttpStatus };
         }
         finally
         {
