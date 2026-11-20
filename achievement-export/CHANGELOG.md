@@ -7,6 +7,21 @@ Release notes rules
 - Keep the Lite edition requirements section at the bottom of this file. The release script appends it to every release. Use Microsoft's link to the latest .NET 10 Desktop Runtime (x64) installer so the footer always points to the current patch.
 -->
 
+## [0.1.4] - 2026-11-21
+
+### Desktop
+
+- The window title shows the installed version. Release downloads are named Full and Lite.
+- Export history shows the completed achievement count and achievement points recorded by the game. The desktop exporter can run without loading the website's achievement catalog.
+
+### Website
+
+- Filter achievements by game version and see the achievement count for each version. Cards show required characters where available.
+- Browse catalog statistics, see why entries are excluded, and switch between mutually exclusive achievements.
+- Search by exact achievement ID. Achievement lists scroll more smoothly, filters persist across visits, and completed stages are shown more clearly.
+
+If you are using v0.1.3, download v0.1.4 manually from GitHub Releases. The v0.1.3 updater does not recognize the new Full edition filename. In-app updates resume after you upgrade.
+
 ## [0.1.3] - 2026-11-15
 
 ### Added
