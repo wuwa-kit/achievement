@@ -228,8 +228,6 @@
     },
     "exclusivePair": "二選一",
     "exclusiveChoice": "任選其一",
-    "exclusiveChange": "更換完成項",
-    "exclusiveChangePrompt": "將完成項改為「{{value0}}」？",
     "astrite": "星聲",
     "search": "搜尋標題、描述或成就 ID…",
     "allStatus": "全部狀態",

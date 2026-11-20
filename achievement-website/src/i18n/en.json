@@ -228,8 +228,6 @@
     },
     "exclusivePair": "Choose one of two",
     "exclusiveChoice": "Choose one",
-    "exclusiveChange": "Switch completed achievement",
-    "exclusiveChangePrompt": "Mark “{{value0}}” as completed instead?",
     "astrite": "Astrite",
     "search": "Search titles, descriptions or achievement IDs…",
     "allStatus": "All statuses",

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('exclusive achievements stay together and switching a completion is confirmed and saved', async ({
+test('exclusive achievements stay together and switching a completion is immediate and saved', async ({
   page,
 }, testInfo) => {
   const errors: string[] = []
@@ -76,7 +76,7 @@ test('exclusive achievements stay together and switching a completion is confirm
   await page.getByTestId('只看隐藏成就').check()
   await expect(group.locator('.achievement-row')).toHaveCount(2)
 
-  await first.click()
+  await first.click({ position: { x: 40, y: 40 } })
   await expect(first).toHaveAttribute('data-completed', 'true')
   await expect(second).toHaveAttribute('data-exclusive-alternative', 'true')
   await expect(overviewCount).toHaveText('1/1297')
@@ -84,16 +84,16 @@ test('exclusive achievements stay together and switching a completion is confirm
 
   await group.getByTestId('查看成就详情 200711').click()
   await page.getByTestId('编辑成就完成状态').click()
-  const confirmation = page.getByTestId('confirm-exclusive-achievement')
-  await expect(confirmation).toBeVisible()
-  await expect(confirmation).toContainText('恒定不变的星海')
-  await confirmation.getByText('取消', { exact: true }).click()
-  await expect(confirmation).toBeHidden()
+  await expect(page.getByTestId('confirm-exclusive-achievement')).toHaveCount(0)
+  await expect(first).toHaveAttribute('data-completed', 'false')
+  await expect(second).toHaveAttribute('data-completed', 'true')
   await page.getByTestId('关闭详情').click()
+  await first.click({ position: { x: 40, y: 40 } })
   await expect(first).toHaveAttribute('data-completed', 'true')
+  await expect(second).toHaveAttribute('data-completed', 'false')
 
-  await second.click()
-  await confirmation.getByTestId('change-exclusive-achievement').click()
+  await second.click({ position: { x: 40, y: 40 } })
+  await expect(page.getByTestId('confirm-exclusive-achievement')).toHaveCount(0)
   await expect(first).toHaveAttribute('data-completed', 'false')
   await expect(second).toHaveAttribute('data-completed', 'true')
   await expect(overviewCount).toHaveText('1/1297')

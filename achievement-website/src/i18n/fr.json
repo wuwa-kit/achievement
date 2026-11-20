@@ -228,8 +228,6 @@
     },
     "exclusivePair": "Un choix sur deux",
     "exclusiveChoice": "Un seul choix",
-    "exclusiveChange": "Changer le succès terminé",
-    "exclusiveChangePrompt": "Marquer « {{value0}} » comme terminé à la place ?",
     "astrite": "Astrites",
     "search": "Rechercher un titre, une description ou un ID de succès…",
     "allStatus": "Tous les états",

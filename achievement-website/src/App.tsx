@@ -20,6 +20,7 @@ import { ArchiveActions } from './components/ArchiveActions'
 import { CatalogStatistics } from './components/CatalogStatistics'
 import { OpenSourceLink } from './components/OpenSourceLink'
 import { ViewerLayout } from './components/ViewerLayout'
+import { HomeButterflies } from './components/HomeButterflies'
 import { AchievementEmblem } from './components/AchievementEmblem'
 import { AchievementList } from './components/AchievementList'
 import { AchievementVersionFilter } from './components/AchievementVersionFilter'
@@ -307,7 +308,6 @@ export default function App() {
     archives,
     activeKey,
     pendingImport,
-    pendingExclusiveId,
     busy,
     setAchievementCompleted,
     filters: storedFilters,
@@ -319,7 +319,6 @@ export default function App() {
     cancelReceive,
     switchAccount,
     confirmImport,
-    confirmExclusiveAchievement,
     connect,
   } = useViewerStore()
   const language = usePreferencesStore((state) => state.language)
@@ -331,7 +330,6 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
   const selected = data?.achievements.find((item) => item.id === selectedId) ?? null
-  const pendingExclusive = data?.achievements.find((item) => item.id === pendingExclusiveId)
   const fileInput = useRef<HTMLInputElement>(null)
   const deferredQuery = useDeferredValue(filters.query)
   const highlightQuery = deferredQuery.trim().toLocaleLowerCase()
@@ -405,171 +403,182 @@ export default function App() {
           onClick={() => setNavigationOpen(false)}
         />
       )}
-      <WScrollArea
-        className="sidebar fixed! inset-y-0 left-0 z-30 flex w-(--sidebar-width) flex-col overflow-y-auto bg-(--color-nav-page) px-[18px] pt-[30px] pb-[22px] text-(--color-nav-muted) [--category-inset:6px] [--color-focus:var(--color-nav-gold)] [--nav-gap:10px] [--nav-inset:12px] compact:px-3.5 sidebar-overlay:w-[min(var(--sidebar-width),calc(100vw-40px))] sidebar-overlay:[transform:translateX(-100%)] sidebar-overlay:transition-transform sidebar-overlay:duration-200 sidebar-overlay:data-[open=true]:[transform:translateX(0)]"
+      <div
+        className="sidebar fixed inset-y-0 left-0 z-30 w-(--sidebar-width) overflow-hidden bg-(--color-nav-page) sidebar-overlay:w-[min(var(--sidebar-width),calc(100vw-40px))] sidebar-overlay:[transform:translateX(-100%)] sidebar-overlay:transition-transform sidebar-overlay:duration-200 sidebar-overlay:data-[open=true]:[transform:translateX(0)]"
         data-open={navigationOpen}
-        data-testid="成就分类导航"
       >
-        <div className="mx-2 mt-[3px] mb-7 flex items-center gap-2">
-          <a
-            className="brand flex min-w-0 flex-1 items-center gap-(--nav-gap) text-[20px] font-semibold tracking-[1px] text-(--color-nav-text) no-underline"
-            href="#"
-            onClick={(event) => {
-              event.preventDefault()
-              navigate(null)
-            }}
-          >
-            <Mark />
-            <span className="brand-text min-w-0">
-              <WEllipsis>{tr('ui.brand')}</WEllipsis>
-              <WEllipsis className="brand-sub mt-1 text-[11px] font-normal tracking-[1px] text-(--color-nav-muted)">
-                {tr('ui.brandSub')}
-              </WEllipsis>
-            </span>
-          </a>
-          {data && (
-            <CatalogStatistics
-              language={filters.language}
-              includedTotal={mainItems.length}
-              excludedItems={excludedItems}
-              exclusiveGroups={exclusiveGroups}
-              achievableTotal={summary.total}
-              astrite={summary.astrite}
-            />
-          )}
-        </div>
-        <div className="nav-overview rounded-lg border border-(--color-nav-border) bg-(--color-nav-surface) p-1 pl-[calc(var(--overview-frame)-1px)] [--overview-frame:3px] [--overview-inset:calc(var(--nav-inset)-4px)] [--overview-start:calc(var(--category-inset)-var(--overview-frame))]">
-          <WButton
-            className={`nav-overview-heading ${sidebarNavColumns} w-full rounded-sm py-[9px] pr-(--overview-inset) pl-(--overview-start) text-start text-[13px] font-semibold text-(--color-nav-muted) hover:bg-(--color-nav-hover) data-[selected=true]:bg-(--color-nav-selection) data-[selected=true]:text-(--color-nav-gold) data-[selected=true]:shadow-[inset_3px_0_var(--color-nav-gold)]`}
-            data-selected={filters.group === null}
-            onClick={() => navigate(null)}
-          >
-            <img src={achievementTabIcon} width={18} height={18} alt="" />
-            <WEllipsis className="nav-label flex-1">{tr('ui.overview')}</WEllipsis>
-            <NavProgress
-              countClass="text-inherit"
-              finished={data ? summary.finished : undefined}
-              total={data ? summary.total : undefined}
-              alwaysShowCount
-            />
-          </WButton>
-          {data && (
-            <div
-              className="archive-summary mt-px mr-(--overview-inset) mb-2.5 ml-(--overview-start) grid gap-2 border-t border-(--color-nav-border) pt-2.5 text-[11px] text-(--color-nav-muted)"
-              data-testid="成就统计"
+        <WScrollArea
+          className="sidebar-scroll relative flex h-full w-full flex-col overflow-y-auto px-[18px] pt-[30px] pb-[22px] text-(--color-nav-muted) [--category-inset:6px] [--color-focus:var(--color-nav-gold)] [--nav-gap:10px] [--nav-inset:12px] compact:px-3.5"
+          data-testid="成就分类导航"
+        >
+          <div className="mx-2 mt-[3px] mb-7 flex items-center gap-2">
+            <a
+              className="brand flex min-w-0 flex-1 items-center gap-(--nav-gap) text-[20px] font-semibold tracking-[1px] text-(--color-nav-text) no-underline"
+              href="#"
+              onClick={(event) => {
+                event.preventDefault()
+                navigate(null)
+              }}
             >
-              {[
-                {
-                  label: tr('ui.astrite'),
-                  image: astriteIcon,
-                  current: summary.completedAstrite,
-                  total: summary.astrite,
-                  testId: 'completed-astrite',
-                },
-                {
-                  label: tr('ui.hidden'),
-                  current: units.filter(
-                    (members) => members.some((item) => item.hidden) && members.some(isFinished),
-                  ).length,
-                  total: summary.hidden,
-                  testId: 'completed-hidden',
-                },
-              ].map(({ label, image, current, total, testId }) => (
-                <div className={`archive-summary-item ${sidebarNavColumns}`} key={testId}>
-                  {image ? (
-                    <img
-                      src={image}
-                      width={14}
-                      height={14}
-                      className="size-3.5 justify-self-center object-contain"
-                      alt=""
-                    />
-                  ) : (
-                    <WSvg name="achievement-hidden" size={14} className="justify-self-center" />
-                  )}
-                  <WEllipsis className="nav-label flex-1">{label}</WEllipsis>
-                  <span className="archive-summary-value font-mono whitespace-nowrap tabular-nums">
-                    <span
-                      className="archive-summary-current font-semibold text-(--color-nav-text)"
-                      data-testid={testId}
-                    >
-                      {current.toString()}
-                    </span>
-                    <span className="archive-summary-total text-(--color-nav-muted)">
-                      /{total.toString()}
-                    </span>
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="category-navigation mt-3">
-          {data?.categories.map((category) => {
-            const icon = achievementCategoryIcons[category.id]
-            const { finished = 0, total = 0 } = categoryCounts.get(category.id) ?? {}
-            return (
-              <div key={category.id}>
-                <div
-                  className={`category-nav-row ${sidebarNavColumns} pt-2.5 pr-(--nav-inset) pb-1.5 pl-(--category-inset) text-[12px] text-(--color-nav-section)`}
-                >
-                  {icon ? (
-                    <img src={icon} width={17} height={17} className="justify-self-center" alt="" />
-                  ) : (
-                    <span />
-                  )}
-                  <WEllipsis className="nav-label">
-                    {titleOf(
-                      category,
-                      filters.language,
-                      tr('ui.categoryId', { value0: category.id }),
+              <Mark />
+              <span className="brand-text min-w-0">
+                <WEllipsis>{tr('ui.brand')}</WEllipsis>
+                <WEllipsis className="brand-sub mt-1 text-[11px] font-normal tracking-[1px] text-(--color-nav-muted)">
+                  {tr('ui.brandSub')}
+                </WEllipsis>
+              </span>
+            </a>
+            {data && (
+              <CatalogStatistics
+                language={filters.language}
+                includedTotal={mainItems.length}
+                excludedItems={excludedItems}
+                exclusiveGroups={exclusiveGroups}
+                achievableTotal={summary.total}
+                astrite={summary.astrite}
+              />
+            )}
+          </div>
+          <div className="nav-overview rounded-lg border border-(--color-nav-border) bg-(--color-nav-surface) p-1 pl-[calc(var(--overview-frame)-1px)] [--overview-frame:3px] [--overview-inset:calc(var(--nav-inset)-4px)] [--overview-start:calc(var(--category-inset)-var(--overview-frame))]">
+            <WButton
+              className={`nav-overview-heading ${sidebarNavColumns} w-full rounded-sm py-[9px] pr-(--overview-inset) pl-(--overview-start) text-start text-[13px] font-semibold text-(--color-nav-muted) hover:bg-(--color-nav-hover) data-[selected=true]:bg-(--color-nav-selection) data-[selected=true]:text-(--color-nav-gold) data-[selected=true]:shadow-[inset_3px_0_var(--color-nav-gold)]`}
+              data-selected={filters.group === null}
+              onClick={() => navigate(null)}
+            >
+              <img src={achievementTabIcon} width={18} height={18} alt="" />
+              <WEllipsis className="nav-label flex-1">{tr('ui.overview')}</WEllipsis>
+              <NavProgress
+                countClass="text-inherit"
+                finished={data ? summary.finished : undefined}
+                total={data ? summary.total : undefined}
+                alwaysShowCount
+              />
+            </WButton>
+            {data && (
+              <div
+                className="archive-summary mt-px mr-(--overview-inset) mb-2.5 ml-(--overview-start) grid gap-2 border-t border-(--color-nav-border) pt-2.5 text-[11px] text-(--color-nav-muted)"
+                data-testid="成就统计"
+              >
+                {[
+                  {
+                    label: tr('ui.astrite'),
+                    image: astriteIcon,
+                    current: summary.completedAstrite,
+                    total: summary.astrite,
+                    testId: 'completed-astrite',
+                  },
+                  {
+                    label: tr('ui.hidden'),
+                    current: units.filter(
+                      (members) => members.some((item) => item.hidden) && members.some(isFinished),
+                    ).length,
+                    total: summary.hidden,
+                    testId: 'completed-hidden',
+                  },
+                ].map(({ label, image, current, total, testId }) => (
+                  <div className={`archive-summary-item ${sidebarNavColumns}`} key={testId}>
+                    {image ? (
+                      <img
+                        src={image}
+                        width={14}
+                        height={14}
+                        className="size-3.5 justify-self-center object-contain"
+                        alt=""
+                      />
+                    ) : (
+                      <WSvg name="achievement-hidden" size={14} className="justify-self-center" />
                     )}
-                  </WEllipsis>
-                  <NavProgress
-                    finished={finished}
-                    total={total}
-                    countClass="text-(--color-nav-muted)"
-                  />
-                </div>
-                <div className="sub-navigation mt-0.5 mr-1.5 mb-2.5 ml-[calc(var(--category-inset)+8px)] border-l-(length:--sub-nav-line-width) border-l-(--color-nav-border) pl-(--sub-nav-inset) [--sub-nav-inset:10px] [--sub-nav-line-width:1px]">
-                  {category.groups.map((group) => {
-                    const icon = achievementGroupIcons[group.id]
-                    const { finished = 0, total = 0 } = groupCounts.get(group.id) ?? {}
-                    return (
-                      <WButton
-                        key={group.id}
-                        data-selected={filters.group === group.id}
-                        onClick={() => navigate(group.id)}
-                        className="relative flex w-full items-center gap-(--nav-gap) rounded-sm px-2 py-1.5 text-left text-[11px] leading-[1.7] text-(--color-nav-muted) hover:bg-(--color-nav-hover) hover:text-(--color-nav-gold) data-[selected=true]:bg-(--color-nav-selection) data-[selected=true]:text-(--color-nav-gold)"
+                    <WEllipsis className="nav-label flex-1">{label}</WEllipsis>
+                    <span className="archive-summary-value font-mono whitespace-nowrap tabular-nums">
+                      <span
+                        className="archive-summary-current font-semibold text-(--color-nav-text)"
+                        data-testid={testId}
                       >
-                        {icon && (
-                          <img
-                            src={icon}
-                            width={15}
-                            height={15}
-                            className="group-icon shrink-0"
-                            alt=""
-                          />
-                        )}
-                        <WEllipsis className="nav-label flex-1">
-                          {titleOf(group, filters.language, tr('ui.group', { value0: group.id }))}
-                        </WEllipsis>
-                        <NavProgress
-                          finished={finished}
-                          total={total}
-                          countClass="text-inherit opacity-85"
-                        />
-                      </WButton>
-                    )
-                  })}
-                </div>
+                        {current.toString()}
+                      </span>
+                      <span className="archive-summary-total text-(--color-nav-muted)">
+                        /{total.toString()}
+                      </span>
+                    </span>
+                  </div>
+                ))}
               </div>
-            )
-          })}
-        </div>
-      </WScrollArea>
+            )}
+          </div>
+          <div className="category-navigation mt-3">
+            {data?.categories.map((category) => {
+              const icon = achievementCategoryIcons[category.id]
+              const { finished = 0, total = 0 } = categoryCounts.get(category.id) ?? {}
+              return (
+                <div key={category.id}>
+                  <div
+                    className={`category-nav-row ${sidebarNavColumns} pt-2.5 pr-(--nav-inset) pb-1.5 pl-(--category-inset) text-[12px] text-(--color-nav-section)`}
+                  >
+                    {icon ? (
+                      <img
+                        src={icon}
+                        width={17}
+                        height={17}
+                        className="justify-self-center"
+                        alt=""
+                      />
+                    ) : (
+                      <span />
+                    )}
+                    <WEllipsis className="nav-label">
+                      {titleOf(
+                        category,
+                        filters.language,
+                        tr('ui.categoryId', { value0: category.id }),
+                      )}
+                    </WEllipsis>
+                    <NavProgress
+                      finished={finished}
+                      total={total}
+                      countClass="text-(--color-nav-muted)"
+                    />
+                  </div>
+                  <div className="sub-navigation mt-0.5 mr-1.5 mb-2.5 ml-[calc(var(--category-inset)+8px)] border-l-(length:--sub-nav-line-width) border-l-(--color-nav-border) pl-(--sub-nav-inset) [--sub-nav-inset:10px] [--sub-nav-line-width:1px]">
+                    {category.groups.map((group) => {
+                      const icon = achievementGroupIcons[group.id]
+                      const { finished = 0, total = 0 } = groupCounts.get(group.id) ?? {}
+                      return (
+                        <WButton
+                          key={group.id}
+                          data-selected={filters.group === group.id}
+                          onClick={() => navigate(group.id)}
+                          className="relative flex w-full items-center gap-(--nav-gap) rounded-sm px-2 py-1.5 text-left text-[11px] leading-[1.7] text-(--color-nav-muted) hover:bg-(--color-nav-hover) hover:text-(--color-nav-gold) data-[selected=true]:bg-(--color-nav-selection) data-[selected=true]:text-(--color-nav-gold)"
+                        >
+                          {icon && (
+                            <img
+                              src={icon}
+                              width={15}
+                              height={15}
+                              className="group-icon shrink-0"
+                              alt=""
+                            />
+                          )}
+                          <WEllipsis className="nav-label flex-1">
+                            {titleOf(group, filters.language, tr('ui.group', { value0: group.id }))}
+                          </WEllipsis>
+                          <NavProgress
+                            finished={finished}
+                            total={total}
+                            countClass="text-inherit opacity-85"
+                          />
+                        </WButton>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </WScrollArea>
+      </div>
 
-      <div className="workspace ml-(--sidebar-width) flex h-dvh flex-col overflow-hidden sidebar-overlay:ml-0 sidebar-overlay:bg-none">
+      <div className="workspace relative isolate ml-(--sidebar-width) flex h-dvh flex-col overflow-hidden sidebar-overlay:ml-0 sidebar-overlay:bg-none">
+        <HomeButterflies />
         <div className="topbar flex h-[69px] flex-none items-center justify-between gap-3 border-b border-b-(--line) bg-(--color-surface) px-10 compact:px-[25px] narrow:h-[60px] narrow:gap-1.5 narrow:px-3.5">
           <div className="topbar-records flex min-w-0 items-center gap-2 narrow:gap-1">
             <WIconButton
@@ -833,23 +842,6 @@ export default function App() {
           />
         )}
       </WDialog>
-      <WConfirmDialog
-        open={!!pendingExclusive}
-        heading={tr('ui.exclusiveChange')}
-        message={tr('ui.exclusiveChangePrompt', {
-          value0: pendingExclusive
-            ? titleOf(pendingExclusive, filters.language, tr('ui.missingTitle'))
-            : '',
-        })}
-        cancelLabel={tr('common.cancel')}
-        confirmLabel={tr('ui.exclusiveChange')}
-        testId="confirm-exclusive-achievement"
-        confirmTestId="change-exclusive-achievement"
-        onOpenChange={(open) => {
-          if (!open) confirmExclusiveAchievement(false)
-        }}
-        onConfirm={() => confirmExclusiveAchievement(true)}
-      />
       <WConfirmDialog
         open={!!ticket && !receipt && !pendingImport}
         heading={tr('ui.receiveDesktop')}

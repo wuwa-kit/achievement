@@ -228,8 +228,6 @@
     },
     "exclusivePair": "둘 중 하나만 달성 가능",
     "exclusiveChoice": "하나만 달성 가능",
-    "exclusiveChange": "완료한 업적 변경",
-    "exclusiveChangePrompt": "완료한 업적을 ‘{{value0}}’(으)로 바꿀까요?",
     "astrite": "별의 소리",
     "search": "제목, 설명 또는 업적 ID 검색…",
     "allStatus": "모든 상태",

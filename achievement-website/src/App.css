@@ -1,4 +1,36 @@
 @layer components {
+  @keyframes home-butterfly-hover {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+
+    28% {
+      transform: translate3d(
+          calc(var(--butterfly-drift) * var(--butterfly-motion-scale, 1)),
+          calc(var(--butterfly-lift) * var(--butterfly-motion-scale, 1) * -0.65),
+          0
+        )
+        rotate(calc(var(--butterfly-sway) * var(--butterfly-motion-scale, 1)));
+    }
+
+    64% {
+      transform: translate3d(
+          calc(var(--butterfly-drift) * var(--butterfly-motion-scale, 1) * -0.7),
+          calc(var(--butterfly-lift) * var(--butterfly-motion-scale, 1)),
+          0
+        )
+        rotate(calc(var(--butterfly-sway) * var(--butterfly-motion-scale, 1) * -0.65));
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .home-butterfly[data-floating='true'] {
+      animation: home-butterfly-hover var(--butterfly-duration) ease-in-out var(--butterfly-delay)
+        infinite;
+    }
+  }
+
   ::highlight(achievement-search-match) {
     color: var(--color-search-match);
   }

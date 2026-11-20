@@ -228,8 +228,6 @@
     },
     "exclusivePair": "Escolha um dos dois",
     "exclusiveChoice": "Escolha uma opção",
-    "exclusiveChange": "Trocar a conquista concluída",
-    "exclusiveChangePrompt": "Marcar “{{value0}}” como concluída no lugar da outra?",
     "astrite": "Astrita",
     "search": "Buscar títulos, descrições ou IDs de conquistas…",
     "allStatus": "Todos os estados",

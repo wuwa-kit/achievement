@@ -228,8 +228,6 @@
     },
     "exclusivePair": "Elige uno de los dos",
     "exclusiveChoice": "Elige una opción",
-    "exclusiveChange": "Cambiar el logro completado",
-    "exclusiveChangePrompt": "¿Marcar «{{value0}}» como completado en su lugar?",
     "astrite": "Astrita",
     "search": "Buscar títulos, descripciones o ID de logros…",
     "allStatus": "Todos los estados",

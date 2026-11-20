@@ -228,8 +228,6 @@
     },
     "exclusivePair": "Eins von zwei",
     "exclusiveChoice": "Eine Option wählen",
-    "exclusiveChange": "Abgeschlossenen Erfolg wechseln",
-    "exclusiveChangePrompt": "Stattdessen „{{value0}}“ als abgeschlossen markieren?",
     "astrite": "Astrite",
     "search": "Titel, Beschreibungen oder Erfolgs-IDs suchen…",
     "allStatus": "Alle Status",

@@ -228,8 +228,6 @@
     },
     "exclusivePair": "二选一",
     "exclusiveChoice": "任选其一",
-    "exclusiveChange": "更换完成项",
-    "exclusiveChangePrompt": "将完成项改为「{{value0}}」？",
     "astrite": "星声",
     "search": "搜索标题、描述或成就 ID…",
     "allStatus": "全部状态",

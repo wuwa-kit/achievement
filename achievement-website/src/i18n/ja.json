@@ -228,8 +228,6 @@
     },
     "exclusivePair": "二者択一",
     "exclusiveChoice": "いずれか一つ",
-    "exclusiveChange": "達成済みの項目を変更",
-    "exclusiveChangePrompt": "達成済みの項目を「{{value0}}」に切り替えますか？",
     "astrite": "星声",
     "search": "タイトル、説明、実績 ID を検索…",
     "allStatus": "すべての状態",

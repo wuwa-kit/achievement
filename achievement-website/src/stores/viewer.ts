@@ -77,7 +77,6 @@ interface ViewerStore {
   archives: Awaited<ReturnType<typeof readArchives>>['archives']
   activeKey: string
   pendingImport: (ArchiveImport & { existingTime: string }) | null
-  pendingExclusiveId: number | null
   busy: boolean
   filters: ViewerFilters
   hiddenCompletedIds?: ReadonlySet<number>
@@ -92,8 +91,7 @@ interface ViewerStore {
   finishReceive(ticket: Ticket, receipt: string): Promise<void>
   switchAccount(id: string): Promise<void>
   deleteAccount(key: string): Promise<void>
-  setAchievementCompleted(id: number, completed: boolean, replaceExclusive?: boolean): Promise<void>
-  confirmExclusiveAchievement(accept: boolean): void
+  setAchievementCompleted(id: number, completed: boolean): Promise<void>
   download(): void
   connect(): () => void
 }
@@ -125,7 +123,6 @@ export const useViewerStore = create<ViewerStore>()(
     archives: [],
     activeKey: defaultArchiveKey,
     pendingImport: null,
-    pendingExclusiveId: null,
     busy: true,
     filters: {
       ...initialFilters,
@@ -172,7 +169,6 @@ export const useViewerStore = create<ViewerStore>()(
         state.activeKey = activeKey
         state.data = next
         if (reset) {
-          state.pendingExclusiveId = null
           state.revision++
           state.filters.group = null
           state.hiddenCompletedIds = state.filters.hideCompleted ? getCompletedIds(next) : undefined
@@ -299,30 +295,14 @@ export const useViewerStore = create<ViewerStore>()(
         set({ busy: false })
       }
     },
-    confirmExclusiveAchievement(accept) {
-      const id = get().pendingExclusiveId
-      set({ pendingExclusiveId: null })
-      if (accept && id !== null) void get().setAchievementCompleted(id, true, true)
-    },
-    async setAchievementCompleted(id, completed, replaceExclusive = false) {
+    async setAchievementCompleted(id, completed) {
       const { data, activeKey, busy, receiving, pendingImport } = get()
       if (!data || activeKey !== archiveKey(data.uid) || busy || receiving || pendingImport) return
       const ids = exclusiveAchievementGroups.find((group) => group.includes(id))
-      if (
-        completed &&
-        ids &&
-        !replaceExclusive &&
-        data.achievements.some(
-          (item) => item.id !== id && ids.includes(item.id) && isFinished(item),
-        )
-      ) {
-        set({ pendingExclusiveId: id })
-        return
-      }
       const edit: CompletionEdit = {
         id,
         completed,
-        exclusive: ids ? { ids, replace: replaceExclusive } : undefined,
+        exclusive: ids ? { ids, replace: true } : undefined,
       }
       const optimistic = applyCompletion(data, edit)
       if (optimistic === data) return
@@ -355,7 +335,6 @@ export const useViewerStore = create<ViewerStore>()(
                 completionQueue.length = 0
                 set({
                   ...snapshot,
-                  pendingExclusiveId: null,
                   hiddenCompletedIds: get().filters.hideCompleted
                     ? getCompletedIds(snapshot.data)
                     : undefined,
