@@ -2,6 +2,11 @@
   "version": 1,
   "rules": [
     {
+      "id": 200704,
+      "reason": "missingTrigger",
+      "condition": "always"
+    },
+    {
       "id": 201196,
       "reason": "deprecated",
       "condition": "titleEquals",

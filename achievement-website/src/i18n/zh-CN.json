@@ -56,6 +56,7 @@
     "unknownUid": "未知",
     "deleteHistoryPrompt": "删除 UID {{uid}} 的本地历史记录？",
     "achievements": "已完成成就",
+    "achievementPoints": "成就点数",
     "web": "导出到网页",
     "subtitle": "鸣潮 · 桌面助手",
     "capture": "采集成就",
@@ -223,6 +224,7 @@
       "exclusionReasons": {
         "deprecated": "游戏客户端已标记为废弃",
         "duplicate": "与已收录成就 #{{id}} 同名同描述，暂按重复配置排除",
+        "missingTrigger": "当前游戏配置缺少触发此成就的逻辑",
         "unavailableWithoutProgress": "当前客户端未显示此成就，也未提供进度"
       }
     },

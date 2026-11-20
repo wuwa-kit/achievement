@@ -18,7 +18,6 @@ export default function DesktopApp() {
   const {
     settings,
     state,
-    historySummaries,
     loaded,
     pending,
     notice,
@@ -156,7 +155,6 @@ export default function DesktopApp() {
             <HistoryCard
               key={entry.id}
               entry={entry}
-              summary={historySummaries[entry.id]}
               disabled={disabled}
               onExport={(format) => void exportHistory(entry.id, format)}
               onDelete={() => {

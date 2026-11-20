@@ -56,6 +56,7 @@
     "unknownUid": "알 수 없음",
     "deleteHistoryPrompt": "UID {{uid}}의 로컬 기록을 삭제할까요?",
     "achievements": "완료한 업적",
+    "achievementPoints": "업적 점수",
     "web": "웹사이트로 내보내기",
     "subtitle": "명조 · 데스크톱",
     "capture": "업적 수집",
@@ -223,6 +224,7 @@
       "exclusionReasons": {
         "deprecated": "게임 클라이언트에서 폐기된 업적으로 표시됩니다",
         "duplicate": "목록에 있는 업적 #{{id}}과 이름 및 설명이 같아 중복으로 처리합니다",
+        "missingTrigger": "현재 게임 설정에는 이 업적을 발동시키는 로직이 없습니다",
         "unavailableWithoutProgress": "현재 게임 클라이언트에 이 업적이 표시되지 않으며 진행도 정보도 제공되지 않습니다"
       }
     },

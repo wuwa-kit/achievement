@@ -56,6 +56,7 @@
     "unknownUid": "Desconhecido",
     "deleteHistoryPrompt": "Excluir o registro local do UID {{uid}}?",
     "achievements": "Conquistas concluídas",
+    "achievementPoints": "Pontos de conquista",
     "web": "Exportar para o site",
     "subtitle": "Wuthering Waves · Desktop",
     "capture": "Capturar conquistas",
@@ -223,6 +224,7 @@
       "exclusionReasons": {
         "deprecated": "O cliente do jogo marca esta conquista como obsoleta",
         "duplicate": "Tem o mesmo nome e descrição da conquista #{{id}} da lista e é tratada como duplicada",
+        "missingTrigger": "A configuração atual do jogo não tem um gatilho para desbloquear esta conquista",
         "unavailableWithoutProgress": "O cliente atual não exibe esta conquista nem fornece dados de progresso"
       }
     },

@@ -56,6 +56,7 @@
     "unknownUid": "Unbekannt",
     "deleteHistoryPrompt": "Den lokalen Verlaufseintrag für UID {{uid}} löschen?",
     "achievements": "Abgeschlossene Erfolge",
+    "achievementPoints": "Erfolgspunkte",
     "web": "Zur Website exportieren",
     "subtitle": "Wuthering Waves · Desktop",
     "capture": "Erfolge erfassen",
@@ -223,6 +224,7 @@
       "exclusionReasons": {
         "deprecated": "Der Spielclient kennzeichnet diesen Erfolg als veraltet",
         "duplicate": "Der gelistete Erfolg #{{id}} hat denselben Namen und dieselbe Beschreibung. Dieser Eintrag gilt als Duplikat",
+        "missingTrigger": "In der aktuellen Spielkonfiguration fehlt der Auslöser für diesen Erfolg",
         "unavailableWithoutProgress": "Der aktuelle Spielclient zeigt diesen Erfolg nicht an und liefert keine Fortschrittsdaten"
       }
     },

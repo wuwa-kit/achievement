@@ -56,6 +56,7 @@
     "unknownUid": "Unknown",
     "deleteHistoryPrompt": "Delete the local history entry for UID {{uid}}?",
     "achievements": "Completed achievements",
+    "achievementPoints": "Achievement points",
     "web": "Export to website",
     "subtitle": "Wuthering Waves · Desktop",
     "capture": "Capture achievements",
@@ -223,6 +224,7 @@
       "exclusionReasons": {
         "deprecated": "The game client marks this achievement as deprecated",
         "duplicate": "This achievement has the same name and description as listed achievement #{{id}} and is treated as a duplicate",
+        "missingTrigger": "The current game configuration lacks a trigger for this achievement",
         "unavailableWithoutProgress": "The current game client neither shows this achievement nor provides progress for it"
       }
     },

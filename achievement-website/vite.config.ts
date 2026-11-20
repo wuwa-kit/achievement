@@ -1,22 +1,17 @@
 import { copyFile, mkdir } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, type Plugin, type UserConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { Features } from 'lightningcss'
 import { z } from 'zod'
-import { buildPublicPreview, readCatalog } from './build/public-catalog.ts'
 import { catalogPng } from './build/catalog-png.ts'
-import exclusiveAchievementGroups from '../data/achievement-exclusive-groups.json' with { type: 'json' }
-import websiteCatalog from './website-catalog.json' with { type: 'json' }
-import websiteImages from './website-images.json' with { type: 'json' }
-import { exclusionReason } from './src/lib/exclusions.ts'
 
 const exclusiveGroupsSchema = z.array(z.array(z.number().int().positive()).min(2))
 
-function validatedExclusiveGroups(achievementIds: ReadonlySet<number>) {
-  const result = exclusiveGroupsSchema.safeParse(exclusiveAchievementGroups)
+function validatedExclusiveGroups(achievementIds: ReadonlySet<number>, groups: unknown) {
+  const result = exclusiveGroupsSchema.safeParse(groups)
   if (!result.success)
     throw new Error('Invalid achievement-exclusive-groups.json', { cause: result.error })
 
@@ -44,15 +39,9 @@ function catalogPreview(path: string, png: Buffer): Plugin {
           .end(png)
       })
     },
-    generateBundle() {
-      this.emitFile({
-        type: 'asset',
-        fileName: path,
-        source: png,
-      })
-    },
   }
 }
+
 function copyRoutePages(): Plugin {
   return {
     name: 'copy-route-pages',
@@ -70,33 +59,41 @@ function copyRoutePages(): Plugin {
   }
 }
 
-const imageLinks: Partial<Record<string, string>> = websiteImages
-function externalAssetUrl(filename: string) {
+function externalAssetUrl(filename: string, imageLinks: Partial<Record<string, string>>) {
   if (/^assets\/H7GBK-Heavy-[\w-]{8}\.ttf$/.test(filename))
     return 'https://media-cdn-mingchao.kurogame.com/font/H7GBK-Heavy.ttf'
   const name = filename.match(/^assets\/(.+)-[\w-]{8}\.png$/)?.[1]
   return name ? imageLinks[name + '.png'] : undefined
 }
 
-function removeExternalAssets(): Plugin {
+function removeExternalAssets(assetUrl: (filename: string) => string | undefined): Plugin {
   return {
     name: 'remove-external-website-assets',
     generateBundle: {
       order: 'post',
       handler(_, bundle) {
         for (const fileName of Object.keys(bundle)) {
-          if (externalAssetUrl(fileName)) delete bundle[fileName]
+          if (assetUrl(fileName)) delete bundle[fileName]
         }
       },
     },
   }
 }
 
-export default defineConfig(async ({ command, mode }) => {
-  const websiteBuild = command === 'build' && mode !== 'desktop'
+async function configureViewerCatalog(websiteBuild: boolean) {
+  const [{ buildPublicPreview, readCatalog }, { default: groups }, { exclusionReason }] =
+    await Promise.all([
+      import('./build/public-catalog.ts'),
+      import('../data/achievement-exclusive-groups.json', { with: { type: 'json' } }),
+      import('./src/lib/exclusions.ts'),
+    ])
+  const websiteCatalog = websiteBuild
+    ? (await import('./website-catalog.json', { with: { type: 'json' } })).default
+    : undefined
   const catalog = await readCatalog()
   const exclusiveGroups = validatedExclusiveGroups(
     new Set(catalog.achievements.map(({ id }) => id)),
+    groups,
   )
   const data = buildPublicPreview(catalog)
   const catalogExclusions = data.achievements.flatMap((item) => {
@@ -108,28 +105,38 @@ export default defineConfig(async ({ command, mode }) => {
   const version = createHash('sha256')
     .update(png ?? preview)
     .digest('hex')
-  if (websiteBuild && version !== websiteCatalog.sourceSha256)
+  if (websiteCatalog && version !== websiteCatalog.sourceSha256)
     throw new Error('Run mise exec -- pnpm upload:catalog to update website-catalog.json')
-  const catalogPath =
-    command === 'serve'
-      ? 'data/achievement-catalog.png'
-      : `assets/achievement-catalog-${version}.png`
+  const catalogPath = 'data/achievement-catalog.png'
   return {
     define: {
       'import.meta.env.VITE_EXCLUSIVE_ACHIEVEMENT_GROUPS': JSON.stringify(exclusiveGroups),
       'import.meta.env.VITE_CATALOG_EXCLUSIONS': JSON.stringify(catalogExclusions),
       'import.meta.env.VITE_CATALOG_VERSION': JSON.stringify(version),
-      'import.meta.env.VITE_CATALOG_URL': JSON.stringify(
-        websiteBuild ? websiteCatalog.url : '/' + catalogPath,
-      ),
+      'import.meta.env.VITE_CATALOG_URL': JSON.stringify(websiteCatalog?.url ?? '/' + catalogPath),
     },
-    experimental: websiteBuild ? { renderBuiltUrl: externalAssetUrl } : undefined,
+    plugin: png && catalogPreview(catalogPath, png),
+  }
+}
+
+export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
+  const desktopBuild = mode === 'desktop'
+  const websiteBuild = command === 'build' && !desktopBuild
+  const catalog = desktopBuild ? undefined : await configureViewerCatalog(websiteBuild)
+  const imageLinks = websiteBuild
+    ? (await import('./website-images.json', { with: { type: 'json' } })).default
+    : undefined
+  const assetUrl = imageLinks && ((filename: string) => externalAssetUrl(filename, imageLinks))
+  return {
+    define: catalog?.define,
+    publicDir: desktopBuild ? false : undefined,
+    experimental: assetUrl ? { renderBuiltUrl: assetUrl } : undefined,
     plugins: [
       react(),
       tailwindcss(),
-      ...(png ? [catalogPreview(catalogPath, png)] : []),
+      catalog?.plugin,
       copyRoutePages(),
-      ...(websiteBuild ? [removeExternalAssets()] : []),
+      assetUrl && removeExternalAssets(assetUrl),
     ],
     // The polyfill cannot see the color-scheme set by the app at runtime.
     css: { lightningcss: { exclude: Features.LightDark } },

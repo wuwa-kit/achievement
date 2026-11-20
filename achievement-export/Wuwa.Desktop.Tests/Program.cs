@@ -20,11 +20,13 @@ try
     var archive = Path.Combine(history, "123.json");
     Check(store.Add(source) == archive);
     var first = store.List().Single();
+    Check(first.StarCount is null);
     Check(ExportHistory.JsonFileName(first) == "Wuthering-Waves-Achievements-123-20261114-000000Z.json");
     store.Add(source);
     Check(store.List().Single() == first && first.Uid == "123" && first.CompletedCount == 1 && first.TotalCount == 2);
     var newest = source.DeepClone().AsObject();
     newest["capturedAt"] = "2026-11-14T01:00:00Z";
+    newest["starCount"] = 87;
     using (File.OpenRead(archive))
     {
         try { store.Add(newest); throw new Exception("Replaced a locked snapshot."); }
@@ -35,6 +37,7 @@ try
     store.Add(source);
     var entries = new ExportHistory(history).List();
     Check(entries.Length == 1 && entries[0].Id != first.Id && Directory.GetFiles(history).Single() == archive);
+    Check(entries[0].StarCount == 87);
     Check(!store.Delete(first.Id));
     try { store.Read(first.Id); throw new Exception("Read a newer snapshot using the old ID."); } catch (FileNotFoundException) { }
     Check(JsonNode.DeepEquals(newest, JsonNode.Parse(store.Read(entries[0].Id).Bytes)));

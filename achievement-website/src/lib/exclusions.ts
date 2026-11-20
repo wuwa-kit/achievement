@@ -3,7 +3,12 @@ import { z } from 'zod'
 import configuration from '../../../data/achievement-exclusions.json' with { type: 'json' }
 import type { Achievement } from './data.ts'
 
-const reasonSchema = z.enum(['deprecated', 'duplicate', 'unavailableWithoutProgress'])
+const reasonSchema = z.enum([
+  'deprecated',
+  'duplicate',
+  'missingTrigger',
+  'unavailableWithoutProgress',
+])
 export type ExclusionReason = z.infer<typeof reasonSchema>
 
 const common = {

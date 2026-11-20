@@ -111,7 +111,7 @@ test('real export, category browsing, filters and detail', async ({ page }, test
   page.on('pageerror', (error) => errors.push(error.message))
   await page.goto('/')
   const list = page.getByTestId('成就列表')
-  await expect(list).toHaveAttribute('data-count', '1304')
+  await expect(list).toHaveAttribute('data-count', '1303')
   await expect(page.locator('.achievement-row').first()).toBeVisible()
   await page.screenshot({ path: testInfo.outputPath('overview.png'), fullPage: false })
   expect(
@@ -120,7 +120,7 @@ test('real export, category browsing, filters and detail', async ({ page }, test
   const hideCompleted = page.getByTestId('隐藏已完成')
   await page.locator('.hide-completed .w-checkbox-label').click()
   await expect(hideCompleted).toBeChecked()
-  await expect(list).toHaveAttribute('data-count', '1249')
+  await expect(list).toHaveAttribute('data-count', '1248')
   await hideCompleted.press('Space')
   await expect(hideCompleted).not.toBeChecked()
   const search = page.getByTestId('搜索成就')
@@ -184,7 +184,7 @@ test('real export, category browsing, filters and detail', async ({ page }, test
   await allAchievements.click()
   await expect(group).toHaveAttribute('data-selected', 'false')
   await expect(allAchievements).toHaveAttribute('data-selected', 'true')
-  await expect(list).toHaveAttribute('data-count', '1304')
+  await expect(list).toHaveAttribute('data-count', '1303')
   await expect.poll(() => list.evaluate((element) => element.scrollTop)).toBe(0)
   await page.getByTestId('搜索成就').fill('no-such-achievement-99999')
   await expect(page.getByText('没有找到匹配的成就', { exact: true })).toBeVisible()
@@ -234,7 +234,7 @@ test('card stars and progress text match standalone and linked achievements', as
 
 test('JSON import is validated and errors preserve the previous snapshot', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1304')
+  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1303')
   const input = page.getByTestId('导入成就 JSON 文件')
   const fileChooser = page.waitForEvent('filechooser')
   await page.getByTestId('import-achievement-file').click()
@@ -246,7 +246,7 @@ test('JSON import is validated and errors preserve the previous snapshot', async
     buffer: Buffer.from('{bad'),
   })
   await expect(page.locator('.w-message[data-type="error"]')).toContainText('JSON 格式错误')
-  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1304')
+  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1303')
   await input.setInputFiles(fileURLToPath(fixture))
   await expect(page.locator('.w-message[data-type="error"]')).toHaveCount(0)
   await page.getByTestId('档案更多操作').click()
@@ -321,11 +321,11 @@ test('hidden achievements can be filtered with completion and search', async ({ 
 
   await expect(hiddenOnly).not.toBeChecked()
   await hiddenOnly.check()
-  await expect(list).toHaveAttribute('data-count', '267')
+  await expect(list).toHaveAttribute('data-count', '266')
   await hideCompleted.check()
-  await expect(list).toHaveAttribute('data-count', '263')
+  await expect(list).toHaveAttribute('data-count', '262')
   await hiddenOnly.uncheck()
-  await expect(list).toHaveAttribute('data-count', '1249')
+  await expect(list).toHaveAttribute('data-count', '1248')
 
   await hiddenOnly.check()
   await search.fill('100101')
@@ -334,7 +334,7 @@ test('hidden achievements can be filtered with completion and search', async ({ 
   await expect(hiddenOnly).not.toBeChecked()
   await expect(hideCompleted).not.toBeChecked()
   await expect(search).toHaveValue('')
-  await expect(list).toHaveAttribute('data-count', '1304')
+  await expect(list).toHaveAttribute('data-count', '1303')
 })
 
 test('hide completed keeps the current results until a filter is reapplied', async ({
@@ -613,6 +613,6 @@ test('missing default export can recover through local import', async ({ page })
   await page.goto('/')
   await expect(page.locator('.w-message[data-type="error"]')).toContainText('未找到本地导出')
   await page.getByTestId('导入成就 JSON 文件').setInputFiles(fileURLToPath(fixture))
-  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1304')
+  await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1303')
   await expect(page.locator('.w-message[data-type="error"]')).toHaveCount(0)
 })

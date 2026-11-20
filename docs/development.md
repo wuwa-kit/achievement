@@ -30,9 +30,11 @@ mise exec -- pnpm publish:desktop
 
 桌面产物为 `achievement-export/artifacts/app-compact/WuwaAchievementExport.exe`（内置 .NET）和 `achievement-export/artifacts/app-lite/WuwaAchievementExport-Lite.exe`（使用系统的 .NET 10 Desktop Runtime x64）。自动构建和发布配置见 [构建与发布](releasing.md)。
 
+本地桌面构建默认使用当前分支可达的最高正式版本标签，例如 `v0.1.3`。如浅克隆缺少标签，可获取标签后重试，或用 `-p:DesktopReleaseTag=v0.1.3` 指定已有版本。
+
 ## 数据流程
 
-桌面导出 v3 账号进度，网页按成就 ID 与 data/achievement-catalog.json 合并，补齐文本、分类、隐藏属性和奖励。排除规则统一维护于 data/achievement-exclusions.json，在网页应用。
+桌面导出 v3 原始账号进度，历史卡片直接显示档案中的已完成成就数和成就点数。网页按成就 ID 与 data/achievement-catalog.json 合并，补齐文本、分类、隐藏属性和奖励，并应用 data/achievement-exclusions.json 中的排除规则。图鉴、排除规则、互斥组和成就版本更新随网页发布。
 
 网页按 UID 保存，无 UID 的快照归到默认账号。网页保留 v3 原始进度和未知新 ID，也支持导入已有 v2 档案。桌面通过 GC 诊断和进程内存读取采集动态进度。
 
@@ -42,7 +44,7 @@ mise exec -- pnpm publish:desktop
 
 桌面端的 WPF 外壳承载 WebView2，界面为同一 React 项目的 `/desktop` 路由，复用 W 基础组件。C# 负责导出、文件对话框、设置持久化、窗口置顶及网页接收服务。
 
-运行 `mise exec -- dotnet run --project achievement-export/Wuwa.Desktop -c Debug`。构建会自动构建网页并嵌入桌面页面、脚本和官方 TTF；因此构建环境需要先安装 pnpm 依赖。测试发送到网页时，另开终端运行 `mise exec -- pnpm dev`，Debug 桌面会发送到 `http://127.0.0.1:5173`。Release 桌面会发送到 `https://wu.songe.li`。
+运行 `mise exec -- dotnet run --project achievement-export/Wuwa.Desktop -c Debug`。构建会打包桌面页面、脚本和官方 TTF，因此构建环境需要先安装 pnpm 依赖。测试发送到网页时，另开终端运行 `mise exec -- pnpm dev`，Debug 桌面会发送到 `http://127.0.0.1:5173`。Release 桌面会发送到 `https://wu.songe.li`。
 
 普通浏览器可直接访问 `/desktop` 预览界面。预览的游戏路径保存在 sessionStorage 中，语言和主题沿用浏览器偏好。实时导出及本机文件操作需要桌面宿主。
 

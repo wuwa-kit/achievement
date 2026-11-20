@@ -24,7 +24,7 @@ test('exclusive achievements stay together and switching a completion is immedia
   await expect(dialog).toBeInViewport()
   await expect(statistics).toHaveAttribute('data-expanded', 'true')
   await expect(dialog.getByText('图鉴统计', { exact: true })).toBeVisible()
-  for (const value of ['1307 条', '1304 条', '3 条', '7 组，14 条', '1297 项', '8760']) {
+  for (const value of ['1307 条', '1303 条', '4 条', '7 组，14 条', '1296 项', '8755']) {
     await expect(dialog.getByText(value, { exact: true })).toBeVisible()
   }
   await expect(
@@ -32,11 +32,13 @@ test('exclusive achievements stay together and switching a completion is immedia
   ).toHaveCount(0)
   const scroll = dialog.getByTestId('catalog-statistics-scroll')
   const excluded = scroll.getByTestId('catalog-excluded-achievements')
+  await expect(excluded.getByText('找回来了，都找回来了', { exact: true })).toBeVisible()
   await expect(excluded.getByText('dnt/这是一个废弃的成就', { exact: true })).toBeVisible()
   await expect(excluded.getByText('行于未明', { exact: true })).toBeVisible()
   await expect(excluded.getByText('要用声骸打败声骸', { exact: true })).toBeVisible()
   await expect(excluded.getByText('将一个声骸升到最高级', { exact: true })).toBeVisible()
   for (const reason of [
+    '当前游戏配置缺少触发此成就的逻辑',
     '游戏客户端已标记为废弃',
     '与已收录成就 #200141 同名同描述，暂按重复配置排除',
     '当前客户端未显示此成就，也未提供进度',
@@ -66,20 +68,22 @@ test('exclusive achievements stay together and switching a completion is immedia
   await expect(dialog).toBeHidden()
   if (testInfo.project.name === 'mobile') await page.locator('.nav-overview-heading').click()
 
+  await search.fill('200704')
+  await expect(list).toHaveAttribute('data-count', '0')
   await search.fill('200711')
   await expect(group.getByText('二选一')).toBeVisible()
   await expect(group.locator('.achievement-row')).toHaveCount(2)
   await expect(list).toHaveAttribute('data-count', '2')
   await expect(first).toHaveAttribute('data-completed', 'false')
   await expect(second).toHaveAttribute('data-completed', 'false')
-  await expect(overviewCount).toHaveText('0/1297')
+  await expect(overviewCount).toHaveText('0/1296')
   await page.getByTestId('只看隐藏成就').check()
   await expect(group.locator('.achievement-row')).toHaveCount(2)
 
   await first.click({ position: { x: 40, y: 40 } })
   await expect(first).toHaveAttribute('data-completed', 'true')
   await expect(second).toHaveAttribute('data-exclusive-alternative', 'true')
-  await expect(overviewCount).toHaveText('1/1297')
+  await expect(overviewCount).toHaveText('1/1296')
   await expect(page.getByTestId('completed-astrite')).toHaveText('5')
 
   await group.getByTestId('查看成就详情 200711').click()
@@ -96,7 +100,7 @@ test('exclusive achievements stay together and switching a completion is immedia
   await expect(page.getByTestId('confirm-exclusive-achievement')).toHaveCount(0)
   await expect(first).toHaveAttribute('data-completed', 'false')
   await expect(second).toHaveAttribute('data-completed', 'true')
-  await expect(overviewCount).toHaveText('1/1297')
+  await expect(overviewCount).toHaveText('1/1296')
   await page.getByTestId('隐藏已完成').check()
   await expect(list).toHaveAttribute('data-count', '0')
   await expect(group).toHaveCount(0)

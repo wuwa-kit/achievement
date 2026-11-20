@@ -10,15 +10,20 @@ import './theme.css'
 if (window.chrome?.webview) {
   document.documentElement.classList.replace('font-sans', 'font-desktop')
 }
-const Viewer = lazy(() => import('./App.tsx'))
+const desktopBuild = import.meta.env.MODE === 'desktop'
 const Desktop = lazy(() => import('./desktop/DesktopApp.tsx'))
-const NotFound = lazy(() => import('./NotFound.tsx'))
+const websitePages = desktopBuild
+  ? null
+  : {
+      Viewer: lazy(() => import('./App.tsx')),
+      NotFound: lazy(() => import('./NotFound.tsx')),
+    }
 
 function Page({
   component: Component,
   title,
 }: {
-  component: typeof Viewer
+  component: typeof Desktop
   title: 'ui.appTitle' | 'common.desktopTitle' | 'notFound.title'
 }) {
   const { t } = useTranslation()
@@ -30,25 +35,35 @@ function Page({
 }
 
 const root = createRoot(document.getElementById('root')!)
+const desktopPage = <Page component={Desktop} title="common.desktopTitle" />
 void usePreferencesStore.getState().initialize()
 root.render(
   <StrictMode>
     <WScrollArea page />
     <WMessage />
-    <BrowserRouter>
-      <Suspense fallback={null}>
-        <Routes>
-          <Route path="/" element={<Page component={Viewer} title="ui.appTitle" />} />
-          <Route path="/index.html" element={<Page component={Viewer} title="ui.appTitle" />} />
-          <Route path="/desktop" element={<Page component={Desktop} title="common.desktopTitle" />} />
-          <Route
-            path="/desktop/index.html"
-            element={<Page component={Desktop} title="common.desktopTitle" />}
-          />
-          <Route path="/404" element={<Page component={NotFound} title="notFound.title" />} />
-          <Route path="*" element={<Page component={NotFound} title="notFound.title" />} />
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+    <Suspense fallback={null}>
+      {websitePages ? (
+        <BrowserRouter>
+          <Routes>
+            <Route
+              path="/"
+              element={<Page component={websitePages.Viewer} title="ui.appTitle" />}
+            />
+            <Route
+              path="/index.html"
+              element={<Page component={websitePages.Viewer} title="ui.appTitle" />}
+            />
+            <Route path="/desktop" element={desktopPage} />
+            <Route path="/desktop/index.html" element={desktopPage} />
+            <Route
+              path="*"
+              element={<Page component={websitePages.NotFound} title="notFound.title" />}
+            />
+          </Routes>
+        </BrowserRouter>
+      ) : (
+        desktopPage
+      )}
+    </Suspense>
   </StrictMode>,
 )

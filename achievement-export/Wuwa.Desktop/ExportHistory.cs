@@ -7,7 +7,7 @@ using Wuwa.Export;
 
 namespace Wuwa.Desktop;
 
-internal sealed record HistoryEntry(string Id, string Uid, string ExportedAt, int CompletedCount, int TotalCount);
+internal sealed record HistoryEntry(string Id, string Uid, string ExportedAt, int CompletedCount, int TotalCount, int? StarCount);
 
 internal sealed class ExportHistory(string directory)
 {
@@ -30,7 +30,9 @@ internal sealed class ExportHistory(string directory)
         var capturedAt = data.GetProperty("capturedAt").GetString() ?? throw new InvalidDataException("Missing capture time.");
         var timestamp = DateTimeOffset.Parse(capturedAt, CultureInfo.InvariantCulture);
         var id = uid + "-" + timestamp.UtcTicks.ToString(CultureInfo.InvariantCulture);
-        return new(id, uid, capturedAt, data.GetProperty("completedCount").GetInt32(), data.GetProperty("count").GetInt32());
+        int? starCount = data.TryGetProperty("starCount", out var stars) && stars.ValueKind == JsonValueKind.Number &&
+            stars.TryGetInt32(out int points) && points >= 0 ? points : null;
+        return new(id, uid, capturedAt, data.GetProperty("completedCount").GetInt32(), data.GetProperty("count").GetInt32(), starCount);
     }
 
     private static DateTimeOffset Timestamp(HistoryEntry entry) => DateTimeOffset.Parse(entry.ExportedAt, CultureInfo.InvariantCulture);

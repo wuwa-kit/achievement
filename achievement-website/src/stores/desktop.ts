@@ -13,17 +13,10 @@ import { tr } from '../i18n/index.ts'
 import { desktopBootstrap } from '../lib/bootstrap'
 import { usePreferencesStore } from './preferences'
 import { wMessage } from './message'
-import type { summarize } from '../lib/data'
-
-export type HistorySummary = Pick<
-  ReturnType<typeof summarize>,
-  'total' | 'completedAstrite' | 'astrite'
->
 
 interface DesktopStore {
   settings: DesktopSettings
   state: DesktopState
-  historySummaries: Partial<Record<string, HistorySummary | null>>
   loaded: boolean
   pending: boolean
   notice: CollectionNotice | null
@@ -50,39 +43,12 @@ export const useDesktopStore = create<DesktopStore>()(
       language: usePreferencesStore.getState().language,
     },
     state: { stage: 'ready', busy: false, transferUrl: null, error: null },
-    historySummaries: {},
     loaded: false,
     pending: false,
     notice: null,
     acceptState(state) {
-      const { state: previous, historySummaries } = get()
-      const history = state.history ?? []
-      set({
-        state: structuredClone(state),
-        historySummaries: Object.fromEntries(
-          history.map(({ id }) => [id, historySummaries[id] ?? null]),
-        ),
-      })
-      for (const { id } of history) {
-        if (Object.hasOwn(historySummaries, id)) continue
-        void Promise.all([
-          request('history.read', { id }),
-          import('../lib/data'),
-          import('../lib/catalog'),
-        ])
-          .then(async ([snapshot, { summarize }, { parseAccountOrExport }]) => {
-            const { total, completedAstrite, astrite } = summarize(
-              (await parseAccountOrExport(snapshot)).achievements,
-            )
-            set((store) => {
-              if (Object.hasOwn(store.historySummaries, id))
-                store.historySummaries[id] = { total, completedAstrite, astrite }
-            })
-          })
-          .catch((error) => {
-            if (Object.hasOwn(get().historySummaries, id)) wMessage.error(String(error))
-          })
-      }
+      const previous = get().state
+      set({ state: structuredClone(state) })
       if (state.error && state.error !== previous.error) wMessage.error(state.error)
       const diagnostic = state.collectionDiagnostic
       if (

@@ -2,7 +2,7 @@
 
 `achievement-exclusions.json` 是网页的排除规则来源。网页对公开图鉴和已保存档案应用规则。修改后重新构建并更新网页即可。
 
-每条规则包含唯一的正整数 `id`、原因代码 `reason` 和 `condition`。`reason` 可使用 `deprecated`（客户端标记为废弃）、`duplicate`（重复配置）或 `unavailableWithoutProgress`（客户端未显示且未提供进度）。图鉴统计从 `ui.catalogStats.exclusionReasons` 读取对应的多语言文案。
+每条规则包含唯一的正整数 `id`、原因代码 `reason` 和 `condition`。`reason` 可使用 `deprecated`（客户端标记为废弃）、`duplicate`（重复配置）、`missingTrigger`（游戏互动缺少成就触发逻辑）或 `unavailableWithoutProgress`（客户端未显示且未提供进度）。图鉴统计从 `ui.catalogStats.exclusionReasons` 读取对应的多语言文案。
 
 支持的排除条件：
 

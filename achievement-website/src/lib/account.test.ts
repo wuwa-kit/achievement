@@ -246,11 +246,12 @@ test(
     })
     const merged = parseCompact(future)
     assert.equal(merged.achievements.find((a) => a.id === 100101)!.status, 'unknown')
-    assert.ok(!merged.achievements.some((a) => [201196, 400205, 999999].includes(a.id)))
+    assert.ok(!merged.achievements.some((a) => [200704, 201196, 400205, 999999].includes(a.id)))
     assert.deepEqual(merged.unknownCatalogIds, [999999])
     const raw = accountSchema.parse(exportPayload(merged))
     assert.ok(raw.achievements.some((a) => a.id === 999999))
     assert.ok(raw.achievements.some((a) => a.id === 201196))
+    assert.ok(raw.achievements.some((a) => a.id === 200704))
   },
 )
 

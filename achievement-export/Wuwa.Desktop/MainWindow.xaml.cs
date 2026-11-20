@@ -189,10 +189,6 @@ public partial class MainWindow : Window
                     if (gameDialog.ShowDialog(this) == true) result = gameDialog.FileName;
                     break;
                 case "export.start": EnsureIdle(); _ = RunExport(); break;
-                case "history.read":
-                    var readId = message.GetProperty("params").GetProperty("id").GetString()!;
-                    result = JsonSerializer.Deserialize<JsonElement>(history.Read(readId).Bytes);
-                    break;
                 case "history.export":
                     EnsureIdle();
                     var parameters = message.GetProperty("params");

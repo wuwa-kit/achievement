@@ -8,13 +8,11 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>
-    <DesktopReleaseTag Condition="'$(DesktopReleaseTag)' == ''">0.0.0</DesktopReleaseTag>
-    <Version>$([System.Text.RegularExpressions.Regex]::Replace('$(DesktopReleaseTag)', '^[vV]', ''))</Version>
+    <Version Condition="'$(DesktopReleaseTag)' != ''">$([System.Text.RegularExpressions.Regex]::Replace('$(DesktopReleaseTag)', '^[vV]', ''))</Version>
     <DesktopEdition Condition="'$(DesktopLite)' != 'true'">standard</DesktopEdition>
     <DesktopEdition Condition="'$(DesktopLite)' == 'true'">lite</DesktopEdition>
   </PropertyGroup>
   <ItemGroup>
-    <AssemblyMetadata Include="DesktopReleaseTag" Value="$(DesktopReleaseTag)" />
     <AssemblyMetadata Include="DesktopEdition" Value="$(DesktopEdition)" />
   </ItemGroup>
   <PropertyGroup Condition="'$(DesktopLite)' == 'true'">
@@ -33,6 +31,24 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
   </ItemGroup>
+  <Target Name="ResolveDesktopReleaseTag" BeforeTargets="GetAssemblyVersion">
+    <Exec Condition="'$(DesktopReleaseTag)' == ''"
+          Command="git tag --merged HEAD --sort=-version:refname --list &quot;v*&quot;"
+          WorkingDirectory="$(MSBuildProjectDirectory)" ConsoleToMSBuild="true"
+          StandardOutputImportance="Low" IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" ItemName="_DesktopGitTags" />
+    </Exec>
+    <PropertyGroup Condition="'$(DesktopReleaseTag)' == ''">
+      <_DesktopGitTagList>@(_DesktopGitTags)</_DesktopGitTagList>
+      <DesktopReleaseTag>$([System.Text.RegularExpressions.Regex]::Match('$(_DesktopGitTagList)', '(?&lt;![^;])v[0-9]+\.[0-9]+\.[0-9]+(?=;|$)').Value)</DesktopReleaseTag>
+      <Version>$([System.Text.RegularExpressions.Regex]::Replace('$(DesktopReleaseTag)', '^v', ''))</Version>
+    </PropertyGroup>
+    <Error Condition="'$(DesktopReleaseTag)' == ''"
+           Text="No stable desktop release tag is reachable from HEAD. Fetch the release tags or pass an existing DesktopReleaseTag explicitly." />
+    <ItemGroup>
+      <AssemblyMetadata Include="DesktopReleaseTag" Value="$(DesktopReleaseTag)" />
+    </ItemGroup>
+  </Target>
   <Target Name="BuildDesktopUi" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true'">
     <Exec WorkingDirectory="$(MSBuildProjectDirectory)/../.." Command="pnpm --filter achievement-website build --mode desktop" />
     <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)/../scripts/package-ui.ps1&quot;" />

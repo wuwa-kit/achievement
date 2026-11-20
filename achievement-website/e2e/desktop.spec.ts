@@ -1,9 +1,5 @@
 import { selectValue } from './select-helpers'
 import { expect, test } from '@playwright/test'
-import { readFile } from 'node:fs/promises'
-import type { AccountData } from '../src/lib/account'
-import { localFixture } from '../test/local-fixtures'
-import { skipIfMissingLocalFixtures } from './local-fixtures'
 
 test('desktop route supports browser preview and persists preview language', async ({ page }) => {
   await page.goto('/desktop')
@@ -189,113 +185,98 @@ test('desktop bridge preserves progress while switching language and supports ca
 })
 
 test('desktop history replaces the previous snapshot and confirms deletion', async ({ page }) => {
-  const fixtureName = 'session-24624/achievement-snapshot.json'
-  skipIfMissingLocalFixtures(fixtureName)
   const transferUrl = 'http://127.0.0.1:5173/#handoff=v1&port=51234&key=' + 'a'.repeat(64)
-  const fixture = localFixture(fixtureName)
-  const capture = JSON.parse((await readFile(fixture, 'utf8')).replace(/^\uFEFF/, ''))
-  const account: AccountData = {
-    schemaVersion: 3,
-    kind: 'account-progress',
-    complete: true,
-    uid: '10001',
-    capturedAt: capture.at,
-    resourceFingerprint: 'test',
-    count: capture.count,
-    completedCount: capture.modelFinishCount,
-    starCount: capture.modelStarCount,
-    groupStates: capture.groupStates,
-    achievements: capture.achievements,
-  }
-  await page.addInitScript(
-    ({ transferUrl, account }) => {
-      let listener: (event: { data: unknown }) => void
-      const history = [
-        {
-          id: 'old',
-          uid: account.uid,
-          exportedAt: account.capturedAt,
-          completedCount: account.completedCount,
-          totalCount: account.count,
-        },
-      ]
-      const state = {
-        stage: 'ready',
-        busy: false,
-        transferUrl: null as string | null,
-        error: null,
-        history,
-      }
-      window.addEventListener('test-transfer-received', () => {
-        state.stage = 'completed'
-        state.busy = false
-        state.transferUrl = null
-        listener({ data: { event: 'state', data: state } })
-      })
-      Object.defineProperty(window, 'chrome', {
-        configurable: true,
-        value: {
-          webview: {
-            addEventListener: (_: string, callback: typeof listener) => {
-              listener = callback
-            },
-            postMessage: (message: { id: string; method: string; params: unknown }) => {
-              let result: unknown = null
-              if (message.method === 'settings.get')
-                result = { gamePath: 'game.exe', language: 'zh-CN' }
-              if (message.method === 'state.get') result = state
-              if (message.method === 'history.read') result = account
-              if (message.method === 'export.start') {
-                state.stage = 'completed'
-                account.completedCount++
-                const restored = account.achievements.find(({ id }) => id === 400205)!
-                restored.currentProgress = 1
-                restored.maxProgress = 1
-                restored.hasGetReward = true
-                history[0] = { ...history[0], id: 'new', completedCount: account.completedCount }
+  const catalogRequests: string[] = []
+  page.on('request', (request) => {
+    const { pathname } = new URL(request.url())
+    if (/achievement-catalog|\/src\/lib\/(catalog|exclusions|data)\.ts/.test(pathname)) {
+      catalogRequests.push(pathname)
+    }
+  })
+  await page.addInitScript((transferUrl) => {
+    let listener: (event: { data: unknown }) => void
+    const history = [
+      {
+        id: 'old',
+        uid: '10001',
+        exportedAt: '2026-01-01T00:00:00Z',
+        completedCount: 55,
+        totalCount: 1307,
+        starCount: null as number | null,
+      },
+    ]
+    const state = {
+      stage: 'ready',
+      busy: false,
+      transferUrl: null as string | null,
+      error: null,
+      history,
+    }
+    window.addEventListener('test-transfer-received', () => {
+      state.stage = 'completed'
+      state.busy = false
+      state.transferUrl = null
+      listener({ data: { event: 'state', data: state } })
+    })
+    Object.defineProperty(window, 'chrome', {
+      configurable: true,
+      value: {
+        webview: {
+          addEventListener: (_: string, callback: typeof listener) => {
+            listener = callback
+          },
+          postMessage: (message: { id: string; method: string; params: unknown }) => {
+            let result: unknown = null
+            if (message.method === 'settings.get')
+              result = { gamePath: 'game.exe', language: 'zh-CN' }
+            if (message.method === 'state.get') result = state
+            if (message.method === 'history.read') localStorage.setItem('history-read', 'true')
+            if (message.method === 'export.start') {
+              state.stage = 'completed'
+              history[0] = { ...history[0], id: 'new', completedCount: 56, starCount: 87 }
+            }
+            if (message.method === 'history.export') {
+              localStorage.setItem('last-history-export', JSON.stringify(message.params))
+              if ((message.params as { format: string }).format === 'web') {
+                state.stage = 'sending'
+                state.busy = true
+                state.transferUrl = transferUrl
               }
-              if (message.method === 'history.export') {
-                localStorage.setItem('last-history-export', JSON.stringify(message.params))
-                if ((message.params as { format: string }).format === 'web') {
-                  state.stage = 'sending'
-                  state.busy = true
-                  state.transferUrl = transferUrl
-                }
-              }
-              if (message.method === 'transfer.copyLink') {
-                localStorage.setItem('copied-transfer-link', state.transferUrl ?? '')
-                result = !!state.transferUrl
-              }
-              if (message.method === 'export.cancel') {
-                state.stage = 'cancelled'
-                state.busy = false
-                state.transferUrl = null
-              }
-              if (message.method === 'history.delete') {
-                localStorage.setItem('last-history-delete', JSON.stringify(message.params))
-                history.splice(0, 1)
-                result = state
-              }
-              queueMicrotask(() => {
-                listener({ data: { id: message.id, result } })
-                listener({ data: { event: 'state', data: state } })
-              })
-            },
+            }
+            if (message.method === 'transfer.copyLink') {
+              localStorage.setItem('copied-transfer-link', state.transferUrl ?? '')
+              result = !!state.transferUrl
+            }
+            if (message.method === 'export.cancel') {
+              state.stage = 'cancelled'
+              state.busy = false
+              state.transferUrl = null
+            }
+            if (message.method === 'history.delete') {
+              localStorage.setItem('last-history-delete', JSON.stringify(message.params))
+              history.splice(0, 1)
+              result = state
+            }
+            queueMicrotask(() => {
+              listener({ data: { id: message.id, result } })
+              listener({ data: { event: 'state', data: state } })
+            })
           },
         },
-      })
-    },
-    { transferUrl, account },
-  )
+      },
+    })
+  }, transferUrl)
   await page.goto('/desktop')
   await expect(page.locator('.desktop-history-card')).toHaveCount(1)
   const card = page.locator('.desktop-history-card').first()
-  await expect(card.locator('.desktop-history-count')).toHaveText('55/1304')
-  await expect(card.locator('.desktop-history-astrite')).toHaveText('450/8795')
+  await expect(card.locator('.desktop-history-count')).toHaveText('55')
+  await expect(card.locator('.desktop-history-star-count')).toHaveText('—')
   await page.getByTestId('开始采集').click()
   await expect(page.locator('.desktop-history-card')).toHaveCount(1)
-  await expect(card.locator('.desktop-history-count')).toHaveText('56/1305')
-  await expect(card.locator('.desktop-history-astrite')).toHaveText('455/8800')
+  await expect(card.locator('.desktop-history-count')).toHaveText('56')
+  await expect(card.locator('.desktop-history-star-count')).toHaveText('87')
+  expect(await page.evaluate(() => localStorage.getItem('history-read'))).toBeNull()
+  expect(catalogRequests).toEqual([])
   const exportButton = card.getByTestId('历史记录导出')
   const deleteButton = card.getByTestId('删除档案')
   for (const [label, format] of [
@@ -332,6 +313,7 @@ test('desktop history replaces the previous snapshot and confirms deletion', asy
       await expect(dialog).toBeVisible()
       await page.evaluate(() => window.dispatchEvent(new Event('test-transfer-received')))
       await expect(dialog).toHaveCount(0)
+      await expect(card.locator('.desktop-history-star-count')).toHaveText('87')
       await expect(exportCard.getByTestId('开始采集')).toBeEnabled()
     }
   }

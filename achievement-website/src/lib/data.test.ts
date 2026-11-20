@@ -72,16 +72,16 @@ test(
     assert.equal(data.categories.length, 4)
     assert.equal(data.categories.flatMap((c) => c.groups).length, 36)
     assert.deepEqual(summarize(main), {
-      total: 1304,
+      total: 1303,
       finished: 55,
-      hidden: 267,
+      hidden: 266,
       completedAstrite: 450,
-      incompleteAstrite: 8345,
+      incompleteAstrite: 8340,
       unknownAstrite: 0,
       unknown: 0,
-      astrite: 8795,
+      astrite: 8790,
     })
-    assert.equal(data.achievements.length, 1304)
+    assert.equal(data.achievements.length, 1303)
     assert.equal(data.otherGameplayCount, 0)
     assert.ok(data.achievements.every((a) => a.inMainMenu))
   },
@@ -90,7 +90,7 @@ test('visibility, hidden state and completion remain separate filters', skipWith
   const data = readExport()
   assert.equal(
     filterAchievements(data.achievements, { ...filters, visibility: 'hidden' }).length,
-    267,
+    266,
   )
   assert.equal(
     filterAchievements(data.achievements, { ...filters, visibility: 'visible' }).length,
@@ -211,7 +211,7 @@ test(
     const legacy = readLegacy()
     assert.equal(legacy.count, 1408)
     const current = parseExport(legacy)
-    assert.equal(current.count, 1304)
+    assert.equal(current.count, 1303)
     assert.equal(current.otherGameplayCount, 0)
     assert.equal(current.completedCount, 55)
     assert.equal(current.starCount, 87)

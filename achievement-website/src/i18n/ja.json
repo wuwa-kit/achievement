@@ -56,6 +56,7 @@
     "unknownUid": "不明",
     "deleteHistoryPrompt": "UID {{uid}} のローカル履歴を削除しますか？",
     "achievements": "達成済み実績",
+    "achievementPoints": "実績ポイント",
     "web": "ウェブサイトにエクスポート",
     "subtitle": "鳴潮 · デスクトップ",
     "capture": "実績の取得",
@@ -223,6 +224,7 @@
       "exclusionReasons": {
         "deprecated": "ゲームクライアントで廃止済みとされている実績です",
         "duplicate": "一覧にある実績 #{{id}} と名前も説明も同じため、重複として扱います",
+        "missingTrigger": "現在のゲーム設定には、この実績を達成するための処理がありません",
         "unavailableWithoutProgress": "現在のゲームクライアントでは、この実績も進捗も表示されません"
       }
     },

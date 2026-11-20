@@ -53,7 +53,7 @@ test('the catalog is read from IndexedDB until its version changes', async ({ pa
   })
   await page.goto('/')
   const list = page.getByTestId('成就列表')
-  await expect(list).toHaveAttribute('data-count', '1304')
+  await expect(list).toHaveAttribute('data-count', '1303')
   const firstCard = list.locator('.achievement-card').first()
   await expect(firstCard.locator('.status')).toHaveCount(0)
   await expect(firstCard.locator('.row-progress')).toHaveCount(0)
@@ -98,7 +98,7 @@ test('the catalog is read from IndexedDB until its version changes', async ({ pa
     return route.abort()
   })
   await page.reload()
-  await expect(list).toHaveAttribute('data-count', '1304')
+  await expect(list).toHaveAttribute('data-count', '1303')
   expect(requests).toBe(1)
 
   await page.evaluate(
@@ -123,7 +123,7 @@ test('the catalog is read from IndexedDB until its version changes', async ({ pa
   const refreshed = page.waitForResponse('**/data/achievement-catalog.png')
   await page.reload()
   expect((await refreshed).ok()).toBe(true)
-  await expect(list).toHaveAttribute('data-count', '1304')
+  await expect(list).toHaveAttribute('data-count', '1303')
 })
 
 test('injected desktop settings render immediately while business state is pending', async ({

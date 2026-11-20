@@ -56,6 +56,7 @@
     "unknownUid": "Inconnu",
     "deleteHistoryPrompt": "Supprimer l’entrée d’historique locale de l’UID {{uid}} ?",
     "achievements": "Succès accomplis",
+    "achievementPoints": "Points de succès",
     "web": "Exporter vers le site web",
     "subtitle": "Wuthering Waves · Bureau",
     "capture": "Collecter les succès",
@@ -223,6 +224,7 @@
       "exclusionReasons": {
         "deprecated": "Le client du jeu indique que ce succès est obsolète",
         "duplicate": "Ce succès porte le même nom et la même description que le succès #{{id}} de la liste et est considéré comme un doublon",
+        "missingTrigger": "La configuration actuelle du jeu ne prévoit aucun déclencheur pour ce succès",
         "unavailableWithoutProgress": "Le client actuel n’affiche pas ce succès et ne fournit aucune donnée de progression"
       }
     },

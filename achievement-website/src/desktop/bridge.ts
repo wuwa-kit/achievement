@@ -12,6 +12,7 @@ export interface HistoryEntry {
   exportedAt: string
   completedCount: number
   totalCount: number
+  starCount?: number | null
 }
 export type HistoryExportFormat = 'web' | 'json'
 export type CollectionStage =
@@ -65,7 +66,6 @@ type Methods = {
     result: DesktopSettings
   }
   'theme.set': { params: { dark: boolean }; result: null }
-  'history.read': { params: { id: string }; result: unknown }
   'history.export': { params: { id: string; format: HistoryExportFormat }; result: null }
   'history.delete': { params: { id: string }; result: DesktopState }
   'settings.get': { params: undefined; result: DesktopSettings }
