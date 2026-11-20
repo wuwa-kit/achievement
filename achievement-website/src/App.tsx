@@ -103,6 +103,48 @@ function NavProgress({
   )
 }
 
+function AchievementSearch({
+  item,
+  language,
+  compact = false,
+}: {
+  item: Achievement
+  language: string
+  compact?: boolean
+}) {
+  const { t } = useTranslation()
+  const isChinese = language === 'zh-Hans' || language === 'zh-Hant'
+  const searchTitle = isChinese
+    ? plainText(item.texts['zh-Hans']?.title).trim() ||
+      plainText(item.texts['zh-Hant']?.title).trim()
+    : plainText(item.texts[language]?.title).trim()
+  if (!searchTitle) return null
+  const searchHref = isChinese
+    ? `https://search.bilibili.com/all?${new URLSearchParams({ keyword: `鸣潮 ${searchTitle}` })}`
+    : `https://www.google.com/search?${new URLSearchParams({ q: `Wuthering Waves ${searchTitle}` })}`
+
+  return (
+    <WTooltip text={t('ui.searchAchievementOn', { site: isChinese ? '哔哩哔哩' : 'Google' })}>
+      <a
+        className={`icon-button pointer-events-auto relative isolate inline-grid shrink-0 place-items-center rounded-[5px] text-(--color-muted) before:absolute before:-z-10 before:rounded-[5px] before:content-[''] hover:text-(--color-text) hover:before:bg-(--color-surface-soft) focus-visible:outline-none focus-visible:before:outline-2 focus-visible:before:outline-offset-2 focus-visible:before:outline-(--color-focus) motion-safe:w-transition-colors motion-safe:before:w-transition-colors ${compact ? 'ms-1.5 size-6 before:-inset-2' : 'size-8 before:inset-0'}`}
+        href={searchHref}
+        target="_blank"
+        rel="noreferrer"
+        onClick={(event) => {
+          if (event.detail > 0) event.currentTarget.blur()
+        }}
+        data-testid={compact ? `search-achievement-online-${item.id}` : 'search-achievement-online'}
+      >
+        <WSvg
+          name="search"
+          size={compact ? 16 : 18}
+          className={compact ? 'group-data-[completed=true]/card:opacity-35' : undefined}
+        />
+      </a>
+    </WTooltip>
+  )
+}
+
 function AchievementSummary({
   item,
   language,
@@ -130,7 +172,7 @@ function AchievementSummary({
       className="achievement-info pointer-events-none z-10 col-start-2 flex min-w-0 flex-col gap-1 data-[waiting=true]:text-(--color-muted) group-data-[completed=true]/card:text-(--color-muted)/85 narrow:gap-0.5"
       data-waiting={waiting || exclusiveAlternative}
     >
-      <span className="achievement-title flex items-center gap-2 text-[14px] leading-[1.6] font-[550] narrow:text-[12px]">
+      <span className="achievement-title flex items-center gap-1 text-[14px] leading-[1.6] font-[550] narrow:text-[12px]">
         <WButton
           className="group/title pointer-events-auto min-w-0 rounded-sm text-left wrap-anywhere whitespace-pre-line"
           data-testid={`查看成就详情 ${item.id}`}
@@ -147,12 +189,7 @@ function AchievementSummary({
             )}
           </span>
         </WButton>
-        {item.hidden && (
-          <span className="hidden-badge inline-flex flex-none items-center gap-[3px] rounded-[3px] border border-(--color-border) px-[5px] text-[11px] font-normal whitespace-nowrap text-(--color-muted)">
-            <WSvg name="achievement-hidden" size={11} />
-            {t('ui.hiddenBadge')}{' '}
-          </span>
-        )}
+        <AchievementSearch item={item} language={language} compact />
       </span>
       <span
         ref={descriptionRef}
@@ -191,14 +228,6 @@ function AchievementDetail({
   const groupFallback = tr('ui.group', { value0: item.groupId })
   const title = plainText(item.texts[language]?.title)
   const description = plainText(item.texts[language]?.description)
-  const isChinese = language === 'zh-Hans' || language === 'zh-Hant'
-  const searchTitle = isChinese
-    ? plainText(item.texts['zh-Hans']?.title).trim() ||
-      plainText(item.texts['zh-Hant']?.title).trim()
-    : title.trim()
-  const searchHref = isChinese
-    ? `https://search.bilibili.com/all?${new URLSearchParams({ keyword: `鸣潮 ${searchTitle}` })}`
-    : `https://www.google.com/search?${new URLSearchParams({ q: `Wuthering Waves ${searchTitle}` })}`
   const titleRef = useAchievementHighlight(title, query)
   const descriptionRef = useAchievementHighlight(description, query)
   return (
@@ -231,27 +260,14 @@ function AchievementDetail({
                 {title || tr('ui.missingTitle')}
               </span>
               {item.hidden && (
-                <span className="tag ms-2 inline-flex items-center gap-[3px] rounded-sm border border-(--color-border) bg-(--color-surface-soft) px-2 py-1 align-middle text-[11px] leading-normal font-normal whitespace-nowrap text-(--color-muted)">
-                  <WSvg name="achievement-hidden" size={11} />
-                  {tr('ui.hiddenBadge')}
-                </span>
+                <WTooltip text={tr('ui.hiddenBadge')}>
+                  <span className="hidden-badge ms-2 inline-flex size-5 items-center justify-center align-middle text-(--color-muted)">
+                    <WSvg name="achievement-hidden" size={18} />
+                  </span>
+                </WTooltip>
               )}
             </div>
-            {searchTitle && (
-              <WTooltip
-                text={tr('ui.searchAchievementOn', { site: isChinese ? '哔哩哔哩' : 'Google' })}
-              >
-                <a
-                  className="icon-button inline-grid size-8 shrink-0 place-items-center rounded-[5px] text-(--color-muted) hover:bg-(--color-surface-soft) hover:text-(--color-text)"
-                  href={searchHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  data-testid="search-achievement-online"
-                >
-                  <WSvg name="search" size={18} />
-                </a>
-              </WTooltip>
-            )}
+            <AchievementSearch item={item} language={language} />
           </div>
           <span className="inline-flex h-8 shrink-0 items-center gap-1 text-xs font-medium text-(--color-gold)">
             <img
@@ -751,6 +767,13 @@ export default function App() {
                           </span>
                         </WButton>
                       </WTooltip>
+                      {item.hidden && (
+                        <WTooltip text={tr('ui.hiddenBadge')}>
+                          <span className="hidden-badge absolute top-1.5 left-1.5 z-10 grid size-4 place-items-center text-(--color-muted) group-data-[completed=true]/card:opacity-35">
+                            <WSvg name="achievement-hidden" size={12} />
+                          </span>
+                        </WTooltip>
+                      )}
                       <AchievementSummary
                         item={item}
                         language={filters.language}

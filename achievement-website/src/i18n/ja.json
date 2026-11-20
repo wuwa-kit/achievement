@@ -245,7 +245,7 @@
     "progressColumn": "進捗",
     "status": "状態",
     "missingTitleShort": "タイトルなし",
-    "hiddenBadge": "非表示",
+    "hiddenBadge": "隠し実績",
     "notVisible": "ゲーム内で非表示",
     "noMatches": "一致する実績がありません",
     "noMatchesHint": "別のキーワードを試すか、絞り込み条件を減らしてください",

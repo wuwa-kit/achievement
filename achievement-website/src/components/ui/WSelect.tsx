@@ -90,6 +90,7 @@ export function WSelect({
     <>
       <WButton
         {...props}
+        blurOnPointerClick={false}
         ref={anchorRef}
         className={`w-select group/select inline-flex min-w-0 items-center [justify-content:var(--select-justify,space-between)] gap-[var(--select-gap,10px)] rounded-md border border-(--color-border) bg-(--color-surface) px-[var(--select-px,12px)] py-[var(--select-py,9px)] text-start text-[13px] text-(--color-text) enabled:hover:border-(--color-border-strong) enabled:hover:bg-(--color-surface-hover) data-[expanded=true]:border-(--color-border-strong) data-[expanded=true]:bg-(--color-surface-hover) ${className}`}
         disabled={disabled}

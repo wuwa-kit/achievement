@@ -245,7 +245,7 @@
     "progressColumn": "ความคืบหน้า",
     "status": "สถานะ",
     "missingTitleShort": "ไม่มีชื่อ",
-    "hiddenBadge": "ซ่อนอยู่",
+    "hiddenBadge": "ความสำเร็จที่ซ่อนอยู่",
     "notVisible": "ไม่แสดงในเกม",
     "noMatches": "ไม่พบความสำเร็จที่ตรงกัน",
     "noMatchesHint": "ลองใช้คำค้นอื่นหรือลดเงื่อนไขการกรอง",
