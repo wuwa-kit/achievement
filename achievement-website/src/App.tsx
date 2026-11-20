@@ -361,6 +361,16 @@ export default function App() {
     [mainItems, exclusiveById],
   )
   const summary = useMemo(() => summarize(mainItems, exclusiveById), [mainItems, exclusiveById])
+  const versionCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const members of units) {
+      const versions = new Set(members.map(({ id }) => achievementVersionById.get(id)))
+      for (const version of versions) {
+        if (version) counts.set(version, (counts.get(version) ?? 0) + 1)
+      }
+    }
+    return counts
+  }, [units])
   const { categoryCounts, groupCounts } = useMemo(() => {
     function countBy(key: 'categoryId' | 'groupId') {
       const counts = new Map<number, { finished: number; total: number }>()
@@ -693,6 +703,7 @@ export default function App() {
                   </div>
                   <AchievementVersionFilter
                     versions={filters.versions}
+                    versionCounts={versionCounts}
                     onVersionsChange={(versions) => update({ versions })}
                   />
                 </div>

@@ -133,16 +133,20 @@ export function CatalogStatistics({
           >
             <div className="grid gap-5 px-5 pt-2 pb-5">
               {excludedItems.length > 0 && (
-                <div data-testid="catalog-excluded-achievements">
+                <div className="@container" data-testid="catalog-excluded-achievements">
                   <div className="mb-2 text-sm font-semibold">{t('ui.catalogStats.excluded')}</div>
-                  <div className="divide-y divide-(--color-border) rounded-lg border border-(--color-border)">
+                  <div className="grid grid-cols-1 gap-2 @min-[600px]:grid-cols-2">
                     {excludedItems.map((item) => (
-                      <AchievementDescription
+                      <div
                         key={item.id}
-                        item={item}
-                        language={language}
-                        reason={item.reason}
-                      />
+                        className="min-w-0 rounded-lg border border-(--color-border)"
+                      >
+                        <AchievementDescription
+                          item={item}
+                          language={language}
+                          reason={item.reason}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>

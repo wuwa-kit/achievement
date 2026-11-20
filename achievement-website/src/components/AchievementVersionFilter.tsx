@@ -11,9 +11,11 @@ import { WSvg } from './ui/WSvg'
 
 export function AchievementVersionFilter({
   versions,
+  versionCounts,
   onVersionsChange,
 }: {
   versions: readonly string[]
+  versionCounts: ReadonlyMap<string, number>
   onVersionsChange: (versions: string[]) => void
 }) {
   const { t } = useTranslation()
@@ -66,12 +68,18 @@ export function AchievementVersionFilter({
             {achievementVersions.map((version) => (
               <WCheckBox
                 key={version}
-                className="w-full leading-5 [--checkbox-px:12px] [--checkbox-text:14px]"
+                className="w-full leading-5 [--checkbox-px:12px] [--checkbox-text:14px] [&_.w-checkbox-label]:flex [&_.w-checkbox-label]:min-w-0 [&_.w-checkbox-label]:flex-1 [&_.w-checkbox-label]:items-center [&_.w-checkbox-label]:justify-between [&_.w-checkbox-label]:gap-2"
                 data-version={version}
                 checked={selected.has(version)}
                 onCheckedChange={(checked) => handleVersionChange(version, checked)}
               >
-                {version}
+                <span>{version}</span>
+                <span
+                  className="text-xs text-(--color-muted) tabular-nums"
+                  data-testid="version-count"
+                >
+                  {(versionCounts.get(version) ?? 0).toString()}
+                </span>
               </WCheckBox>
             ))}
           </WScrollArea>

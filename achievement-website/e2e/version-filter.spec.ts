@@ -12,9 +12,17 @@ test('multiple versions filter together with search and show on achievement card
     list.getByTestId(`查看成就详情 ${id}`).locator('.achievement-title-text + .achievement-version')
   const version38 = popover.locator('[data-version="3.8"]')
   const version37 = popover.locator('[data-version="3.7"]')
+  const count38 = popover
+    .locator('.w-checkbox:has([data-version="3.8"])')
+    .getByTestId('version-count')
+  const count37 = popover
+    .locator('.w-checkbox:has([data-version="3.7"])')
+    .getByTestId('version-count')
 
   await expect(trigger).toHaveText('全部版本')
   await trigger.click()
+  await expect(count38).toHaveText('26')
+  await expect(count37).toHaveText('72')
   await version37.check()
   await expect(trigger).toHaveText('3.7')
   await version38.check()
@@ -33,6 +41,8 @@ test('multiple versions filter together with search and show on achievement card
   await expect(versionOf(200137)).toHaveCSS('vertical-align', 'super')
 
   await trigger.click()
+  await expect(count38).toHaveText('26')
+  await expect(count37).toHaveText('72')
   await version38.uncheck()
   await expect(list).toHaveAttribute('data-count', '0')
   await popover.getByText('全部版本', { exact: true }).click()
