@@ -4,7 +4,7 @@ import {
   editAchievement,
   filterAchievements,
   getAchievementStages,
-  isStageWaiting,
+  isFinished,
   parseExport,
   plainText,
   progressRatio,
@@ -13,6 +13,7 @@ import {
 import { exclusionReason } from './exclusions.ts'
 import type { Filters } from './data.ts'
 import { missingLocalFixtures, readLocalFixtureJson } from '../../test/local-fixtures.ts'
+import { publicPreview } from '../../build/public-catalog.ts'
 
 const exportFile = 'achievements.json'
 const legacyFile = 'csharp-live/achievements.json'
@@ -30,6 +31,36 @@ const filters: Filters = {
   visibility: 'all',
   sort: 'id',
 }
+
+test('search matches complete IDs alongside numeric title and description text', async () => {
+  const catalog = parseExport(JSON.parse(await publicPreview()))
+  const base = catalog.achievements.find((item) => item.id === 100101)!
+  const makeItem = (id: number, title: string, description: string, englishTitle: string) => ({
+    ...base,
+    id,
+    previousId: -1,
+    nextId: -1,
+    texts: {
+      'zh-Hans': { title, description },
+      en: { title: englishTitle, description: '' },
+    },
+  })
+  const items = [
+    makeItem(100101, '普通成就', '完成任务', 'Ordinary achievement'),
+    makeItem(200001, '挑战100次', '完成挑战', 'Challenge'),
+    makeItem(200002, '伤害成就', '累计造成1000点伤害', 'Deal 1000 damage'),
+    makeItem(200003, '记录成就', '累计100101条记录', 'Records'),
+  ]
+  const search = (query: string, language = 'zh-Hans') =>
+    filterAchievements(items, { ...filters, query, language }).map((item) => item.id)
+
+  assert.deepEqual(search('100'), [200001, 200002, 200003])
+  assert.deepEqual(search(' 100101 '), [100101, 200003])
+  assert.deepEqual(search('10010'), [200003])
+  assert.deepEqual(search('挑战100'), [200001])
+  assert.deepEqual(search('100', 'en'), [200001, 200002, 200003])
+  assert.deepEqual(search('DEAL 1000', 'en'), [200002])
+})
 
 test(
   'real export retains the main hierarchy, hidden records and precise rewards',
@@ -100,22 +131,53 @@ test(
   },
 )
 
-test(
-  'manual completion waits for the previous stage, while imported completion is retained',
-  skipWithoutExport,
-  () => {
-    const data = readExport()
-    const first = 100402
-    const second = 100403
-    assert.equal(editAchievement(data, second, true), data)
-    const edited = editAchievement(editAchievement(data, first, true), second, true)
-    const reverted = editAchievement(edited, first, false)
-    const stages = getAchievementStages(reverted.achievements).get(second)!
-    assert.equal(stages[1].status, 'completed')
-    assert.equal(isStageWaiting(stages[1], stages), false)
-    assert.equal(isStageWaiting(stages[2], stages), false)
-  },
-)
+test('manual stage edits complete predecessors and cancel successors with accurate totals', async () => {
+  const data = parseExport(JSON.parse(await publicPreview()))
+  const ids = [100402, 100403, 100411]
+  const stages = getAchievementStages(data.achievements).get(ids[1])!
+  const states = (value: typeof data) =>
+    ids.map((id) => isFinished(value.achievements.find((item) => item.id === id)!))
+
+  const middle = editAchievement(data, ids[1], true)
+  assert.deepEqual(states(middle), [true, true, false])
+  assert.equal(middle.completedCount, data.completedCount + 2)
+  assert.equal(middle.starCount, data.starCount + stages[0].astrite + stages[1].astrite)
+  assert.equal(editAchievement(middle, ids[1], true), middle)
+  assert.equal(
+    middle.achievements.find((item) => item.id === ids[2]),
+    stages[2],
+  )
+
+  const last = editAchievement(middle, ids[2], true)
+  assert.deepEqual(states(last), [true, true, true])
+  assert.equal(last.completedCount, data.completedCount + 3)
+  assert.equal(last.starCount, data.starCount + stages.reduce((sum, item) => sum + item.astrite, 0))
+  assert.equal(
+    last.achievements.find((item) => item.id === ids[0]),
+    middle.achievements.find((item) => item.id === ids[0]),
+  )
+  const directLast = editAchievement(data, ids[2], true)
+  assert.deepEqual(states(directLast), [true, true, true])
+
+  const reverted = editAchievement(last, ids[1], false)
+  assert.deepEqual(states(reverted), [true, false, false])
+  assert.equal(reverted.completedCount, data.completedCount + 1)
+  assert.equal(reverted.starCount, data.starCount + stages[0].astrite)
+  for (const id of ids.slice(1)) {
+    const item = reverted.achievements.find((item) => item.id === id)!
+    assert.equal(item.currentProgress, 0)
+    assert.equal(item.finishTimeRaw, null)
+  }
+  const cleared = editAchievement(reverted, ids[0], false)
+  assert.deepEqual(states(cleared), [false, false, false])
+  assert.equal(cleared.completedCount, data.completedCount)
+  assert.equal(cleared.starCount, data.starCount)
+  assert.equal(editAchievement(cleared, ids[0], false), cleared)
+  assert.equal(
+    cleared.achievements.find((item) => item.id === 100101),
+    data.achievements.find((item) => item.id === 100101),
+  )
+})
 test('unknown progress and missing translations are never fabricated', skipWithoutBoth, () => {
   const data = readExport()
   const legacy = readLegacy()

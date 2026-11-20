@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { useUnmount } from 'ahooks'
 import { useTranslation } from 'react-i18next'
 import { useViewerStore } from '../stores/viewer'
-import { WButton } from './ui/WButton'
+import { WIconButton } from './ui/WIconButton'
 import { ArchiveDeleteDialog } from './ArchiveDeleteDialog'
 import { WPopover } from './ui/WPopover'
 import { WSvg } from './ui/WSvg'
@@ -55,16 +55,16 @@ export function ArchiveActions() {
           }}
         >
           <WTooltip text={t('common.archiveActions')}>
-            <WButton
+            <WIconButton
               ref={anchorRef}
-              className="topbar-icon inline-grid size-9 flex-none place-items-center rounded-md border border-(--color-border) bg-(--color-surface) text-(--color-accent) enabled:hover:bg-(--color-surface-soft)"
+              className="topbar-icon text-(--color-accent)"
               data-testid="档案更多操作"
               disabled={disabled}
               data-expanded={expanded && !disabled}
               onClick={openMenu}
             >
-              <WSvg name="ellipsis" size={18} />
-            </WButton>
+              <WSvg name="ellipsis" size={20} />
+            </WIconButton>
           </WTooltip>
           <WPopover
             open={expanded && !disabled}
@@ -75,8 +75,8 @@ export function ArchiveActions() {
           >
             <div className="archive-actions-buttons flex gap-1 p-1">
               <WTooltip text={t('common.deleteArchive')}>
-                <WButton
-                  className="topbar-icon inline-grid size-9 flex-none place-items-center rounded-md border border-(--color-border) bg-(--color-surface) text-(--color-accent) enabled:hover:bg-(--color-surface-soft)"
+                <WIconButton
+                  className="topbar-icon text-(--color-accent)"
                   data-testid="删除档案"
                   disabled={disabled}
                   onClick={() => {
@@ -85,12 +85,12 @@ export function ArchiveActions() {
                     setConfirmDelete(true)
                   }}
                 >
-                  <WSvg name="trash-2" size={17} />
-                </WButton>
+                  <WSvg name="trash-2" size={20} />
+                </WIconButton>
               </WTooltip>
               <WTooltip text={t('common.exportAchievementFile')}>
-                <WButton
-                  className="topbar-icon inline-grid size-9 flex-none place-items-center rounded-md border border-(--color-border) bg-(--color-surface) text-(--color-accent) enabled:hover:bg-(--color-surface-soft)"
+                <WIconButton
+                  className="topbar-icon text-(--color-accent)"
                   data-testid="export-achievement-file"
                   disabled={disabled}
                   onClick={() => {
@@ -98,8 +98,8 @@ export function ArchiveActions() {
                     download()
                   }}
                 >
-                  <WSvg name="arrow-down-to-line" size={18} />
-                </WButton>
+                  <WSvg name="arrow-down-to-line" size={20} />
+                </WIconButton>
               </WTooltip>
             </div>
           </WPopover>

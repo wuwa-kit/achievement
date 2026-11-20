@@ -13,7 +13,7 @@ export function WThemeSwitch() {
   return (
     <WTooltip text={`${t('common.theme')} · ${t('common.' + mode)}`}>
       <WSelect
-        className="w-theme-switch size-9 shrink-0 [--select-justify:center] [--select-px:0px] [--select-py:0px]"
+        className="w-theme-switch w-9 shrink-0 [--select-justify:center] [--select-px:0px]"
         data-testid="theme-switch"
         value={mode}
         disabled={!ready}

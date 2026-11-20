@@ -11,6 +11,7 @@
     {
       "id": 201541,
       "reason": "duplicate",
+      "duplicateOf": 200141,
       "condition": "titleEquals",
       "language": "zh-Hans",
       "title": "行于未明"

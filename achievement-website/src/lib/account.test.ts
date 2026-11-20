@@ -60,6 +60,79 @@ test('exclusive options stay adjacent through sorting, searching, and filtering'
   assert.equal(summary.astrite, 17)
 })
 
+test('completion snapshots retain new single, stage and exclusive completions until reapplied', () => {
+  const ids = [100101, 100402, 100403, 100411, 200710, 200711]
+  const completedIds = new Set([100101, 100402, 200710])
+  const items = catalog.achievements
+    .filter((item) => ids.includes(item.id))
+    .map((item) => (completedIds.has(item.id) ? { ...item, status: 'completed' as const } : item))
+  const groups = getExclusiveAchievements(items, [[200710, 200711]])
+  const filter = (snapshot?: ReadonlySet<number>) =>
+    filterAchievements(
+      items,
+      { group: null, language: 'zh-Hans', query: '', hideCompleted: true },
+      undefined,
+      snapshot,
+      groups,
+    ).map((item) => item.id)
+
+  assert.deepEqual(filter(new Set()), ids)
+  assert.deepEqual(filter(completedIds), [100403, 100411])
+  assert.deepEqual(filter(), [100403, 100411])
+})
+
+test('stage edits persist every linked change in a compact archive and survive reimport', () => {
+  const ids = [100402, 100403, 100411]
+  const stages = ids.map((id) => catalog.achievements.find((item) => item.id === id)!)
+  const data = parseCompact({
+    schemaVersion: 3,
+    kind: 'account-progress',
+    complete: true,
+    uid: '10001',
+    capturedAt: '2020-01-02T00:00:00Z',
+    resourceFingerprint: 'test',
+    count: 3,
+    completedCount: 0,
+    starCount: 0,
+    groupStates: [{ id: stages[0].groupId, unlocked: true }],
+    achievements: stages.map((item, index) => ({
+      id: item.id,
+      previousId: item.previousId,
+      nextId: item.nextId,
+      currentProgress: 0,
+      maxProgress: [50, 100, 200][index],
+      hasGetReward: false,
+      finishTimeRaw: null,
+    })),
+  })
+  const middle = editAchievement(data, ids[1], true, catalog)
+  const payload = accountSchema.parse(exportPayload(middle))
+  assert.equal(payload.completedCount, 2)
+  assert.equal(payload.starCount, stages[0].astrite + stages[1].astrite)
+  assert.equal(payload.count, 3)
+  assert.deepEqual(
+    ids.map((id) => payload.achievements.find((item) => item.id === id)!.currentProgress),
+    [50, 100, 0],
+  )
+  const reloaded = parseCompact(payload)
+  assert.deepEqual(
+    ids.map((id) => isFinished(reloaded.achievements.find((item) => item.id === id)!)),
+    [true, true, false],
+  )
+  const last = editAchievement(reloaded, ids[2], true, catalog)
+  const reverted = editAchievement(last, ids[1], false, catalog)
+  const revertedPayload = accountSchema.parse(exportPayload(reverted))
+  assert.equal(revertedPayload.completedCount, 1)
+  assert.equal(revertedPayload.starCount, stages[0].astrite)
+  assert.deepEqual(
+    ids.map((id) => revertedPayload.achievements.find((item) => item.id === id)!.currentProgress),
+    [50, 0, 0],
+  )
+  const cleared = editAchievement(parseCompact(revertedPayload), ids[0], false, catalog)
+  assert.equal(cleared.completedCount, 0)
+  assert.equal(cleared.starCount, 0)
+})
+
 test('switching an exclusive option updates a compact archive together', () => {
   const ids = [200710, 200711]
   const data = parseCompact({

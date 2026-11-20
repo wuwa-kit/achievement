@@ -16,6 +16,9 @@ import { WButton } from './WButton'
 import { WPopover, type WPopoverPlacement } from './WPopover'
 import { WScrollArea } from './WScrollArea'
 
+export const selectTriggerClass =
+  'group/select inline-flex h-9 min-w-0 items-center [justify-content:var(--select-justify,space-between)] gap-[var(--select-gap,8px)] rounded-md border border-(--color-border) bg-(--color-surface) px-[var(--select-px,12px)] py-0 text-start text-[14px] leading-5 text-(--color-text) enabled:hover:border-(--color-border-strong) enabled:hover:bg-(--color-surface-hover) data-[expanded=true]:border-(--color-border-strong) data-[expanded=true]:bg-(--color-surface-hover)'
+
 type OptionProps = WOptionProps
 export type WSelectProps = Omit<ComponentProps<'button'>, 'value' | 'onChange' | 'children'> & {
   triggerContent?: ReactNode
@@ -92,7 +95,7 @@ export function WSelect({
         {...props}
         blurOnPointerClick={false}
         ref={anchorRef}
-        className={`w-select group/select inline-flex min-w-0 items-center [justify-content:var(--select-justify,space-between)] gap-[var(--select-gap,10px)] rounded-md border border-(--color-border) bg-(--color-surface) px-[var(--select-px,12px)] py-[var(--select-py,9px)] text-start text-[13px] text-(--color-text) enabled:hover:border-(--color-border-strong) enabled:hover:bg-(--color-surface-hover) data-[expanded=true]:border-(--color-border-strong) data-[expanded=true]:bg-(--color-surface-hover) ${className}`}
+        className={`w-select ${selectTriggerClass} ${className}`}
         disabled={disabled}
 
         data-value={value}

@@ -208,7 +208,6 @@
     "keepLocalArchive": "Conserver l’archive locale",
     "replaceArchive": "Écraser l’archive locale",
     "stageAchievements": "Étapes du succès",
-    "completePreviousStage": "Terminez d’abord l’étape précédente",
     "catalogStats": {
       "title": "Statistiques du catalogue",
       "total": "Total du catalogue",
@@ -223,7 +222,7 @@
       "exclusionReason": "Motif de l’exclusion · {{reason}}",
       "exclusionReasons": {
         "deprecated": "Le client du jeu indique que ce succès est obsolète",
-        "duplicate": "Ce succès porte le même nom et la même description qu’un succès de la liste et est considéré comme un doublon",
+        "duplicate": "Ce succès porte le même nom et la même description que le succès #{{id}} de la liste et est considéré comme un doublon",
         "unavailableWithoutProgress": "Le client actuel n’affiche pas ce succès et ne fournit aucune donnée de progression"
       }
     },

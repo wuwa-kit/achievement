@@ -13,7 +13,7 @@ export function WLanguageSwitch() {
   return (
     <WTooltip text={t('common.language')}>
       <WSelect
-        className="w-language-switch desktop-language size-9 shrink-0 [--select-justify:center] [--select-px:0px] [--select-py:0px]"
+        className="w-language-switch desktop-language w-9 shrink-0 [--select-justify:center] [--select-px:0px]"
         data-testid={t('common.language')}
         value={language}
         disabled={!ready}

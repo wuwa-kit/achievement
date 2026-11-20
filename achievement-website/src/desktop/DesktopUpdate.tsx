@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { WButton } from '../components/ui/WButton'
+import { WIconButton } from '../components/ui/WIconButton'
 import { WDialog } from '../components/ui/WDialog'
 import { WScrollArea } from '../components/ui/WScrollArea'
 import { WSvg } from '../components/ui/WSvg'
@@ -44,8 +45,7 @@ export function DesktopUpdate() {
   return (
     <>
       <WTooltip text={t('desktop.update.check')}>
-        <WButton
-          className="grid size-9 shrink-0 place-items-center rounded-md border border-(--color-border) bg-(--color-surface) enabled:hover:bg-(--color-surface-soft)"
+        <WIconButton
           data-testid="desktop-check-update"
           loading={manualChecking}
           onClick={() => void check(true)}
@@ -55,7 +55,7 @@ export function DesktopUpdate() {
             size={20}
             className={manualChecking ? 'motion-safe:animate-spin' : undefined}
           />
-        </WButton>
+        </WIconButton>
       </WTooltip>
       {offer && (
         <WDialog

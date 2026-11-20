@@ -6,7 +6,11 @@ import type { Achievement } from './data.ts'
 const reasonSchema = z.enum(['deprecated', 'duplicate', 'unavailableWithoutProgress'])
 export type ExclusionReason = z.infer<typeof reasonSchema>
 
-const common = { id: z.number().int().positive(), reason: reasonSchema }
+const common = {
+  id: z.number().int().positive(),
+  reason: reasonSchema,
+  duplicateOf: z.number().int().positive().optional(),
+}
 const rule = z.discriminatedUnion('condition', [
   z.object({ ...common, condition: z.literal('always') }).strict(),
   z.object({ ...common, condition: z.literal('missingProgress') }).strict(),
@@ -26,6 +30,10 @@ const config = z
 if (new Set(config.rules.map((rule) => rule.id)).size !== config.rules.length)
   throw new Error(tr('ui.exclusionDuplicate'))
 const rules = new Map(config.rules.map((rule) => [rule.id, rule]))
+
+export function getDuplicateAchievementId(id: number): number | undefined {
+  return rules.get(id)?.duplicateOf
+}
 
 export function exclusionReason(item: Achievement): ExclusionReason | null {
   const rule = rules.get(item.id)

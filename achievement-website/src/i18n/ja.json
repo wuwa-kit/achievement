@@ -208,7 +208,6 @@
     "keepLocalArchive": "ローカルアーカイブを保持",
     "replaceArchive": "ローカルアーカイブを上書き",
     "stageAchievements": "段階実績",
-    "completePreviousStage": "先に前の段階を達成してください",
     "catalogStats": {
       "title": "図鑑の統計",
       "total": "図鑑の総数",
@@ -223,7 +222,7 @@
       "exclusionReason": "除外理由 · {{reason}}",
       "exclusionReasons": {
         "deprecated": "ゲームクライアントで廃止済みとされている実績です",
-        "duplicate": "一覧にある実績と名前も説明も同じため、重複として扱います",
+        "duplicate": "一覧にある実績 #{{id}} と名前も説明も同じため、重複として扱います",
         "unavailableWithoutProgress": "現在のゲームクライアントでは、この実績も進捗も表示されません"
       }
     },

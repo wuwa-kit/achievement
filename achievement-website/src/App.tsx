@@ -12,6 +12,7 @@ import { WScrollArea } from './components/ui/WScrollArea'
 import { WSelect } from './components/ui/WSelect.tsx'
 import { WInput } from './components/ui/WInput.tsx'
 import { WButton } from './components/ui/WButton.tsx'
+import { WIconButton } from './components/ui/WIconButton'
 import { WCheckBox } from './components/ui/WCheckBox'
 import { WDialog } from './components/ui/WDialog'
 import { WConfirmDialog } from './components/ui/WConfirmDialog'
@@ -42,7 +43,6 @@ import {
   getAchievementUnits,
   getExclusiveAchievements,
   isFinished,
-  isStageWaiting,
   plainText,
   summarize,
   titleOf,
@@ -138,7 +138,7 @@ function AchievementSearch({
         <WSvg
           name="search"
           size={compact ? 16 : 18}
-          className={compact ? 'group-data-[completed=true]/card:opacity-35' : undefined}
+          className={compact ? 'group-data-[muted=true]/card:opacity-35' : undefined}
         />
       </a>
     </WTooltip>
@@ -149,15 +149,11 @@ function AchievementSummary({
   item,
   language,
   query,
-  waiting,
-  exclusiveAlternative,
   onOpenDetails,
 }: {
   item: Achievement
   language: string
   query: string
-  waiting: boolean
-  exclusiveAlternative: boolean
   onOpenDetails: () => void
 }) {
   const { t } = useTranslation()
@@ -168,10 +164,7 @@ function AchievementSummary({
   const descriptionRef = useAchievementHighlight(description, query)
 
   return (
-    <span
-      className="achievement-info pointer-events-none z-10 col-start-2 flex min-w-0 flex-col gap-1 data-[waiting=true]:text-(--color-muted) group-data-[completed=true]/card:text-(--color-muted)/85 narrow:gap-0.5"
-      data-waiting={waiting || exclusiveAlternative}
-    >
+    <span className="achievement-info pointer-events-none z-10 col-start-2 flex min-w-0 flex-col gap-1 group-data-[muted=true]/card:text-(--color-muted)/85 narrow:gap-0.5">
       <span className="achievement-title flex items-center gap-1 text-[14px] leading-[1.6] font-[550] narrow:text-[12px]">
         <WButton
           className="group/title pointer-events-auto min-w-0 rounded-sm text-left wrap-anywhere whitespace-pre-line"
@@ -183,7 +176,7 @@ function AchievementSummary({
               {title || t('ui.missingTitle')}
             </span>
             {version && (
-              <span className="achievement-version ms-0.5 align-super text-[0.72em] leading-none font-semibold whitespace-nowrap text-(--color-search-match) group-data-[completed=true]/card:text-(--color-accent-muted)/85">
+              <span className="achievement-version ms-0.5 align-super text-[0.72em] leading-none font-semibold whitespace-nowrap text-(--color-search-match) group-data-[muted=true]/card:text-(--color-accent-muted)/85">
                 {version}
               </span>
             )}
@@ -193,7 +186,7 @@ function AchievementSummary({
       </span>
       <span
         ref={descriptionRef}
-        className="achievement-description text-[12px] leading-[1.5] wrap-anywhere whitespace-pre-line text-(--color-muted) group-data-[completed=true]/card:text-(--color-muted)/85 narrow:text-[11px]"
+        className="achievement-description text-[12px] leading-[1.5] wrap-anywhere whitespace-pre-line text-(--color-muted) group-data-[muted=true]/card:text-(--color-muted)/85 narrow:text-[11px]"
       >
         {description || t('ui.missingDescription')}
       </span>
@@ -206,14 +199,12 @@ function AchievementDetail({
   data,
   language,
   query,
-  stages,
   onClose,
 }: {
   item: Achievement
   data: ExportData
   language: string
   query: string
-  stages?: Achievement[]
   onClose: () => void
 }) {
   const { t: tr } = useTranslation()
@@ -221,7 +212,6 @@ function AchievementDetail({
   const completed = isFinished(item)
   const showManualProgress =
     data.uid === null && item.currentProgress === null && item.maxProgress === null
-  const waiting = isStageWaiting(item, stages)
   const category = data.categories.find((category) => category.id === item.categoryId)
   const group = category?.groups.find((group) => group.id === item.groupId)
   const categoryFallback = tr('ui.categoryId', { value0: item.categoryId })
@@ -296,7 +286,7 @@ function AchievementDetail({
             className="ms-auto whitespace-nowrap text-(--color-text)"
             data-testid="编辑成就完成状态"
             checked={completed}
-            disabled={busy || receiving || !!pendingImport || waiting}
+            disabled={busy || receiving || !!pendingImport}
             onCheckedChange={(checked) => void setAchievementCompleted(item.id, checked)}
           >
             {tr('ui.finished')}
@@ -580,17 +570,18 @@ export default function App() {
       </WScrollArea>
 
       <div className="workspace ml-(--sidebar-width) flex h-dvh flex-col overflow-hidden sidebar-overlay:ml-0 sidebar-overlay:bg-none">
-        <div className="topbar flex h-[69px] flex-none items-center justify-between gap-3 border-b border-b-(--line) bg-(--color-surface) px-10 compact:px-[25px] narrow:h-[60px] narrow:gap-2 narrow:px-3.5">
-          <div className="topbar-records flex min-w-0 items-center gap-2 narrow:gap-1.5">
-            <WButton
-              className="icon-button mobile-menu hidden size-8 flex-none place-items-center rounded-[5px] text-(--color-muted) hover:bg-(--color-surface-soft) hover:text-(--color-text) sidebar-overlay:inline-grid"
+        <div className="topbar flex h-[69px] flex-none items-center justify-between gap-3 border-b border-b-(--line) bg-(--color-surface) px-10 compact:px-[25px] narrow:h-[60px] narrow:gap-1.5 narrow:px-3.5">
+          <div className="topbar-records flex min-w-0 items-center gap-2 narrow:gap-1">
+            <WIconButton
+              variant="ghost"
+              className="icon-button mobile-menu text-(--color-muted) hover:text-(--color-text) min-[901px]:hidden"
               data-testid="打开导航"
               onClick={() => setNavigationOpen(true)}
             >
-              <WSvg name="menu" size={21} />
-            </WButton>
+              <WSvg name="menu" size={20} />
+            </WIconButton>
             <WSelect
-              className="topbar-account h-9 [--select-px:10px] [--select-py:0px] narrow:[--select-gap:4px] narrow:[--select-px:6px] narrow:[&_.archive-account-time]:hidden"
+              className="topbar-account narrow:[--select-gap:4px] narrow:[--select-px:6px] narrow:[&_.archive-account-time]:hidden"
               data-testid="账号档案"
               value={activeKey}
               disabled={busy || receiving}
@@ -614,14 +605,14 @@ export default function App() {
                 ))}
             </WSelect>
             <WTooltip text={tr('ui.importAchievementFile')}>
-              <WButton
-                className="topbar-icon inline-grid size-9 flex-none place-items-center rounded-md border border-(--color-border) bg-(--color-surface) text-(--color-accent) enabled:hover:bg-(--color-surface-soft)"
+              <WIconButton
+                className="topbar-icon text-(--color-accent)"
                 data-testid="import-achievement-file"
                 onClick={() => fileInput.current?.click()}
                 disabled={busy || receiving}
               >
-                <WSvg name="upload" size={18} />
-              </WButton>
+                <WSvg name="upload" size={20} />
+              </WIconButton>
             </WTooltip>
             <WInput
               ref={fileInput}
@@ -637,7 +628,7 @@ export default function App() {
             />
             <ArchiveActions />
           </div>
-          <div className="topbar-actions flex flex-none items-center gap-2 narrow:gap-1.5">
+          <div className="topbar-actions flex flex-none items-center gap-2 narrow:gap-1">
             <WThemeSwitch />
             <WLanguageSwitch />
             <OpenSourceLink />
@@ -671,11 +662,11 @@ export default function App() {
             <div className="ui-section achievement-panel flex min-h-0 flex-1 flex-col">
               <div className="filter-bar flex flex-none items-center gap-2.5 py-3.5 narrow:flex-wrap narrow:gap-[7px] narrow:py-3">
                 <div className="flex min-w-0 flex-1 items-center gap-2.5 narrow:basis-full narrow:gap-[7px]">
-                  <div className="search-field flex h-[38px] min-w-0 flex-1 items-center gap-[9px] rounded-sm border border-(--line) bg-(--color-surface) px-3 text-(--color-muted) focus-within:border-(--input-focus) focus-within:shadow-[0_0_0_3px_var(--input-focus-ring)] motion-safe:w-transition-colors">
-                    <WSvg name="search" size={17} />
+                  <div className="search-field flex h-9 min-w-0 flex-1 items-center gap-[9px] rounded-sm border border-(--line) bg-(--color-surface) px-3 text-(--color-muted) focus-within:border-(--input-focus) focus-within:shadow-[0_0_0_3px_var(--input-focus-ring)] motion-safe:w-transition-colors">
+                    <WSvg name="search" size={18} />
                     <WInput
                       variant="embedded"
-                      className="flex-1 text-[11px] text-(--color-text) placeholder:text-(--color-muted)"
+                      className="flex-1 text-(--color-text) placeholder:text-(--color-muted)"
                       data-testid="搜索成就"
                       placeholder={tr('ui.search')}
                       value={filters.query}
@@ -730,7 +721,6 @@ export default function App() {
                 ])}
                 renderItem={(item) => {
                   const stages = stagesById.get(item.id)
-                  const waiting = isStageWaiting(item, stages)
                   const completed = isFinished(item)
                   const exclusiveAlternative =
                     !completed && (exclusiveById.get(item.id)?.some(isFinished) ?? false)
@@ -744,32 +734,30 @@ export default function App() {
                     <div
                       className="achievement-card group/card relative isolate grid min-h-20 grid-cols-[64px_minmax(0,1fr)_max-content] items-center gap-5 px-[25px] py-1.5 compact:grid-cols-[52px_minmax(0,1fr)_max-content] compact:gap-[13px] compact:px-5 narrow:grid-cols-[44px_minmax(0,1fr)_max-content] narrow:gap-[9px] narrow:px-3.5 narrow:py-1"
                       data-completed={completed}
+                      data-muted={completed || exclusiveAlternative}
                     >
-                      <WTooltip text={waiting ? tr('ui.completePreviousStage') : undefined}>
-                        <WButton
-                          className="achievement-row absolute inset-0 isolate rounded-lg focus-visible:outline-offset-[-3px] disabled:opacity-100"
-                          data-testid={`成就卡片 ${item.id}`}
-                          data-completed={completed}
-                          data-waiting={waiting}
-                          data-exclusive-alternative={exclusiveAlternative || undefined}
-                          disabled={waiting || receiving || !!pendingImport || busy}
-                          onClick={() => void setAchievementCompleted(item.id, !completed)}
-                        >
-                          <span className="pointer-events-none absolute top-1/2 left-16 w-24 -translate-1/2 compact:left-[52px] compact:w-[92px] narrow:left-[47px] narrow:w-[88px] group-data-[completed=true]/card:[&>.achievement-emblem]:opacity-35 group-data-[completed=true]/card:[&>.achievement-emblem]:saturate-45">
-                            <AchievementEmblem {...getAchievementStars(item, stages)} />
-                            {completed && (
-                              <WTooltip text={tr('ui.finished')}>
-                                <span className="achievement-completed-mark pointer-events-auto absolute right-[28%] bottom-[15%] grid size-4 place-items-center text-(--color-muted)">
-                                  <WSvg name="check" size={14} strokeWidth={1.8} />
-                                </span>
-                              </WTooltip>
-                            )}
-                          </span>
-                        </WButton>
-                      </WTooltip>
+                      <WButton
+                        className="achievement-row absolute inset-0 isolate rounded-lg focus-visible:outline-offset-[-3px] disabled:opacity-100"
+                        data-testid={`成就卡片 ${item.id}`}
+                        data-completed={completed}
+                        data-exclusive-alternative={exclusiveAlternative || undefined}
+                        disabled={receiving || !!pendingImport || busy}
+                        onClick={() => void setAchievementCompleted(item.id, !completed)}
+                      >
+                        <span className="pointer-events-none absolute top-1/2 left-16 w-24 -translate-1/2 compact:left-[52px] compact:w-[92px] narrow:left-[47px] narrow:w-[88px] group-data-[muted=true]/card:[&>.achievement-emblem]:opacity-35 group-data-[muted=true]/card:[&>.achievement-emblem]:saturate-45">
+                          <AchievementEmblem {...getAchievementStars(item, stages)} />
+                          {completed && (
+                            <WTooltip text={tr('ui.finished')}>
+                              <span className="achievement-completed-mark pointer-events-auto absolute right-[28%] bottom-[15%] grid size-4 place-items-center text-(--color-muted)">
+                                <WSvg name="check" size={14} strokeWidth={1.8} />
+                              </span>
+                            </WTooltip>
+                          )}
+                        </span>
+                      </WButton>
                       {item.hidden && (
                         <WTooltip text={tr('ui.hiddenBadge')}>
-                          <span className="hidden-badge absolute top-1.5 left-1.5 z-10 grid size-4 place-items-center text-(--color-muted) group-data-[completed=true]/card:opacity-35">
+                          <span className="hidden-badge absolute top-1.5 left-1.5 z-10 grid size-4 place-items-center text-(--color-muted) group-data-[muted=true]/card:opacity-35">
                             <WSvg name="achievement-hidden" size={12} />
                           </span>
                         </WTooltip>
@@ -778,28 +766,23 @@ export default function App() {
                         item={item}
                         language={filters.language}
                         query={highlightQuery}
-                        waiting={waiting}
-                        exclusiveAlternative={exclusiveAlternative}
                         onOpenDetails={() => {
                           setSelectedId(item.id)
                           setDetailOpen(true)
                         }}
                       />
-                      <span
-                        className="pointer-events-none z-10 col-start-3 flex items-center gap-3 whitespace-nowrap data-[exclusive-alternative]:opacity-60 narrow:flex-col-reverse narrow:items-end narrow:gap-1"
-                        data-exclusive-alternative={exclusiveAlternative || undefined}
-                      >
+                      <span className="pointer-events-none z-10 col-start-3 flex items-center gap-3 whitespace-nowrap narrow:flex-col-reverse narrow:items-end narrow:gap-1">
                         {showProgress && (
                           <span className="row-progress font-mono text-[11px] text-(--color-muted) narrow:leading-tight">
                             {currentProgress}/{maxProgress}
                           </span>
                         )}
-                        <span className="row-reward flex items-center gap-[7px] text-[12px] text-(--color-gold) group-data-[completed=true]/card:text-(--color-muted)/85 narrow:text-[11px]">
+                        <span className="row-reward flex items-center gap-[7px] text-[12px] text-(--color-gold) group-data-[muted=true]/card:text-(--color-muted)/85 narrow:text-[11px]">
                           <img
                             src={astriteIcon}
                             width={16}
                             height={16}
-                            className="size-4 shrink-0 object-contain group-data-[completed=true]/card:opacity-35"
+                            className="size-4 shrink-0 object-contain group-data-[muted=true]/card:opacity-35"
                             alt=""
                           />
                           <span className="w-[2ch] shrink-0 text-left tabular-nums">
@@ -846,7 +829,6 @@ export default function App() {
             data={data}
             language={filters.language}
             query={highlightQuery}
-            stages={stagesById.get(selected.id)}
             onClose={() => setDetailOpen(false)}
           />
         )}

@@ -208,7 +208,6 @@
     "keepLocalArchive": "Manter o arquivo local",
     "replaceArchive": "Sobrescrever o arquivo local",
     "stageAchievements": "Etapas da conquista",
-    "completePreviousStage": "Conclua a etapa anterior primeiro",
     "catalogStats": {
       "title": "Estatísticas do catálogo",
       "total": "Total do catálogo",
@@ -223,7 +222,7 @@
       "exclusionReason": "Motivo da exclusão · {{reason}}",
       "exclusionReasons": {
         "deprecated": "O cliente do jogo marca esta conquista como obsoleta",
-        "duplicate": "Tem o mesmo nome e descrição de uma conquista da lista e é tratada como duplicada",
+        "duplicate": "Tem o mesmo nome e descrição da conquista #{{id}} da lista e é tratada como duplicada",
         "unavailableWithoutProgress": "O cliente atual não exibe esta conquista nem fornece dados de progresso"
       }
     },

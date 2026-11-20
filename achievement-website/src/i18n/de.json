@@ -208,7 +208,6 @@
     "keepLocalArchive": "Lokales Archiv behalten",
     "replaceArchive": "Lokales Archiv überschreiben",
     "stageAchievements": "Erfolgsstufen",
-    "completePreviousStage": "Schließe zuerst die vorherige Stufe ab",
     "catalogStats": {
       "title": "Katalogstatistik",
       "total": "Katalog gesamt",
@@ -223,7 +222,7 @@
       "exclusionReason": "Ausschlussgrund · {{reason}}",
       "exclusionReasons": {
         "deprecated": "Der Spielclient kennzeichnet diesen Erfolg als veraltet",
-        "duplicate": "Ein gelisteter Erfolg hat denselben Namen und dieselbe Beschreibung. Dieser Eintrag gilt als Duplikat",
+        "duplicate": "Der gelistete Erfolg #{{id}} hat denselben Namen und dieselbe Beschreibung. Dieser Eintrag gilt als Duplikat",
         "unavailableWithoutProgress": "Der aktuelle Spielclient zeigt diesen Erfolg nicht an und liefert keine Fortschrittsdaten"
       }
     },

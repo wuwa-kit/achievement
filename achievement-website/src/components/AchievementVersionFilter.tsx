@@ -6,6 +6,7 @@ import { WCheckBox } from './ui/WCheckBox'
 import { WEllipsis } from './ui/WEllipsis'
 import { WPopover } from './ui/WPopover'
 import { WScrollArea } from './ui/WScrollArea'
+import { selectTriggerClass } from './ui/WSelect'
 import { WSvg } from './ui/WSvg'
 
 export function AchievementVersionFilter({
@@ -31,7 +32,7 @@ export function AchievementVersionFilter({
     <>
       <WButton
         ref={anchorRef}
-        className="group inline-flex h-[38px] w-[clamp(100px,29vw,138px)] min-w-0 flex-none items-center justify-between gap-2 rounded-md border border-(--color-border) bg-(--color-surface) px-3 text-start text-[13px] text-(--color-text) hover:border-(--color-border-strong) hover:bg-(--color-surface-hover) data-[expanded=true]:border-(--color-border-strong) data-[expanded=true]:bg-(--color-surface-hover)"
+        className={`group w-[clamp(100px,29vw,138px)] flex-none ${selectTriggerClass}`}
         data-testid="版本筛选"
         data-expanded={open}
         onClick={() => setOpen(!open)}
@@ -55,7 +56,7 @@ export function AchievementVersionFilter({
       >
         <div className="flex max-h-[min(280px,calc(var(--w-popover-height,280px)-2px))] flex-col p-1">
           <WButton
-            className="shrink-0 rounded-sm px-2 py-2 text-start text-[13px] wrap-anywhere hover:bg-(--color-surface-hover) data-[selected=true]:bg-(--color-selection)"
+            className="shrink-0 rounded-sm px-3 py-1.5 text-start text-[14px] leading-5 wrap-anywhere hover:bg-(--color-surface-hover) data-[selected=true]:bg-(--color-selection)"
             data-selected={versions.length === 0}
             onClick={() => onVersionsChange([])}
           >
@@ -65,7 +66,7 @@ export function AchievementVersionFilter({
             {achievementVersions.map((version) => (
               <WCheckBox
                 key={version}
-                className="w-full"
+                className="w-full leading-5 [--checkbox-px:12px] [--checkbox-text:14px]"
                 data-version={version}
                 checked={selected.has(version)}
                 onCheckedChange={(checked) => handleVersionChange(version, checked)}

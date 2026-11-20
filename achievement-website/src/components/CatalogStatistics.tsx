@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ExcludedCatalogAchievement } from '../lib/catalog'
 import { plainText, type Achievement } from '../lib/data'
-import type { ExclusionReason } from '../lib/exclusions'
+import { getDuplicateAchievementId, type ExclusionReason } from '../lib/exclusions'
 import { WButton } from './ui/WButton'
 import { WDialog } from './ui/WDialog'
 import { WScrollArea } from './ui/WScrollArea'
@@ -23,16 +23,17 @@ function AchievementDescription({
   const text = item.texts[language]
   return (
     <div className="min-w-0 px-3 py-2.5 wrap-anywhere">
-      <div className="text-[13px] font-medium">
-        {plainText(text?.title) || t('ui.missingTitle')}
+      <div className="flex items-baseline gap-2 text-[13px] font-medium">
+        <span className="shrink-0 font-mono text-xs text-(--color-muted)">#{item.id}</span>
+        <span className="min-w-0">{plainText(text?.title) || t('ui.missingTitle')}</span>
       </div>
       <div className="mt-0.5 text-xs leading-relaxed whitespace-pre-line text-(--color-muted)">
         {plainText(text?.description) || t('ui.missingDescription')}
       </div>
       {reason && (
-        <div className="mt-1.5 text-xs leading-relaxed text-(--color-gold)">
-          {t('ui.catalogStats.exclusionReason', {
-            reason: t(`ui.catalogStats.exclusionReasons.${reason}`),
+        <div className="mt-0.5 text-xs leading-relaxed text-(--color-gold)">
+          {t(`ui.catalogStats.exclusionReasons.${reason}`, {
+            id: getDuplicateAchievementId(item.id),
           })}
         </div>
       )}
@@ -100,7 +101,7 @@ export function CatalogStatistics({
         open={open}
         onOpenChange={setOpen}
         closeOnBackdrop
-        className="w-[620px] overflow-hidden"
+        className="w-[620px] overflow-hidden lg:w-[960px]"
         data-testid="catalog-statistics-dialog"
       >
         <div className="flex max-h-[calc(88dvh-2px)] flex-col">

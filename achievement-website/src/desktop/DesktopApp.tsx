@@ -8,6 +8,7 @@ import { OpenSourceLink } from '../components/OpenSourceLink'
 import { WButton } from '../components/ui/WButton'
 import { WDialog } from '../components/ui/WDialog'
 import { WInput } from '../components/ui/WInput'
+import { WIconButton } from '../components/ui/WIconButton'
 import { WLanguageSwitch } from '../components/ui/WLanguageSwitch'
 import { useTranslation } from 'react-i18next'
 import { HistoryCard } from './HistoryCard'
@@ -61,14 +62,13 @@ export default function DesktopApp() {
           <div className="desktop-tools flex shrink-0 items-center gap-2">
             <DesktopUpdate />
             <WTooltip text={t('desktop.exportLogs')}>
-              <WButton
-                className="grid size-9 shrink-0 place-items-center rounded-md border border-(--color-border) bg-(--color-surface) enabled:hover:bg-(--color-surface-soft)"
+              <WIconButton
                 data-testid="desktop-export-logs"
                 disabled={disabled}
                 onClick={() => void exportLogs()}
               >
                 <WSvg name="file-export" size={20} />
-              </WButton>
+              </WIconButton>
             </WTooltip>
             <WThemeSwitch />
             <WLanguageSwitch />
@@ -86,24 +86,24 @@ export default function DesktopApp() {
             onChange={(e) => setGamePath(e.target.value)}
           />
           <WTooltip text={t('desktop.detect')}>
-            <WButton
-              className="desktop-path-action grid min-h-10 w-10 shrink-0 place-items-center rounded-md border border-(--color-border) bg-(--color-surface) enabled:hover:bg-(--color-surface-soft)"
+            <WIconButton
+              className="desktop-path-action"
               data-testid={t('desktop.detect')}
               disabled={disabled}
               onClick={() => void detectPath()}
             >
-              <WSvg name="search" size={18} />
-            </WButton>
+              <WSvg name="search" size={20} />
+            </WIconButton>
           </WTooltip>
           <WTooltip text={t('desktop.choose')}>
-            <WButton
-              className="desktop-path-action grid min-h-10 w-10 shrink-0 place-items-center rounded-md border border-(--color-border) bg-(--color-surface) enabled:hover:bg-(--color-surface-soft)"
+            <WIconButton
+              className="desktop-path-action"
               data-testid={t('desktop.choose')}
               disabled={disabled}
               onClick={() => void choosePath()}
             >
-              <WSvg name="folder-open" size={18} />
-            </WButton>
+              <WSvg name="folder-open" size={20} />
+            </WIconButton>
           </WTooltip>
         </div>
       </div>

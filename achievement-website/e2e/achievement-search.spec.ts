@@ -2,6 +2,23 @@ import { expect, test } from '@playwright/test'
 import { catalogPng } from '../build/catalog-png'
 import { readCatalogResponse } from './catalog-helpers'
 
+test('numeric searches match descriptions while achievement IDs require the complete value', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const search = page.getByTestId('搜索成就')
+  const exactId = page.getByTestId('成就卡片 100101')
+  await search.fill('100')
+  await expect(
+    page.locator('.achievement-description').filter({ hasText: '100' }).first(),
+  ).toBeVisible()
+  await expect(exactId).toHaveCount(0)
+  await search.fill('100101')
+  await expect(exactId).toBeVisible()
+  await search.fill('10010')
+  await expect(exactId).toHaveCount(0)
+})
+
 test('hidden icon explains its status and card search opens without a detail dialog', async ({
   page,
   context,

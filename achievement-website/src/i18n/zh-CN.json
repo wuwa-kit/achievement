@@ -208,7 +208,6 @@
     "keepLocalArchive": "保留本地档案",
     "replaceArchive": "覆盖本地档案",
     "stageAchievements": "阶段成就",
-    "completePreviousStage": "请先完成前一阶段",
     "catalogStats": {
       "title": "图鉴统计",
       "total": "图鉴总数",
@@ -223,7 +222,7 @@
       "exclusionReason": "排除原因 · {{reason}}",
       "exclusionReasons": {
         "deprecated": "游戏客户端已标记为废弃",
-        "duplicate": "与已收录成就同名同描述，暂按重复配置排除",
+        "duplicate": "与已收录成就 #{{id}} 同名同描述，暂按重复配置排除",
         "unavailableWithoutProgress": "当前客户端未显示此成就，也未提供进度"
       }
     },

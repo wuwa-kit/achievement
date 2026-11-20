@@ -17,7 +17,7 @@ export function WOption({ value, disabled = false, children }: WOptionProps) {
       data-disabled={disabled || undefined}
       data-value={value}
       data-active={context.activeValue === value || undefined}
-      className="w-select-option grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_14px] items-center gap-2.5 rounded-sm px-2 py-1.5 text-start text-[13px] leading-normal text-inherit select-none data-[selected=true]:bg-(--color-selection) data-active:bg-(--color-surface-hover) data-active:data-[selected=true]:bg-(--color-selection) data-active:outline data-active:outline-offset-[-1px] data-active:outline-(--color-focus) data-disabled:cursor-default data-disabled:opacity-40"
+      className="w-select-option grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_14px] items-center gap-2.5 rounded-sm px-3 py-1.5 text-start text-[14px] leading-5 text-inherit select-none data-[selected=true]:bg-(--color-selection) data-active:bg-(--color-surface-hover) data-active:data-[selected=true]:bg-(--color-selection) data-active:outline data-active:outline-offset-[-1px] data-active:outline-(--color-focus) data-disabled:cursor-default data-disabled:opacity-40"
       onPointerMove={() => {
         if (!disabled) context.activateValue(value)
       }}

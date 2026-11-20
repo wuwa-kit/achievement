@@ -208,7 +208,6 @@
     "keepLocalArchive": "保留本機檔案",
     "replaceArchive": "覆寫本機檔案",
     "stageAchievements": "階段成就",
-    "completePreviousStage": "請先完成前一階段",
     "catalogStats": {
       "title": "圖鑑統計",
       "total": "圖鑑總數",
@@ -223,7 +222,7 @@
       "exclusionReason": "排除原因 · {{reason}}",
       "exclusionReasons": {
         "deprecated": "遊戲客戶端已標記為廢棄",
-        "duplicate": "與已收錄成就同名同描述，暫按重複設定排除",
+        "duplicate": "與已收錄成就 #{{id}} 同名同描述，暫按重複設定排除",
         "unavailableWithoutProgress": "目前客戶端未顯示此成就，也未提供進度"
       }
     },

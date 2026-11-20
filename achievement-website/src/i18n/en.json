@@ -208,7 +208,6 @@
     "keepLocalArchive": "Keep local archive",
     "replaceArchive": "Overwrite local archive",
     "stageAchievements": "Achievement stages",
-    "completePreviousStage": "Complete the previous stage first",
     "catalogStats": {
       "title": "Catalog statistics",
       "total": "Catalog total",
@@ -223,7 +222,7 @@
       "exclusionReason": "Exclusion reason · {{reason}}",
       "exclusionReasons": {
         "deprecated": "The game client marks this achievement as deprecated",
-        "duplicate": "This achievement has the same name and description as a listed achievement and is treated as a duplicate",
+        "duplicate": "This achievement has the same name and description as listed achievement #{{id}} and is treated as a duplicate",
         "unavailableWithoutProgress": "The current game client neither shows this achievement nor provides progress for it"
       }
     },

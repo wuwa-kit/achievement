@@ -5,9 +5,9 @@ export type WInputProps = ComponentProps<'input'> & {
 }
 
 const inputClass =
-  'w-input min-w-0 focus:outline-none forced-colors:focus:[outline:2px_solid_Highlight] forced-colors:focus:outline-offset-2'
+  'w-input min-w-0 text-[14px] leading-5 focus:outline-none forced-colors:focus:[outline:2px_solid_Highlight] forced-colors:focus:outline-offset-2'
 const defaultInputClass =
-  'rounded-md border border-(--input-border) bg-(--color-surface) px-3 py-2.5 text-[13px] text-inherit placeholder:text-(--color-muted) [&:hover:not(:disabled):not(:read-only):not(:focus):not([data-invalid=true])]:border-(--color-border-strong) focus:border-(--input-focus) focus:shadow-[0_0_0_3px_var(--input-focus-ring)] disabled:cursor-not-allowed disabled:bg-(--color-surface-soft) disabled:opacity-55 [&:read-only:not(:disabled)]:bg-(--color-surface-soft) data-[invalid=true]:border-(--color-danger) data-[invalid=true]:[--input-focus:var(--color-danger)] data-[invalid=true]:[--input-focus-ring:color-mix(in_srgb,var(--color-danger)_22%,transparent)] motion-safe:w-transition-colors'
+  'h-9 rounded-md border border-(--input-border) bg-(--color-surface) px-3 py-0 text-inherit placeholder:text-(--color-muted) [&:hover:not(:disabled):not(:read-only):not(:focus):not([data-invalid=true])]:border-(--color-border-strong) focus:border-(--input-focus) focus:shadow-[0_0_0_3px_var(--input-focus-ring)] disabled:cursor-not-allowed disabled:bg-(--color-surface-soft) disabled:opacity-55 [&:read-only:not(:disabled)]:bg-(--color-surface-soft) data-[invalid=true]:border-(--color-danger) data-[invalid=true]:[--input-focus:var(--color-danger)] data-[invalid=true]:[--input-focus-ring:color-mix(in_srgb,var(--color-danger)_22%,transparent)] motion-safe:w-transition-colors'
 
 export function WInput({
   variant = 'default',
@@ -22,7 +22,7 @@ export function WInput({
       type={type}
       className={
         styled
-          ? `${inputClass} ${variant === 'default' ? defaultInputClass : ''} ${className}`
+          ? `${inputClass} ${variant === 'default' ? defaultInputClass : 'h-full'} ${className}`
           : className
       }
       data-variant={styled ? variant : undefined}

@@ -1,6 +1,7 @@
 import { tr } from '../i18n/index.ts'
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
+import { z } from 'zod'
 import { acknowledge, parseTicket, receiveExport, type Ticket } from '../lib/handoff'
 import {
   archiveKey,
@@ -26,6 +27,7 @@ import {
   type Filters,
 } from '../lib/data'
 import { wMessage } from './message'
+import { isJsonEqual } from '../lib/is-json-equal'
 
 type ViewerFilters = Required<Pick<Filters, 'query' | 'group' | 'hideCompleted' | 'visibility'>> & {
   versions: string[]
@@ -37,6 +39,31 @@ const initialFilters: ViewerFilters = {
   visibility: 'all',
   versions: [],
 }
+const persistentFiltersKey = 'wuwa-viewer-filters'
+const sessionFiltersKey = 'wuwa-viewer-session-filters'
+const persistentFiltersSchema = z.object({
+  hideCompleted: z.boolean(),
+  visibility: z.enum(['all', 'hidden', 'normal', 'visible', 'invisible']),
+})
+const sessionFiltersSchema = z.object({ query: z.string(), versions: z.array(z.string()) })
+
+function readFilterStorage<T>(storage: () => Storage, key: string, schema: z.ZodType<T>) {
+  try {
+    return schema.parse(JSON.parse(storage().getItem(key) ?? 'null'))
+  } catch {
+    return undefined
+  }
+}
+
+function writeFilterStorage(storage: () => Storage, key: string, value: object | null) {
+  try {
+    if (value === null) storage().removeItem(key)
+    else storage().setItem(key, JSON.stringify(value))
+  } catch {
+    // Keep the current filters usable when browser storage is unavailable.
+  }
+}
+
 // Consume bearer keys before React renders, including StrictMode remounts.
 const incomingTicket = parseTicket(location.hash)
 const malformedTicket = location.hash.includes('handoff=') && !incomingTicket
@@ -100,15 +127,34 @@ export const useViewerStore = create<ViewerStore>()(
     pendingImport: null,
     pendingExclusiveId: null,
     busy: true,
-    filters: initialFilters,
+    filters: {
+      ...initialFilters,
+      ...readFilterStorage(() => localStorage, persistentFiltersKey, persistentFiltersSchema),
+      ...readFilterStorage(() => sessionStorage, sessionFiltersKey, sessionFiltersSchema),
+    },
     revision: 0,
     update: (patch) => {
-      const { data } = get()
+      const { data, filters } = get()
+      const nextFilters = { ...filters, ...patch }
+      if (isJsonEqual(filters, nextFilters)) return
       set((state) => {
-        Object.assign(state.filters, patch)
+        state.filters = nextFilters
         // Apply the current completion states only when the user filters the list.
         state.hiddenCompletedIds = state.filters.hideCompleted ? getCompletedIds(data) : undefined
       })
+      const { hideCompleted, visibility, query, versions } = get().filters
+      if (patch.hideCompleted !== undefined || patch.visibility !== undefined)
+        writeFilterStorage(
+          () => localStorage,
+          persistentFiltersKey,
+          hideCompleted || visibility !== 'all' ? { hideCompleted, visibility } : null,
+        )
+      if (patch.query !== undefined || patch.versions !== undefined)
+        writeFilterStorage(
+          () => sessionStorage,
+          sessionFiltersKey,
+          query || versions.length ? { query, versions } : null,
+        )
     },
     async refreshArchives({ signal, reset = true } = {}) {
       const current = () => !signal || (!signal.aborted && initialLoad?.signal === signal)
@@ -128,8 +174,8 @@ export const useViewerStore = create<ViewerStore>()(
         if (reset) {
           state.pendingExclusiveId = null
           state.revision++
-          state.filters = { ...initialFilters }
-          state.hiddenCompletedIds = undefined
+          state.filters.group = null
+          state.hiddenCompletedIds = state.filters.hideCompleted ? getCompletedIds(next) : undefined
         }
       })
     },

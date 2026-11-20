@@ -208,7 +208,6 @@
     "keepLocalArchive": "로컬 기록 유지",
     "replaceArchive": "로컬 기록 덮어쓰기",
     "stageAchievements": "단계별 업적",
-    "completePreviousStage": "이전 단계를 먼저 완료하세요",
     "catalogStats": {
       "title": "도감 통계",
       "total": "도감 전체 수",
@@ -223,7 +222,7 @@
       "exclusionReason": "제외 사유 · {{reason}}",
       "exclusionReasons": {
         "deprecated": "게임 클라이언트에서 폐기된 업적으로 표시됩니다",
-        "duplicate": "목록에 있는 업적과 이름 및 설명이 같아 중복으로 처리합니다",
+        "duplicate": "목록에 있는 업적 #{{id}}과 이름 및 설명이 같아 중복으로 처리합니다",
         "unavailableWithoutProgress": "현재 게임 클라이언트에 이 업적이 표시되지 않으며 진행도 정보도 제공되지 않습니다"
       }
     },

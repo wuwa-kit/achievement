@@ -184,9 +184,13 @@ export function editAchievement(
   exclusive?: { ids: readonly number[]; replace: boolean },
 ): ExportData {
   const item = data.achievements.find((entry) => entry.id === id)
-  if (!item || (item.status !== 'unknown' && isFinished(item) === completed)) return data
-  if (completed && isStageWaiting(item, getAchievementStages(data.achievements).get(id)))
-    return data
+  if (!item) return data
+  const stages = getAchievementStages(data.achievements).get(id) ?? [item]
+  const index = stages.findIndex((entry) => entry.id === id)
+  const targets = completed ? stages.slice(0, index + 1) : stages.slice(index)
+  const changed = targets.filter(
+    (entry) => entry.status === 'unknown' || isFinished(entry) !== completed,
+  )
 
   const replaced = completed
     ? data.achievements.filter(
@@ -194,6 +198,7 @@ export function editAchievement(
       )
     : []
   if (replaced.length && !exclusive?.replace) return data
+  if (!changed.length && !replaced.length) return data
 
   const capturedAt = new Date(Math.max(Date.now(), Date.parse(data.capturedAt) + 1)).toISOString()
   function progressFor(entry: Achievement, finished: boolean) {
@@ -209,20 +214,23 @@ export function editAchievement(
     }
   }
   const changes = [
-    progressFor(item, completed),
+    ...changed.map((entry) => progressFor(entry, completed)),
     ...replaced.map((entry) => progressFor(entry, false)),
   ]
   const byId = new Map(changes.map((progress) => [progress.id, progress]))
-  const delta = Number(completed) - Number(isFinished(item))
+  const completedIds = new Set(completed ? changed.map((entry) => entry.id) : [])
+  const completedDelta = changed.reduce(
+    (sum, entry) => sum + Number(completed) - Number(isFinished(entry)),
+    -replaced.length,
+  )
+  const astriteDelta = changed.reduce(
+    (sum, entry) => sum + (Number(completed) - Number(isFinished(entry))) * entry.astrite,
+    -replaced.reduce((sum, entry) => sum + entry.astrite, 0),
+  )
   const totals = {
     capturedAt,
-    completedCount: Math.max(0, data.completedCount + delta - replaced.length),
-    starCount: Math.max(
-      0,
-      data.starCount +
-        delta * item.astrite -
-        replaced.reduce((sum, entry) => sum + entry.astrite, 0),
-    ),
+    completedCount: Math.max(0, data.completedCount + completedDelta),
+    starCount: Math.max(0, data.starCount + astriteDelta),
   }
   const account = data.accountSnapshot as AccountData | undefined
   if (account?.schemaVersion === 3) {
@@ -240,7 +248,7 @@ export function editAchievement(
     achievements: data.achievements.map((entry) => {
       const progress = byId.get(entry.id)
       if (!progress) return entry
-      const finished = completed && entry.id === id
+      const finished = completedIds.has(entry.id)
       return {
         ...entry,
         ...progress,
@@ -306,10 +314,6 @@ export function getAchievementStages(items: Achievement[]) {
   return stagesById
 }
 
-export function isStageWaiting(item: Achievement, stages?: Achievement[]): boolean {
-  const previous = stages?.find((stage) => stage.id === item.previousId)
-  return previous !== undefined && !isFinished(previous) && !isFinished(item)
-}
 export function progressRatio(item: Achievement): number {
   if (isFinished(item)) return 1
   if (item.currentProgress === null || item.maxProgress === null || item.maxProgress <= 0) return 0
@@ -353,12 +357,11 @@ export function filterAchievements(
   exclusiveById?: ExclusiveAchievements,
 ): Achievement[] {
   const query = filters.query.trim().toLocaleLowerCase()
-  const isIdQuery = /^\d+$/.test(query)
   function matchesQuery(item: Achievement) {
-    if (isIdQuery) return item.id.toString() === query
+    if (item.id.toString() === query) return true
     const translated = item.texts[filters.language]
     const searchable =
-      `${item.id} ${plainText(translated?.title)} ${plainText(translated?.description)} ${plainText(item.texts['zh-Hans']?.title)} ${plainText(item.texts['zh-Hans']?.description)}`.toLocaleLowerCase()
+      `${plainText(translated?.title)} ${plainText(translated?.description)} ${plainText(item.texts['zh-Hans']?.title)} ${plainText(item.texts['zh-Hans']?.description)}`.toLocaleLowerCase()
     return searchable.includes(query)
   }
   function matchesFilters(item: Achievement) {
@@ -394,9 +397,7 @@ export function filterAchievements(
       (members) =>
         !(
           filters.hideCompleted &&
-          (members.length > 1
-            ? members.some(isFinished)
-            : (hiddenCompletedIds?.has(members[0].id) ?? isFinished(members[0])))
+          members.some((item) => hiddenCompletedIds?.has(item.id) ?? isFinished(item))
         ) && members.some(matchesFilters),
     )
     .flat()

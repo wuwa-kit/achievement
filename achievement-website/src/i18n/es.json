@@ -208,7 +208,6 @@
     "keepLocalArchive": "Conservar el archivo local",
     "replaceArchive": "Sobrescribir el archivo local",
     "stageAchievements": "Etapas del logro",
-    "completePreviousStage": "Completa primero la etapa anterior",
     "catalogStats": {
       "title": "Estadísticas del catálogo",
       "total": "Total del catálogo",
@@ -223,7 +222,7 @@
       "exclusionReason": "Motivo de exclusión · {{reason}}",
       "exclusionReasons": {
         "deprecated": "El cliente del juego marca este logro como obsoleto",
-        "duplicate": "Tiene el mismo nombre y descripción que un logro de la lista y se considera un duplicado",
+        "duplicate": "Tiene el mismo nombre y descripción que el logro #{{id}} de la lista y se considera un duplicado",
         "unavailableWithoutProgress": "El cliente actual no muestra este logro ni proporciona datos de progreso"
       }
     },

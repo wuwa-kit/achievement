@@ -1,7 +1,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useCallback, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { isFinished, type Achievement } from '../lib/data'
+import type { Achievement } from '../lib/data'
 import { WScrollArea } from './ui/WScrollArea'
 
 type AchievementRow = {
@@ -95,13 +95,8 @@ export function AchievementList({
                     className="flex flex-col gap-[3px] rounded-lg border border-(--color-border) bg-(--color-surface-soft) p-[3px]"
                     data-testid={`${exclusive ? 'exclusive' : 'stage'}-achievements-${related[0].id}`}
                   >
-                    <div className="flex items-center justify-between gap-2 px-3 pt-1 pb-0.5 text-xs font-medium text-(--color-muted)">
+                    <div className="px-3 pt-1 pb-0.5 text-xs font-medium text-(--color-muted)">
                       <span>{t(label)}</span>
-                      {!exclusive && (
-                        <span className="shrink-0 font-mono text-[11px] tabular-nums">
-                          {related.filter(isFinished).length}/{related.length}
-                        </span>
-                      )}
                     </div>
                     {members.map((item, offset) => (
                       <div key={item.id} data-card-index={cardIndex + offset}>

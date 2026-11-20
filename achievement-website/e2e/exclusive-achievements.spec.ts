@@ -38,10 +38,10 @@ test('exclusive achievements stay together and switching a completion is confirm
   await expect(excluded.getByText('将一个声骸升到最高级', { exact: true })).toBeVisible()
   for (const reason of [
     '游戏客户端已标记为废弃',
-    '与已收录成就同名同描述，暂按重复配置排除',
+    '与已收录成就 #200141 同名同描述，暂按重复配置排除',
     '当前客户端未显示此成就，也未提供进度',
   ]) {
-    await expect(excluded.getByText(`排除原因 · ${reason}`, { exact: true })).toBeVisible()
+    await expect(excluded.getByText(reason, { exact: true })).toBeVisible()
   }
   const exclusiveGroups = scroll.getByTestId('catalog-exclusive-group')
   await expect(exclusiveGroups).toHaveCount(7)
@@ -102,6 +102,9 @@ test('exclusive achievements stay together and switching a completion is confirm
   await expect(group).toHaveCount(0)
 
   await page.reload()
+  await expect(page.getByTestId('隐藏已完成')).toBeChecked()
+  await expect(list).toHaveAttribute('data-count', '0')
+  await page.getByTestId('隐藏已完成').uncheck()
   await search.fill('200710')
   await expect(first).toHaveAttribute('data-exclusive-alternative', 'true')
   await expect(second).toHaveAttribute('data-completed', 'true')
