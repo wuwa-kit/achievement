@@ -1,0 +1,1241 @@
+{
+  "schemaVersion": 1,
+  "gameDataVersion": "3.8.11",
+  "roles": {
+    "1102": {
+      "id": 1102,
+      "names": {
+        "de": "Sanhua",
+        "en": "Sanhua",
+        "es": "Sanhua",
+        "fr": "Sanhua",
+        "id": null,
+        "ja": "散華",
+        "ko": "산화",
+        "pt": "Sanhua",
+        "ru": null,
+        "th": "Sanhua",
+        "vi": null,
+        "zh-Hans": "散华",
+        "zh-Hant": "散華"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/c30eae12241f421da85e7f20718301cf20261121.png"
+    },
+    "1103": {
+      "id": 1103,
+      "names": {
+        "de": "Baizhi",
+        "en": "Baizhi",
+        "es": "Baizhi",
+        "fr": "Baizhi",
+        "id": null,
+        "ja": "白芷",
+        "ko": "설지",
+        "pt": "Baizhi",
+        "ru": null,
+        "th": "Baizhi",
+        "vi": null,
+        "zh-Hans": "白芷",
+        "zh-Hant": "白芷"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/7622f8b5b34e47abbac34b70f9d247c920261121.png"
+    },
+    "1104": {
+      "id": 1104,
+      "names": {
+        "de": "Lingyang",
+        "en": "Lingyang",
+        "es": "Lingyang",
+        "fr": "Lingyang",
+        "id": null,
+        "ja": "凌陽",
+        "ko": "능양",
+        "pt": "Lingyang",
+        "ru": null,
+        "th": "Lingyang",
+        "vi": null,
+        "zh-Hans": "凌阳",
+        "zh-Hant": "凌陽"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/73ba2c993cfc49b29b870b4425e78ffb20261121.png"
+    },
+    "1105": {
+      "id": 1105,
+      "names": {
+        "de": "Zhezhi",
+        "en": "Zhezhi",
+        "es": "Zhezhi",
+        "fr": "Zhezhi",
+        "id": null,
+        "ja": "折枝",
+        "ko": "절지",
+        "pt": "Zhezhi",
+        "ru": null,
+        "th": "Zhezhi",
+        "vi": null,
+        "zh-Hans": "折枝",
+        "zh-Hant": "折枝"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/7913f8c1cc014c97a87f73f13c14dadc20261121.png"
+    },
+    "1106": {
+      "id": 1106,
+      "names": {
+        "de": "Youhu",
+        "en": "Youhu",
+        "es": "Youhu",
+        "fr": "Youhu",
+        "id": null,
+        "ja": "釉瑚",
+        "ko": "유호",
+        "pt": "Youhu",
+        "ru": null,
+        "th": "Youhu",
+        "vi": null,
+        "zh-Hans": "釉瑚",
+        "zh-Hant": "釉瑚"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/810a2a666fb84ee5aa19d1b7bb39133e20261121.png"
+    },
+    "1107": {
+      "id": 1107,
+      "names": {
+        "de": "Carlotta",
+        "en": "Carlotta",
+        "es": "Carlotta",
+        "fr": "Carlotta",
+        "id": null,
+        "ja": "カルロッタ",
+        "ko": "카를로타",
+        "pt": "Carlotta",
+        "ru": null,
+        "th": "Carlotta",
+        "vi": null,
+        "zh-Hans": "珂莱塔",
+        "zh-Hant": "珂萊塔"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/b6f6a5d5ef4d4b94bfd66affc6ffd98120261121.png"
+    },
+    "1108": {
+      "id": 1108,
+      "names": {
+        "de": "Hiyuki",
+        "en": "Hiyuki",
+        "es": "Hiyuki",
+        "fr": "Hiyuki",
+        "id": null,
+        "ja": "緋雪",
+        "ko": "히유키",
+        "pt": "Hiyuki",
+        "ru": null,
+        "th": "Hiyuki",
+        "vi": null,
+        "zh-Hans": "绯雪",
+        "zh-Hant": "緋雪"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/bf5bbf11da614562b84c6d8e42beb2a520261121.png"
+    },
+    "1109": {
+      "id": 1109,
+      "names": {
+        "de": "Lucilla",
+        "en": "Lucilla",
+        "es": "Lucilla",
+        "fr": "Lucilla",
+        "id": null,
+        "ja": "ルシラー",
+        "ko": "루실라",
+        "pt": "Lucilla",
+        "ru": null,
+        "th": "Lucilla",
+        "vi": null,
+        "zh-Hans": "洛瑟菈",
+        "zh-Hant": "洛瑟菈"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/f966abc93a914dc78056c89848ac5c4020261121.png"
+    },
+    "1110": {
+      "id": 1110,
+      "names": {
+        "de": "Suisui",
+        "en": "Suisui",
+        "es": "Suisui",
+        "fr": "Suisui",
+        "id": null,
+        "ja": "穂穂",
+        "ko": "수수",
+        "pt": "Suisui",
+        "ru": null,
+        "th": "Suisui",
+        "vi": null,
+        "zh-Hans": "穗穗",
+        "zh-Hant": "穗穗"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/49384fa3af62458c8541b8b87573076620261121.png"
+    },
+    "1202": {
+      "id": 1202,
+      "names": {
+        "de": "Chixia",
+        "en": "Chixia",
+        "es": "Chixia",
+        "fr": "Chixia",
+        "id": null,
+        "ja": "熾霞",
+        "ko": "치샤",
+        "pt": "Chixia",
+        "ru": null,
+        "th": "Chixia",
+        "vi": null,
+        "zh-Hans": "炽霞",
+        "zh-Hant": "熾霞"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/4e701774c8684eeb8a6f127c26c0ecf020261121.png"
+    },
+    "1203": {
+      "id": 1203,
+      "names": {
+        "de": "Encore",
+        "en": "Encore",
+        "es": "Encore",
+        "fr": "Encore",
+        "id": null,
+        "ja": "アンコ",
+        "ko": "앙코",
+        "pt": "Encore",
+        "ru": null,
+        "th": "Encore",
+        "vi": null,
+        "zh-Hans": "安可",
+        "zh-Hant": "安可"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/b924ccb28ad744d2ba5eee4f79dabd4020261121.png"
+    },
+    "1204": {
+      "id": 1204,
+      "names": {
+        "de": "Mortefi",
+        "en": "Mortefi",
+        "es": "Mortefi",
+        "fr": "Mortefi",
+        "id": null,
+        "ja": "モルトフィー",
+        "ko": "모르테피",
+        "pt": "Mortefi",
+        "ru": null,
+        "th": "Mortefi",
+        "vi": null,
+        "zh-Hans": "莫特斐",
+        "zh-Hant": "莫特斐"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/7e57d5fa3ded4510b67f07b39222e97420261121.png"
+    },
+    "1205": {
+      "id": 1205,
+      "names": {
+        "de": "Changli",
+        "en": "Changli",
+        "es": "Changli",
+        "fr": "Changli",
+        "id": null,
+        "ja": "長離",
+        "ko": "장리",
+        "pt": "Changli",
+        "ru": null,
+        "th": "Changli",
+        "vi": null,
+        "zh-Hans": "长离",
+        "zh-Hant": "長離"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/46fb17199c834633aa2d3e534225998f20261121.png"
+    },
+    "1206": {
+      "id": 1206,
+      "names": {
+        "de": "Brant",
+        "en": "Brant",
+        "es": "Brant",
+        "fr": "Brant",
+        "id": null,
+        "ja": "ブラント",
+        "ko": "브렌트",
+        "pt": "Brant",
+        "ru": null,
+        "th": "Brant",
+        "vi": null,
+        "zh-Hans": "布兰特",
+        "zh-Hant": "布蘭特"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/87f80f2f386b4ea292d9922847f62ff820261121.png"
+    },
+    "1207": {
+      "id": 1207,
+      "names": {
+        "de": "Lupa",
+        "en": "Lupa",
+        "es": "Lupa",
+        "fr": "Lupa",
+        "id": null,
+        "ja": "ルパ",
+        "ko": "루파",
+        "pt": "Lupa",
+        "ru": null,
+        "th": "Lupa",
+        "vi": null,
+        "zh-Hans": "露帕",
+        "zh-Hant": "露帕"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/1ab48a6219734fadb95b35d669d8a5f220261121.png"
+    },
+    "1208": {
+      "id": 1208,
+      "names": {
+        "de": "Galbrena",
+        "en": "Galbrena",
+        "es": "Galbrena",
+        "fr": "Galbrena",
+        "id": null,
+        "ja": "ガルブレーナ",
+        "ko": "갈브레나",
+        "pt": "Galbrena",
+        "ru": null,
+        "th": "Galbrena",
+        "vi": null,
+        "zh-Hans": "嘉贝莉娜",
+        "zh-Hant": "嘉貝莉娜"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/82176776cdeb4e3586c915109325566b20261121.png"
+    },
+    "1209": {
+      "id": 1209,
+      "names": {
+        "de": "Mornye",
+        "en": "Mornye",
+        "es": "Mornye",
+        "fr": "Mornye",
+        "id": null,
+        "ja": "モーニエ",
+        "ko": "모니에",
+        "pt": "Mornye",
+        "ru": null,
+        "th": "Mornye",
+        "vi": null,
+        "zh-Hans": "莫宁",
+        "zh-Hant": "莫寧"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/dedb3d876d4a40d889874e7f9cf53b4220261121.png"
+    },
+    "1210": {
+      "id": 1210,
+      "names": {
+        "de": "Aemeath",
+        "en": "Aemeath",
+        "es": "Aemeath",
+        "fr": "Aemeath",
+        "id": null,
+        "ja": "エイメス",
+        "ko": "에이메스",
+        "pt": "Aemeath",
+        "ru": null,
+        "th": "Aemeath",
+        "vi": null,
+        "zh-Hans": "爱弥斯",
+        "zh-Hant": "愛彌斯"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/d967322e09b84d0aa3d85fce59731cba20261121.png"
+    },
+    "1211": {
+      "id": 1211,
+      "names": {
+        "de": "Denia",
+        "en": "Denia",
+        "es": "Denia",
+        "fr": "Denia",
+        "id": null,
+        "ja": "ダーニャ",
+        "ko": "데니아",
+        "pt": "Denia",
+        "ru": null,
+        "th": "Denia",
+        "vi": null,
+        "zh-Hans": "达妮娅",
+        "zh-Hant": "達妮婭"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/b6be3da890664c3d922d3abda6fc059420261121.png"
+    },
+    "1212": {
+      "id": 1212,
+      "names": {
+        "de": "Jingran",
+        "en": "Jingran",
+        "es": "Jingran",
+        "fr": "Jingran",
+        "id": null,
+        "ja": "景燃",
+        "ko": "경연",
+        "pt": "Jingran",
+        "ru": null,
+        "th": "Jingran",
+        "vi": null,
+        "zh-Hans": "景燃",
+        "zh-Hant": "景燃"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/f890dcb5eb654862a6d35f2b099f87a120261121.png"
+    },
+    "1301": {
+      "id": 1301,
+      "names": {
+        "de": "Calcharo",
+        "en": "Calcharo",
+        "es": "Calcharo",
+        "fr": "Calcharo",
+        "id": null,
+        "ja": "カカロ",
+        "ko": "카카루",
+        "pt": "Calcharo",
+        "ru": null,
+        "th": "Calcharo",
+        "vi": null,
+        "zh-Hans": "卡卡罗",
+        "zh-Hant": "卡卡羅"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/6ebd71bfdcd64043892325e5231666e420261121.png"
+    },
+    "1302": {
+      "id": 1302,
+      "names": {
+        "de": "Yinlin",
+        "en": "Yinlin",
+        "es": "Yinlin",
+        "fr": "Yinlin",
+        "id": null,
+        "ja": "吟霖",
+        "ko": "음림",
+        "pt": "Yinlin",
+        "ru": null,
+        "th": "Yinlin",
+        "vi": null,
+        "zh-Hans": "吟霖",
+        "zh-Hant": "吟霖"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/d0b2483b888641b88fdfac28ba5374af20261121.png"
+    },
+    "1303": {
+      "id": 1303,
+      "names": {
+        "de": "Yuanwu",
+        "en": "Yuanwu",
+        "es": "Yuanwu",
+        "fr": "Yuanwu",
+        "id": null,
+        "ja": "淵武",
+        "ko": "연무",
+        "pt": "Yuanwu",
+        "ru": null,
+        "th": "Yuanwu",
+        "vi": null,
+        "zh-Hans": "渊武",
+        "zh-Hant": "淵武"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/8f908d8ddbdb4765a0ee92a7e7105e2320261121.png"
+    },
+    "1304": {
+      "id": 1304,
+      "names": {
+        "de": "Jinhsi",
+        "en": "Jinhsi",
+        "es": "Jinhsi",
+        "fr": "Jinhsi",
+        "id": null,
+        "ja": "今汐",
+        "ko": "금희",
+        "pt": "Jinhsi",
+        "ru": null,
+        "th": "Jinhsi",
+        "vi": null,
+        "zh-Hans": "今汐",
+        "zh-Hant": "今汐"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/b28cca3417ff4995819a8449179b8a2120261121.png"
+    },
+    "1305": {
+      "id": 1305,
+      "names": {
+        "de": "Xiangli Yao",
+        "en": "Xiangli Yao",
+        "es": "Xiangli Yao",
+        "fr": "Xiangli Yao",
+        "id": null,
+        "ja": "相里要",
+        "ko": "상리요",
+        "pt": "Xiangli Yao",
+        "ru": null,
+        "th": "Xiangli Yao",
+        "vi": null,
+        "zh-Hans": "相里要",
+        "zh-Hant": "相里要"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/b8bef58336fc4199aae6ab41d0426ca820261121.png"
+    },
+    "1306": {
+      "id": 1306,
+      "names": {
+        "de": "Augusta",
+        "en": "Augusta",
+        "es": "Augusta",
+        "fr": "Augusta",
+        "id": null,
+        "ja": "オーガスタ",
+        "ko": "아우구스타",
+        "pt": "Augusta",
+        "ru": null,
+        "th": "Augusta",
+        "vi": null,
+        "zh-Hans": "奥古斯塔",
+        "zh-Hant": "奧古斯塔"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/85cb82a2dc94466d87fc928b6529a10320261121.png"
+    },
+    "1307": {
+      "id": 1307,
+      "names": {
+        "de": "Buling",
+        "en": "Buling",
+        "es": "Buling",
+        "fr": "Buling",
+        "id": null,
+        "ja": "卜霊",
+        "ko": "복링",
+        "pt": "Buling",
+        "ru": null,
+        "th": "Buling",
+        "vi": null,
+        "zh-Hans": "卜灵",
+        "zh-Hant": "卜靈"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/4aefcc5138a04766b66c077ff103f43b20261121.png"
+    },
+    "1308": {
+      "id": 1308,
+      "names": {
+        "de": "Rebecca",
+        "en": "Rebecca",
+        "es": "Rebecca",
+        "fr": "Rebecca",
+        "id": null,
+        "ja": "レベッカ",
+        "ko": "레베카",
+        "pt": "Rebecca",
+        "ru": null,
+        "th": "Rebecca",
+        "vi": null,
+        "zh-Hans": "丽贝卡",
+        "zh-Hant": "蕾貝卡"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/77f866b9fc0342858395038f16ea6bdf20261121.png"
+    },
+    "1309": {
+      "id": 1309,
+      "names": {
+        "de": "Rover: Electro",
+        "en": "Rover: Electro",
+        "es": "Errante: Electro",
+        "fr": "Nomade-Electro",
+        "id": null,
+        "ja": "漂泊者・電導",
+        "ko": "방랑자 · 전도",
+        "pt": "Rover: Voltaico",
+        "ru": null,
+        "th": "ผู้พเนจร: อิเล็กโทร",
+        "vi": null,
+        "zh-Hans": "漂泊者·导电",
+        "zh-Hant": "漂泊者·導電"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/72ef7fd05e1940d78fccb3ef43b9d7a620261121.png"
+    },
+    "1310": {
+      "id": 1310,
+      "names": {
+        "de": "Rover: Electro",
+        "en": "Rover: Electro",
+        "es": "Errante: Electro",
+        "fr": "Nomade-Electro",
+        "id": null,
+        "ja": "漂泊者・電導",
+        "ko": "방랑자 · 전도",
+        "pt": "Rover: Voltaico",
+        "ru": null,
+        "th": "ผู้พเนจร: อิเล็กโทร",
+        "vi": null,
+        "zh-Hans": "漂泊者·导电",
+        "zh-Hant": "漂泊者·導電"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/420876e44ffa4c91bb27ec2f926e2aea20261121.png"
+    },
+    "1311": {
+      "id": 1311,
+      "names": {
+        "de": "Hsin",
+        "en": "Hsin",
+        "es": "Hsin",
+        "fr": "Hsin",
+        "id": null,
+        "ja": "心",
+        "ko": "여우의 별자리",
+        "pt": "Hsin",
+        "ru": null,
+        "th": "Hsin",
+        "vi": null,
+        "zh-Hans": "心",
+        "zh-Hant": "心"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/b8a2fc2de4c145eb85c4deb06a7ff1ef20261121.png"
+    },
+    "1312": {
+      "id": 1312,
+      "names": {
+        "de": "Suoming",
+        "en": "Suoming",
+        "es": "Suoming",
+        "fr": "Suoming",
+        "id": null,
+        "ja": "鎖暝",
+        "ko": "쇄명",
+        "pt": "Suoming",
+        "ru": null,
+        "th": "Suoming",
+        "vi": null,
+        "zh-Hans": "锁暝",
+        "zh-Hant": "鎖暝"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/9032061208ed462f809054da5634210e20261121.png"
+    },
+    "1402": {
+      "id": 1402,
+      "names": {
+        "de": "Yangyang",
+        "en": "Yangyang",
+        "es": "Yangyang",
+        "fr": "Yangyang",
+        "id": null,
+        "ja": "秧秧",
+        "ko": "양양",
+        "pt": "Yangyang",
+        "ru": null,
+        "th": "Yangyang",
+        "vi": null,
+        "zh-Hans": "秧秧",
+        "zh-Hant": "秧秧"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/69b00a23ea1f4ee795c2388f8eb420af20261121.png"
+    },
+    "1403": {
+      "id": 1403,
+      "names": {
+        "de": "Aalto",
+        "en": "Aalto",
+        "es": "Aalto",
+        "fr": "Aalto",
+        "id": null,
+        "ja": "アールト",
+        "ko": "알토",
+        "pt": "Aalto",
+        "ru": null,
+        "th": "Aalto",
+        "vi": null,
+        "zh-Hans": "秋水",
+        "zh-Hant": "秋水"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/86cbbe345ecf41a2b3605f07e738053820261121.png"
+    },
+    "1404": {
+      "id": 1404,
+      "names": {
+        "de": "Jiyan",
+        "en": "Jiyan",
+        "es": "Jiyan",
+        "fr": "Jiyan",
+        "id": null,
+        "ja": "忌炎",
+        "ko": "기염",
+        "pt": "Jiyan",
+        "ru": null,
+        "th": "Jiyan",
+        "vi": null,
+        "zh-Hans": "忌炎",
+        "zh-Hant": "忌炎"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/4874931769994aa29c1cf613325c8f4320261121.png"
+    },
+    "1405": {
+      "id": 1405,
+      "names": {
+        "de": "Jianxin",
+        "en": "Jianxin",
+        "es": "Jianxin",
+        "fr": "Jianxin",
+        "id": null,
+        "ja": "鑑心",
+        "ko": "감심",
+        "pt": "Jianxin",
+        "ru": null,
+        "th": "Jianxin",
+        "vi": null,
+        "zh-Hans": "鉴心",
+        "zh-Hant": "鑒心"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/4645777ce3e84aabb2a4fa2bd4fcfb1620261121.png"
+    },
+    "1406": {
+      "id": 1406,
+      "names": {
+        "de": "Rover-Aero",
+        "en": "Rover: Aero",
+        "es": "Errante: Aero",
+        "fr": "Nomade-Aero",
+        "id": null,
+        "ja": "漂泊者・気動",
+        "ko": "방랑자 · 기류",
+        "pt": "Rover: Pneumático",
+        "ru": null,
+        "th": "ผู้พเนจร: แอโร",
+        "vi": null,
+        "zh-Hans": "漂泊者·气动",
+        "zh-Hant": "漂泊者·氣動"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/72ef7fd05e1940d78fccb3ef43b9d7a620261121.png"
+    },
+    "1407": {
+      "id": 1407,
+      "names": {
+        "de": "Ciaccona",
+        "en": "Ciaccona",
+        "es": "Ciaccona",
+        "fr": "Ciaccona",
+        "id": null,
+        "ja": "シャコンヌ",
+        "ko": "샤콘",
+        "pt": "Ciaccona",
+        "ru": null,
+        "th": "Ciaccona",
+        "vi": null,
+        "zh-Hans": "夏空",
+        "zh-Hant": "夏空"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/533b8dd9282243d1becd9b7879d333db20261121.png"
+    },
+    "1408": {
+      "id": 1408,
+      "names": {
+        "de": "Rover-Aero",
+        "en": "Rover: Aero",
+        "es": "Errante: Aero",
+        "fr": "Nomade-Aero",
+        "id": null,
+        "ja": "漂泊者・気動",
+        "ko": "방랑자 · 기류",
+        "pt": "Rover: Pneumático",
+        "ru": null,
+        "th": "ผู้พเนจร: แอโร",
+        "vi": null,
+        "zh-Hans": "漂泊者·气动",
+        "zh-Hant": "漂泊者·氣動"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/420876e44ffa4c91bb27ec2f926e2aea20261121.png"
+    },
+    "1409": {
+      "id": 1409,
+      "names": {
+        "de": "Cartethyia",
+        "en": "Cartethyia",
+        "es": "Cartethyia",
+        "fr": "Cartethyia",
+        "id": null,
+        "ja": "カルテジア",
+        "ko": "카르티시아",
+        "pt": "Cartethyia",
+        "ru": null,
+        "th": "Cartethyia",
+        "vi": null,
+        "zh-Hans": "卡提希娅",
+        "zh-Hant": "卡提希婭"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/ddfee6a7be1a4c28954f3ac62a44024820261121.png"
+    },
+    "1410": {
+      "id": 1410,
+      "names": {
+        "de": "Iuno",
+        "en": "Iuno",
+        "es": "Iuno",
+        "fr": "Iuno",
+        "id": null,
+        "ja": "ユーノ",
+        "ko": "유노",
+        "pt": "Iuno",
+        "ru": null,
+        "th": "Iuno",
+        "vi": null,
+        "zh-Hans": "尤诺",
+        "zh-Hant": "尤諾"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/f91f93a5072049fca87c82aca085b64620261121.png"
+    },
+    "1411": {
+      "id": 1411,
+      "names": {
+        "de": "Qiuyuan",
+        "en": "Qiuyuan",
+        "es": "Qiuyuan",
+        "fr": "Qiuyuan",
+        "id": null,
+        "ja": "仇遠",
+        "ko": "구원",
+        "pt": "Qiuyuan",
+        "ru": null,
+        "th": "Qiuyuan",
+        "vi": null,
+        "zh-Hans": "仇远",
+        "zh-Hant": "仇遠"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/821c574dec72437480c216be461c463c20261121.png"
+    },
+    "1412": {
+      "id": 1412,
+      "names": {
+        "de": "Sigrika",
+        "en": "Sigrika",
+        "es": "Sigrika",
+        "fr": "Sigrika",
+        "id": null,
+        "ja": "シグリカ",
+        "ko": "시그리카",
+        "pt": "Sigrika",
+        "ru": null,
+        "th": "Sigrika",
+        "vi": null,
+        "zh-Hans": "西格莉卡",
+        "zh-Hant": "西格莉卡"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/5fa09f3e7cd6404a82eb0927ed6a78f920261121.png"
+    },
+    "1413": {
+      "id": 1413,
+      "names": {
+        "de": "Qingxiao",
+        "en": "Qingxiao",
+        "es": "Qingxiao",
+        "fr": "Qingxiao",
+        "id": null,
+        "ja": "清宵",
+        "ko": "청초",
+        "pt": "Qingxiao",
+        "ru": null,
+        "th": "Qingxiao",
+        "vi": null,
+        "zh-Hans": "清宵",
+        "zh-Hant": "清宵"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/b2be8f97765c4823a02cad3fa2f8cd8220261121.png"
+    },
+    "1501": {
+      "id": 1501,
+      "names": {
+        "de": "Rover-Spectro",
+        "en": "Rover: Spectro",
+        "es": "Errante: Espectro",
+        "fr": "Nomade-Spectro",
+        "id": null,
+        "ja": "漂泊者・回折",
+        "ko": "방랑자 · 회절",
+        "pt": "Rover: Fotônico",
+        "ru": null,
+        "th": "ผู้พเนจร: สเปกโตร",
+        "vi": null,
+        "zh-Hans": "漂泊者·衍射",
+        "zh-Hant": "漂泊者·衍射"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/72ef7fd05e1940d78fccb3ef43b9d7a620261121.png"
+    },
+    "1502": {
+      "id": 1502,
+      "names": {
+        "de": "Rover-Spectro",
+        "en": "Rover: Spectro",
+        "es": "Errante: Espectro",
+        "fr": "Nomade-Spectro",
+        "id": null,
+        "ja": "漂泊者・回折",
+        "ko": "방랑자",
+        "pt": "Rover: Fotônico",
+        "ru": null,
+        "th": "ผู้พเนจร: สเปกโตร",
+        "vi": null,
+        "zh-Hans": "漂泊者·衍射",
+        "zh-Hant": "漂泊者·衍射"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/420876e44ffa4c91bb27ec2f926e2aea20261121.png"
+    },
+    "1503": {
+      "id": 1503,
+      "names": {
+        "de": "Verina",
+        "en": "Verina",
+        "es": "Verina",
+        "fr": "Verina",
+        "id": null,
+        "ja": "ヴェリーナ",
+        "ko": "벨리나",
+        "pt": "Verina",
+        "ru": null,
+        "th": "Verina",
+        "vi": null,
+        "zh-Hans": "维里奈",
+        "zh-Hant": "維里奈"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/840b987aa31c4448b95820d0b4ae41df20261121.png"
+    },
+    "1504": {
+      "id": 1504,
+      "names": {
+        "de": "Lumi",
+        "en": "Lumi",
+        "es": "Lumi",
+        "fr": "Lumi",
+        "id": null,
+        "ja": "灯灯",
+        "ko": "루미",
+        "pt": "Lumi",
+        "ru": null,
+        "th": "Lumi",
+        "vi": null,
+        "zh-Hans": "灯灯",
+        "zh-Hant": "燈燈"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/949c30727bf940f3a0dbdb2f2d89d3ea20261121.png"
+    },
+    "1505": {
+      "id": 1505,
+      "names": {
+        "de": "Küstenwächterin",
+        "en": "Shorekeeper",
+        "es": "Guardacostas",
+        "fr": "Gardienne du littoral",
+        "id": null,
+        "ja": "ショアキーパー",
+        "ko": "파수인",
+        "pt": "Guardiã da Costa",
+        "ru": null,
+        "th": "Shorekeeper",
+        "vi": null,
+        "zh-Hans": "守岸人",
+        "zh-Hant": "守岸人"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/8797bf6774cd439c9c8b64a309dcebf320261121.png"
+    },
+    "1506": {
+      "id": 1506,
+      "names": {
+        "de": "Phoebe",
+        "en": "Phoebe",
+        "es": "Phoebe",
+        "fr": "Phoebe",
+        "id": null,
+        "ja": "フィービー",
+        "ko": "페비",
+        "pt": "Phoebe",
+        "ru": null,
+        "th": "Phoebe",
+        "vi": null,
+        "zh-Hans": "菲比",
+        "zh-Hant": "菲比"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/cd85a409466a42fe84a359ee213ad35b20261121.png"
+    },
+    "1507": {
+      "id": 1507,
+      "names": {
+        "de": "Zani",
+        "en": "Zani",
+        "es": "Zani",
+        "fr": "Zani",
+        "id": null,
+        "ja": "ザンニー",
+        "ko": "젠니",
+        "pt": "Zani",
+        "ru": null,
+        "th": "Zani",
+        "vi": null,
+        "zh-Hans": "赞妮",
+        "zh-Hant": "贊妮"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/4e1fd3e190e54afa9fbb7d36b154b52120261121.png"
+    },
+    "1508": {
+      "id": 1508,
+      "names": {
+        "de": "Chisa",
+        "en": "Chisa",
+        "es": "Chisa",
+        "fr": "Chisa",
+        "id": null,
+        "ja": "千咲",
+        "ko": "치사",
+        "pt": "Chisa",
+        "ru": null,
+        "th": "Chisa",
+        "vi": null,
+        "zh-Hans": "千咲",
+        "zh-Hant": "千咲"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/d0dc6c2a303b4abda0dfdf136fccf1e520261121.png"
+    },
+    "1509": {
+      "id": 1509,
+      "names": {
+        "de": "Lynae",
+        "en": "Lynae",
+        "es": "Lynae",
+        "fr": "Lynae",
+        "id": null,
+        "ja": "リンネー",
+        "ko": "린네",
+        "pt": "Lynae",
+        "ru": null,
+        "th": "Lynae",
+        "vi": null,
+        "zh-Hans": "琳奈",
+        "zh-Hant": "琳奈"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/1bdd453f6b4a44c7b249e4796eea842120261121.png"
+    },
+    "1510": {
+      "id": 1510,
+      "names": {
+        "de": "Luuk Herssen",
+        "en": "Luuk Herssen",
+        "es": "Luuk Herssen",
+        "fr": "Luuk Herssen",
+        "id": null,
+        "ja": "リューク・ヘルセン",
+        "ko": "루크 · 헤르센",
+        "pt": "Luuk Herssen",
+        "ru": null,
+        "th": "Luuk Herssen",
+        "vi": null,
+        "zh-Hans": "陆·赫斯",
+        "zh-Hant": "陸·赫斯"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/77f0ab588a2743a79a6071ab353a9a9d20261121.png"
+    },
+    "1511": {
+      "id": 1511,
+      "names": {
+        "de": "Lucy",
+        "en": "Lucy",
+        "es": "Lucy",
+        "fr": "Lucy",
+        "id": null,
+        "ja": "ルーシー",
+        "ko": "루시",
+        "pt": "Lucy",
+        "ru": null,
+        "th": "Lucy",
+        "vi": null,
+        "zh-Hans": "露西",
+        "zh-Hant": "露西"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/44466039567240b39fe880a98e4e0a3f20261121.png"
+    },
+    "1512": {
+      "id": 1512,
+      "names": {
+        "de": "Lily",
+        "en": "Lily",
+        "es": "Lily",
+        "fr": "Lily",
+        "id": null,
+        "ja": "リリー",
+        "ko": "릴리",
+        "pt": "Lily",
+        "ru": null,
+        "th": "Lily",
+        "vi": null,
+        "zh-Hans": "莉莉",
+        "zh-Hant": "莉莉"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/48c68ea85c1a4450b4edd0eaf492ffe420261121.png"
+    },
+    "1601": {
+      "id": 1601,
+      "names": {
+        "de": "Taoqi",
+        "en": "Taoqi",
+        "es": "Taoqi",
+        "fr": "Taoqi",
+        "id": null,
+        "ja": "桃祈",
+        "ko": "도기",
+        "pt": "Taoqi",
+        "ru": null,
+        "th": "Taoqi",
+        "vi": null,
+        "zh-Hans": "桃祈",
+        "zh-Hant": "桃祈"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/f3b89ae721154d2395725a6394b05efb20261121.png"
+    },
+    "1602": {
+      "id": 1602,
+      "names": {
+        "de": "Danjin",
+        "en": "Danjin",
+        "es": "Danjin",
+        "fr": "Danjin",
+        "id": null,
+        "ja": "丹瑾",
+        "ko": "단근",
+        "pt": "Danjin",
+        "ru": null,
+        "th": "Danjin",
+        "vi": null,
+        "zh-Hans": "丹瑾",
+        "zh-Hant": "丹瑾"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/2aeb960ecb894a6091bf13284b42f87a20261121.png"
+    },
+    "1603": {
+      "id": 1603,
+      "names": {
+        "de": "Camellya",
+        "en": "Camellya",
+        "es": "Camellya",
+        "fr": "Camellya",
+        "id": null,
+        "ja": "ツバキ",
+        "ko": "카멜리아",
+        "pt": "Camellya",
+        "ru": null,
+        "th": "Camellya",
+        "vi": null,
+        "zh-Hans": "椿",
+        "zh-Hant": "椿"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/b26707c749244c86829f43aaad714c4820261121.png"
+    },
+    "1604": {
+      "id": 1604,
+      "names": {
+        "de": "Rover-Chaos",
+        "en": "Rover: Havoc",
+        "es": "Errante: Destrucción",
+        "fr": "Nomade-Havoc",
+        "id": null,
+        "ja": "漂泊者・消滅",
+        "ko": "방랑자 · 인멸",
+        "pt": "Rover: Aniquilante",
+        "ru": null,
+        "th": "ผู้พเนจร: ฮาวอค",
+        "vi": null,
+        "zh-Hans": "漂泊者·湮灭",
+        "zh-Hant": "漂泊者·湮滅"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/420876e44ffa4c91bb27ec2f926e2aea20261121.png"
+    },
+    "1605": {
+      "id": 1605,
+      "names": {
+        "de": "Rover-Chaos",
+        "en": "Rover: Havoc",
+        "es": "Errante: Destrucción",
+        "fr": "Nomade-Havoc",
+        "id": null,
+        "ja": "漂泊者・消滅",
+        "ko": "방랑자 · 인멸",
+        "pt": "Rover: Aniquilante",
+        "ru": null,
+        "th": "ผู้พเนจร: ฮาวอค",
+        "vi": null,
+        "zh-Hans": "漂泊者·湮灭",
+        "zh-Hant": "漂泊者·湮滅"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/72ef7fd05e1940d78fccb3ef43b9d7a620261121.png"
+    },
+    "1606": {
+      "id": 1606,
+      "names": {
+        "de": "Roccia",
+        "en": "Roccia",
+        "es": "Roccia",
+        "fr": "Roccia",
+        "id": null,
+        "ja": "ロココ",
+        "ko": "로코코",
+        "pt": "Roccia",
+        "ru": null,
+        "th": "Roccia",
+        "vi": null,
+        "zh-Hans": "洛可可",
+        "zh-Hant": "洛可可"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/3eb5e3bf54ab45e0aa07e213eca439c720261121.png"
+    },
+    "1607": {
+      "id": 1607,
+      "names": {
+        "de": "Cantarella",
+        "en": "Cantarella",
+        "es": "Cantarella",
+        "fr": "Cantarella",
+        "id": null,
+        "ja": "カンタレラ",
+        "ko": "칸타렐라",
+        "pt": "Cantarella",
+        "ru": null,
+        "th": "Cantarella",
+        "vi": null,
+        "zh-Hans": "坎特蕾拉",
+        "zh-Hant": "坎特蕾拉"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/da23af45d0ca4c3cbdd5ffdbf2f38c0820261121.png"
+    },
+    "1608": {
+      "id": 1608,
+      "names": {
+        "de": "Phrolova",
+        "en": "Phrolova",
+        "es": "Phrolova",
+        "fr": "Phrolova",
+        "id": null,
+        "ja": "フローヴァ",
+        "ko": "플로로",
+        "pt": "Phrolova",
+        "ru": null,
+        "th": "Phrolova",
+        "vi": null,
+        "zh-Hans": "弗洛洛",
+        "zh-Hant": "弗洛洛"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/9b94c19799ed44cb946d651b63e0979920261121.png"
+    },
+    "1610": {
+      "id": 1610,
+      "names": {
+        "de": "Yangyang: Xuanling",
+        "en": "Yangyang: Xuanling",
+        "es": "Yangyang: Xuanling",
+        "fr": "Yangyang : Xuanling",
+        "id": null,
+        "ja": "秧秧・玄翎",
+        "ko": "양양 · 현령",
+        "pt": "Yangyang: Xuanling",
+        "ru": null,
+        "th": "Yangyang - ปักษานิลสวรรค์",
+        "vi": null,
+        "zh-Hans": "秧秧·玄翎",
+        "zh-Hant": "秧秧·玄翎"
+      },
+      "avatarUrl": "https://prod-alicdn-community.kurobbs.com/forum/5ace5550b0ec47df84916fe68c56572e20261121.png"
+    }
+  }
+}

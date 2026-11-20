@@ -26,6 +26,7 @@ import { AchievementList } from './components/AchievementList'
 import { AchievementVersionFilter } from './components/AchievementVersionFilter'
 import { useAchievementHighlight } from './components/useAchievementHighlight'
 import { defaultArchiveKey } from './lib/archives'
+import { getAchievementRoles } from './lib/achievement-roles'
 import { achievementVersionById } from './lib/achievement-versions'
 import { catalogExclusions, exclusiveAchievementGroups } from './lib/catalog'
 import { exclusionReason } from './lib/exclusions'
@@ -217,6 +218,7 @@ function AchievementDetail({
   const group = category?.groups.find((group) => group.id === item.groupId)
   const categoryFallback = tr('ui.categoryId', { value0: item.categoryId })
   const groupFallback = tr('ui.group', { value0: item.groupId })
+  const roleRequirement = getAchievementRoles(item.id, language)
   const title = plainText(item.texts[language]?.title)
   const description = plainText(item.texts[language]?.description)
   const titleRef = useAchievementHighlight(title, query)
@@ -277,6 +279,11 @@ function AchievementDetail({
         >
           {description || tr('ui.missingDescription')}
         </div>
+        {roleRequirement && (
+          <div className="achievement-detail-roles mt-1 text-sm text-(--color-muted)">
+            {tr(roleRequirement.requirementKey, { value0: roleRequirement.value0 })}
+          </div>
+        )}
         <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-(--color-border) pt-3 text-xs text-(--color-muted)">
           <span className="font-mono font-medium whitespace-nowrap text-(--color-text)">
             {showManualProgress
@@ -741,6 +748,7 @@ export default function App() {
                 ])}
                 renderItem={(item) => {
                   const stages = stagesById.get(item.id)
+                  const roleRequirement = getAchievementRoles(item.id, filters.language)
                   const completed = isFinished(item)
                   const exclusiveAlternative =
                     !completed && (exclusiveById.get(item.id)?.some(isFinished) ?? false)
@@ -750,6 +758,16 @@ export default function App() {
                     maxProgress !== null &&
                     currentProgress !== maxProgress &&
                     !(currentProgress === 0 && maxProgress === 1)
+                  const hiddenBadge = item.hidden && (
+                    <WTooltip text={tr('ui.hiddenBadge')}>
+                      <span
+                        className={`hidden-badge absolute grid size-4 cursor-default place-items-center text-(--color-muted) group-data-[muted=true]/card:opacity-35 ${roleRequirement ? 'pointer-events-auto top-2.5 right-[24%] narrow:top-2 narrow:right-6' : 'top-1.5 left-1.5'}`}
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <WSvg name="achievement-hidden" size={12} />
+                      </span>
+                    </WTooltip>
+                  )
                   return (
                     <div
                       className="achievement-card group/card relative isolate grid min-h-20 grid-cols-[64px_minmax(0,1fr)_max-content] items-center gap-5 px-[25px] py-1.5 compact:grid-cols-[52px_minmax(0,1fr)_max-content] compact:gap-[13px] compact:px-5 narrow:grid-cols-[44px_minmax(0,1fr)_max-content] narrow:gap-[9px] narrow:px-3.5 narrow:py-1"
@@ -764,24 +782,45 @@ export default function App() {
                         disabled={receiving || !!pendingImport || busy}
                         onClick={() => void setAchievementCompleted(item.id, !completed)}
                       >
-                        <span className="pointer-events-none absolute top-1/2 left-16 w-24 -translate-1/2 compact:left-[52px] compact:w-[92px] narrow:left-[47px] narrow:w-[88px] group-data-[muted=true]/card:[&>.achievement-emblem]:opacity-35 group-data-[muted=true]/card:[&>.achievement-emblem]:saturate-45">
-                          <AchievementEmblem {...getAchievementStars(item, stages)} />
-                          {completed && (
-                            <WTooltip text={tr('ui.finished')}>
-                              <span className="achievement-completed-mark pointer-events-auto absolute right-[28%] bottom-[15%] grid size-4 place-items-center text-(--color-muted)">
-                                <WSvg name="check" size={14} strokeWidth={1.8} />
-                              </span>
-                            </WTooltip>
-                          )}
-                        </span>
-                      </WButton>
-                      {item.hidden && (
-                        <WTooltip text={tr('ui.hiddenBadge')}>
-                          <span className="hidden-badge absolute top-1.5 left-1.5 z-10 grid size-4 place-items-center text-(--color-muted) group-data-[muted=true]/card:opacity-35">
-                            <WSvg name="achievement-hidden" size={12} />
+                        <span className="pointer-events-none absolute inset-y-0 left-16 flex w-24 -translate-x-1/2 flex-col justify-center compact:left-[52px] compact:w-[92px] narrow:left-[47px] narrow:w-[88px]">
+                          <span className="relative block group-data-[muted=true]/card:[&>.achievement-emblem]:opacity-35 group-data-[muted=true]/card:[&>.achievement-emblem]:saturate-45">
+                            <AchievementEmblem {...getAchievementStars(item, stages)} />
+                            {completed && (
+                              <WTooltip text={tr('ui.finished')}>
+                                <span className="achievement-completed-mark pointer-events-auto absolute right-[28%] bottom-[15%] grid size-4 place-items-center text-(--color-muted)">
+                                  <WSvg name="check" size={14} strokeWidth={1.8} />
+                                </span>
+                              </WTooltip>
+                            )}
                           </span>
-                        </WTooltip>
-                      )}
+                          {roleRequirement && hiddenBadge}
+                        </span>
+                        {roleRequirement ? (
+                          <WTooltip
+                            text={tr(roleRequirement.requirementKey, {
+                              value0: roleRequirement.value0,
+                            })}
+                          >
+                            <span className="achievement-role-avatars absolute top-1.5 left-1.5 flex gap-0.5">
+                              {roleRequirement.avatars.map(({ id, avatarUrl }) => (
+                                <img
+                                  key={id}
+                                  data-role-id={id}
+                                  src={avatarUrl}
+                                  width={24}
+                                  height={24}
+                                  className="size-6 rounded-sm bg-(--color-surface-soft) object-contain group-data-[completed=true]/card:opacity-35 group-data-[completed=true]/card:saturate-45 narrow:size-5"
+                                  loading="lazy"
+                                  decoding="async"
+                                  alt=""
+                                />
+                              ))}
+                            </span>
+                          </WTooltip>
+                        ) : (
+                          hiddenBadge
+                        )}
+                      </WButton>
                       <AchievementSummary
                         item={item}
                         language={filters.language}

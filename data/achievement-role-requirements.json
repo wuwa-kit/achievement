@@ -1,0 +1,420 @@
+{
+  "schemaVersion": 1,
+  "gameDataVersion": "3.8.11",
+  "achievements": {
+    "200331": {
+      "roleIds": [1207],
+      "requirement": "cookSpecialDish"
+    },
+    "300147": {
+      "roleIds": [1501, 1502],
+      "requirement": "outroSkill"
+    },
+    "300148": {
+      "roleIds": [1604, 1605],
+      "requirement": "outroSkill"
+    },
+    "300149": {
+      "roleIds": [1405],
+      "requirement": "outroSkill"
+    },
+    "300150": {
+      "roleIds": [1304],
+      "requirement": "outroSkill"
+    },
+    "300151": {
+      "roleIds": [1202],
+      "requirement": "outroSkill"
+    },
+    "300152": {
+      "roleIds": [1602],
+      "requirement": "outroSkill"
+    },
+    "300153": {
+      "roleIds": [1102],
+      "requirement": "outroSkill"
+    },
+    "300154": {
+      "roleIds": [1601],
+      "requirement": "outroSkill"
+    },
+    "300155": {
+      "roleIds": [1402],
+      "requirement": "outroSkill"
+    },
+    "300156": {
+      "roleIds": [1302],
+      "requirement": "outroSkill"
+    },
+    "300157": {
+      "roleIds": [1503],
+      "requirement": "outroSkill"
+    },
+    "300158": {
+      "roleIds": [1203],
+      "requirement": "outroSkill"
+    },
+    "300159": {
+      "roleIds": [1103],
+      "requirement": "outroSkill"
+    },
+    "300160": {
+      "roleIds": [1104],
+      "requirement": "outroSkill"
+    },
+    "300161": {
+      "roleIds": [1204],
+      "requirement": "outroSkill"
+    },
+    "300162": {
+      "roleIds": [1303],
+      "requirement": "outroSkill"
+    },
+    "300163": {
+      "roleIds": [1404],
+      "requirement": "outroSkill"
+    },
+    "300164": {
+      "roleIds": [1403],
+      "requirement": "outroSkill"
+    },
+    "300165": {
+      "roleIds": [1301],
+      "requirement": "outroSkill"
+    },
+    "300167": {
+      "roleIds": [1205],
+      "requirement": "outroSkill"
+    },
+    "300177": {
+      "roleIds": [1305],
+      "requirement": "outroSkill"
+    },
+    "300178": {
+      "roleIds": [1105],
+      "requirement": "outroSkill"
+    },
+    "300179": {
+      "roleIds": [1505],
+      "requirement": "outroSkill"
+    },
+    "300180": {
+      "roleIds": [1106],
+      "requirement": "outroSkill"
+    },
+    "300181": {
+      "roleIds": [1603],
+      "requirement": "outroSkill"
+    },
+    "300182": {
+      "roleIds": [1504],
+      "requirement": "outroSkill"
+    },
+    "300183": {
+      "roleIds": [1107],
+      "requirement": "outroSkill"
+    },
+    "300184": {
+      "roleIds": [1606],
+      "requirement": "outroSkill"
+    },
+    "300186": {
+      "roleIds": [1206],
+      "requirement": "outroSkill"
+    },
+    "300192": {
+      "roleIds": [1506],
+      "requirement": "outroSkill"
+    },
+    "300301": {
+      "roleIds": [1202],
+      "requirement": "heavyAttackKill"
+    },
+    "300302": {
+      "roleIds": [1202],
+      "requirement": "heavyAttackKill"
+    },
+    "302009": {
+      "roleIds": [1406, 1408],
+      "requirement": "outroSkill"
+    },
+    "302010": {
+      "roleIds": [1607],
+      "requirement": "outroSkill"
+    },
+    "302011": {
+      "roleIds": [1507],
+      "requirement": "outroSkill"
+    },
+    "302012": {
+      "roleIds": [1407],
+      "requirement": "outroSkill"
+    },
+    "302030": {
+      "roleIds": [1409],
+      "requirement": "outroSkill"
+    },
+    "302031": {
+      "roleIds": [1207],
+      "requirement": "outroSkill"
+    },
+    "302032": {
+      "roleIds": [1608],
+      "requirement": "outroSkill"
+    },
+    "302036": {
+      "roleIds": [1306],
+      "requirement": "outroSkill"
+    },
+    "302037": {
+      "roleIds": [1410],
+      "requirement": "outroSkill"
+    },
+    "302040": {
+      "roleIds": [1208],
+      "requirement": "outroSkill"
+    },
+    "302041": {
+      "roleIds": [1411],
+      "requirement": "outroSkill"
+    },
+    "302043": {
+      "roleIds": [1508],
+      "requirement": "outroSkill"
+    },
+    "302044": {
+      "roleIds": [1307],
+      "requirement": "outroSkill"
+    },
+    "302045": {
+      "roleIds": [1509],
+      "requirement": "outroSkill"
+    },
+    "302046": {
+      "roleIds": [1209],
+      "requirement": "outroSkill"
+    },
+    "302064": {
+      "roleIds": [1210],
+      "requirement": "outroSkill"
+    },
+    "302065": {
+      "roleIds": [1510],
+      "requirement": "outroSkill"
+    },
+    "302084": {
+      "roleIds": [1412],
+      "requirement": "outroSkill"
+    },
+    "302085": {
+      "roleIds": [1108],
+      "requirement": "outroSkill"
+    },
+    "302086": {
+      "roleIds": [1211],
+      "requirement": "outroSkill"
+    },
+    "302094": {
+      "roleIds": [1511],
+      "requirement": "outroSkill"
+    },
+    "302095": {
+      "roleIds": [1308],
+      "requirement": "outroSkill"
+    },
+    "302096": {
+      "roleIds": [1308],
+      "requirement": "dodgeSpecificAttack"
+    },
+    "302097": {
+      "roleIds": [1109],
+      "requirement": "outroSkill"
+    },
+    "302098": {
+      "roleIds": [1511],
+      "requirement": "completeHackingPractice"
+    },
+    "302099": {
+      "roleIds": [1610],
+      "requirement": "outroSkill"
+    },
+    "302100": {
+      "roleIds": [1110],
+      "requirement": "outroSkill"
+    },
+    "302102": {
+      "roleIds": [1309, 1310],
+      "requirement": "outroSkill"
+    },
+    "302104": {
+      "roleIds": [1309, 1310],
+      "requirement": "dealSpecificSkillDamage"
+    },
+    "302105": {
+      "roleIds": [1309, 1310],
+      "requirement": "blockAttacks"
+    },
+    "302108": {
+      "roleIds": [1309, 1310],
+      "requirement": "parrySpecificAttack"
+    },
+    "302109": {
+      "roleIds": [1413],
+      "requirement": "outroSkill"
+    },
+    "302110": {
+      "roleIds": [1212],
+      "requirement": "outroSkill"
+    },
+    "302114": {
+      "roleIds": [1312],
+      "requirement": "outroSkill"
+    },
+    "302115": {
+      "roleIds": [1311],
+      "requirement": "outroSkill"
+    },
+    "302120": {
+      "roleIds": [1312],
+      "requirement": "remainAirborneWithSpecificSkill"
+    },
+    "302122": {
+      "roleIds": [1512],
+      "requirement": "outroSkill"
+    },
+    "302123": {
+      "roleIds": [1512],
+      "requirement": "killInDreamState"
+    },
+    "302124": {
+      "roleIds": [1512],
+      "requirement": "interactWithDreamingCharacter"
+    }
+  },
+  "modeAchievements": {
+    "200639": {
+      "roleIds": [1308],
+      "requirement": "storyScenarioCharacter"
+    },
+    "101700401": {
+      "roleIds": [1402],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700402": {
+      "roleIds": [1501, 1502],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700403": {
+      "roleIds": [1103],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700404": {
+      "roleIds": [1202],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700405": {
+      "roleIds": [1404],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700406": {
+      "roleIds": [1601],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700509": {
+      "roleIds": [1304],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700511": {
+      "roleIds": [1405],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700512": {
+      "roleIds": [1102],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700801": {
+      "roleIds": [1305],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700803": {
+      "roleIds": [1105],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700804": {
+      "roleIds": [1602],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700806": {
+      "roleIds": [1303],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101700901": {
+      "roleIds": [1103],
+      "requirement": "rogueSupportCharacter"
+    },
+    "101700903": {
+      "roleIds": [1405],
+      "requirement": "rogueSupportCharacter"
+    },
+    "101700904": {
+      "roleIds": [1602],
+      "requirement": "rogueSupportCharacter"
+    },
+    "101700905": {
+      "roleIds": [1503],
+      "requirement": "rogueSupportCharacter"
+    },
+    "101700906": {
+      "roleIds": [1204],
+      "requirement": "rogueSupportCharacter"
+    },
+    "101700907": {
+      "roleIds": [1102],
+      "requirement": "rogueSupportCharacter"
+    },
+    "101700908": {
+      "roleIds": [1303],
+      "requirement": "rogueSupportCharacter"
+    },
+    "101700909": {
+      "roleIds": [1403],
+      "requirement": "rogueSupportCharacter"
+    },
+    "101701501": {
+      "roleIds": [1603],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101701502": {
+      "roleIds": [1504],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101701503": {
+      "roleIds": [1106],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101701504": {
+      "roleIds": [1505],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101701505": {
+      "roleIds": [1203],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101701506": {
+      "roleIds": [1503],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101701507": {
+      "roleIds": [1301],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101701508": {
+      "roleIds": [1104],
+      "requirement": "roguePlayableCharacter"
+    },
+    "101701509": {
+      "roleIds": [1204],
+      "requirement": "roguePlayableCharacter"
+    }
+  }
+}
