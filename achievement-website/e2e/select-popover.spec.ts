@@ -1,5 +1,26 @@
 import { expect, test } from '@playwright/test'
 
+for (const route of ['/', '/desktop']) {
+  test(`select closes on repeated trigger clicks on ${route}`, async ({ page, isMobile }) => {
+    await page.goto(route)
+    const trigger = page.getByTestId('theme-switch')
+    const popover = page.locator('.w-select-popover')
+    await expect(trigger).toBeEnabled()
+    const value = await trigger.getAttribute('data-value')
+    const clickTrigger = () => (isMobile ? trigger.tap() : trigger.click())
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await clickTrigger()
+      await expect(trigger).toHaveAttribute('data-expanded', 'true')
+      await expect(page.locator('.w-select-popover:popover-open')).toHaveCount(1)
+      await clickTrigger()
+      await expect(trigger).toHaveAttribute('data-expanded', 'false')
+      await expect(popover).toHaveCount(0)
+      await expect(trigger).toHaveAttribute('data-value', value!)
+    }
+  })
+}
+
 test('popover mounts only for entry, open and exit; supports keyboard and interruption', async ({
   page,
 }) => {

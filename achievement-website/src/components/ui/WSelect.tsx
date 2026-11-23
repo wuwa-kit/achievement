@@ -97,6 +97,7 @@ export function WSelect({
         ref={anchorRef}
         className={`w-select ${selectTriggerClass} ${className}`}
         disabled={disabled}
+        popoverTarget={`${id}-popover`}
 
         data-value={value}
 
@@ -105,6 +106,8 @@ export function WSelect({
         onClick={(event) => {
           onClick?.(event)
           if (!event.defaultPrevented) {
+            // Keep React in control of toggling while marking this as the native invoker.
+            event.preventDefault()
             if (open) setOpen(false)
             else show()
           }
@@ -178,6 +181,7 @@ export function WSelect({
       </WButton>
       {name && <input type="hidden" name={name} value={value} disabled={disabled} />}
       <WPopover
+        id={`${id}-popover`}
         placement={placement}
         offset={offset}
         matchTriggerWidth={matchPopoverWidth}
