@@ -75,6 +75,7 @@ test('desktop bridge preserves progress while switching language and supports ca
   await page.locator('.w-message-close').click()
   await page.mouse.move(0, 0)
   const detect = page.getByTestId('自动检测游戏路径')
+  await page.keyboard.press('Tab')
   await detect.focus()
   await expect(page.locator('.w-tooltip')).toHaveText('自动检测游戏路径')
   await detect.press('Escape')

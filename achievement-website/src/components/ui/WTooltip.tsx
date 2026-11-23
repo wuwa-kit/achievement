@@ -55,7 +55,7 @@ export function WTooltip({ text = '', children, placement = 'top', delay = 300 }
         },
         onFocus: (event) => {
           original.onFocus?.(event)
-          show()
+          if (event.currentTarget.matches(':focus-visible')) show()
         },
         onBlur: (event) => {
           original.onBlur?.(event)

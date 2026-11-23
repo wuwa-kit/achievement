@@ -13,6 +13,9 @@ export function OpenSourceLink() {
         href="https://github.com/wuwa-kit/achievement"
         target="_blank"
         rel="noreferrer"
+        onClick={(event) => {
+          if (event.detail > 0) event.currentTarget.blur()
+        }}
       >
         <WSvg name="github" size={20} />
       </a>

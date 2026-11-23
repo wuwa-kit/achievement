@@ -53,6 +53,7 @@ for (const route of ['/', '/desktop']) {
         'href',
         'https://github.com/wuwa-kit/achievement',
       )
+      await page.keyboard.press('Tab')
       await openSourceLink.focus()
       await expect(page.locator('.w-tooltip')).toHaveText('Open source')
       await openSourceLink.press('Escape')
