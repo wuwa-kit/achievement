@@ -205,7 +205,13 @@ public partial class MainWindow : Window
                     result = settings; break;
                 case "game.quality":
                     var path = message.GetProperty("params").GetProperty("gamePath").GetString()?.Trim();
-                    result = await Task.Run(() => File.Exists(path) ? DetectQuality(path) : null);
+                    result = await Task.Run(() =>
+                    {
+                        if (!File.Exists(path)) return null;
+                        var game = Path.GetFullPath(path);
+                        var localTiers = Launcher.LocalTiers(game);
+                        return new { selected = DetectQuality(game, localTiers), localTiers };
+                    });
                     break;
                 case "game.detect":
                     EnsureIdle(); result = await Task.Run(() => GamePathDetector.Detect(settings.GamePath)); break;
@@ -329,9 +335,9 @@ public partial class MainWindow : Window
         }
         return true;
     }
-    private static string? DetectQuality(string gamePath)
+    private static string? DetectQuality(string gamePath, string[]? localTiers = null)
     {
-        try { return Launcher.Quality(Path.GetFullPath(gamePath), "auto"); }
+        try { return Launcher.Quality(Path.GetFullPath(gamePath), "auto", localTiers); }
         catch (Exception error) when (error is IOException or InvalidDataException or UnauthorizedAccessException or JsonException or InvalidOperationException or NullReferenceException) { return null; }
     }
 

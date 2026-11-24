@@ -21,7 +21,25 @@ internal static class Launcher
         using var worker = Process.Start(start) ?? throw new IOException("Cannot start elevated exporter");
         await worker.WaitForExitAsync(); return worker.ExitCode;
     }
-    public static string Quality(string gamePath, string requested)
+    public static string[] LocalTiers(string gamePath)
+    {
+        var content = Path.Combine(Path.GetDirectoryName(gamePath)!, "Client", "Content");
+        var found = new List<string>();
+        foreach (string tier in new[] { "HD", "SD", "UHD" })
+        {
+            var folder = new DirectoryInfo(Path.Combine(content, tier));
+            if (!folder.Exists) continue;
+            try
+            {
+                if (folder.EnumerateFiles($"pakchunk*-{tier}-WindowsNoEditor.pak")
+                    .Any(pak => pak.Length > 0 && File.Exists(Path.ChangeExtension(pak.FullName, ".sig"))))
+                    found.Add(tier.ToLowerInvariant());
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+        }
+        return found.ToArray();
+    }
+    public static string Quality(string gamePath, string requested, string[]? localTiers = null)
     {
         requested = requested.ToLowerInvariant(); string[] allowed = ["sd", "hd", "uhd"];
         if (allowed.Contains(requested)) return requested;
@@ -42,6 +60,7 @@ internal static class Launcher
             }
             catch (Exception e) when (e is FormatException or System.Text.Json.JsonException or InvalidOperationException) { }
         }
+        if ((localTiers ?? LocalTiers(gamePath)).FirstOrDefault() is { } local) return local;
         string manifest = Path.Combine(game, "launcherDownloadConfig.json");
         if (File.Exists(manifest))
         {

@@ -17,6 +17,19 @@ test('desktop route supports browser preview and persists preview language', asy
   )
 })
 
+test('browser mock shows installed resource indicators', async ({ page }) => {
+  await page.setViewportSize({ width: 680, height: 560 })
+  await page.goto('/desktop?mock=1')
+  const quality = page.getByTestId('resource-quality')
+  await expect(quality).toHaveText('自动（高清）')
+  await quality.click()
+  const menu = page.locator('.w-select-popover:popover-open')
+  await expect(menu.getByTestId('local-resource-icon')).toHaveCount(2)
+  await menu.locator('[data-value="hd"]').getByTestId('local-resource-icon').hover()
+  await expect(page.locator('.w-tooltip')).toHaveText('已检测到本地资源')
+  await expect(menu.locator('[data-value="sd"]')).toBeVisible()
+})
+
 test('desktop zoom follows host changes and stays open across adjustments', async ({ page }) => {
   await page.setViewportSize({ width: 580, height: 480 })
   await page.addInitScript(() => {
@@ -99,14 +112,17 @@ test('desktop bridge preserves progress while switching language and supports ca
           postMessage: (message: { id: string; method: string; params: typeof settings }) => {
             let result: unknown = null
             if (message.method === 'game.quality')
-              result = message.params.gamePath.startsWith('D:') ? null : 'hd'
+              result = message.params.gamePath.startsWith('D:')
+                ? null
+                : { selected: 'hd', localTiers: ['hd', 'uhd'] }
             if (message.method === 'game.detect') result = 'D:/Games/Wuthering Waves.exe'
             if (message.method === 'game.choose') result = 'E:/Game/Wuthering Waves.exe'
             if (message.method === 'settings.get') result = settings
             if (message.method === 'state.get') result = state
             if (message.method === 'settings.save') result = settings = message.params
             if (message.method === 'export.start') {
-              if (settings.gamePath.startsWith('D:') && (settings.quality ?? 'auto') === 'auto') result = 'qualityRequired'
+              if (settings.gamePath.startsWith('D:') && (settings.quality ?? 'auto') === 'auto')
+                result = 'qualityRequired'
               else state = { ...state, stage: 'starting', busy: true }
             }
             if (message.method === 'export.cancel')
@@ -157,7 +173,13 @@ test('desktop bridge preserves progress while switching language and supports ca
   await page.getByTestId('打开系统文件选择器').click()
   await expect(pathInput).toHaveValue('E:/Game/Wuthering Waves.exe')
   await expect(quality).toHaveText('自动（高清）')
-  await selectValue(page, quality, 'uhd')
+  await quality.click()
+  const menu = page.locator('.w-select-popover:popover-open')
+  await expect(menu.getByTestId('local-resource-icon')).toHaveCount(2)
+  await menu.locator('[data-value="hd"]').getByTestId('local-resource-icon').hover()
+  await expect(page.locator('.w-tooltip')).toHaveText('已检测到本地资源')
+  await menu.locator('[data-value="uhd"]').click()
+  await expect(quality.getByTestId('local-resource-icon')).toHaveCount(0)
   await expect(quality).toHaveText('超高清')
   await page.getByTestId('开始采集').click()
   const stage = page.locator('.desktop-stage')
@@ -259,7 +281,10 @@ test('desktop bridge preserves progress while switching language and supports ca
       })
       observer.observe(dialog, { attributes: true })
     })
-    dialog.querySelectorAll('button').item(dialog.querySelectorAll('button').length - 1).click()
+    dialog
+      .querySelectorAll('button')
+      .item(dialog.querySelectorAll('button').length - 1)
+      .click()
     return result
   })
   expect(duringClose).toBe(beforeClose)

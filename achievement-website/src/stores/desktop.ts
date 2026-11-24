@@ -30,6 +30,7 @@ interface DesktopStore {
   dismissNotice(): void
   exportLogs(): Promise<void>
   detectedQuality: ResourceTier | null | undefined
+  localTiers: ResourceTier[]
   refreshQuality(): Promise<void>
   setQuality(value: ResourceTier | 'auto'): void
   setGamePath(path: string): void
@@ -152,11 +153,16 @@ export const useDesktopStore = create<DesktopStore>()(
       }
     },
     detectedQuality: undefined,
+    localTiers: [],
     async refreshQuality() {
       const gamePath = get().settings.gamePath
       if (!gamePath.trim()) return
-      const detectedQuality = await request('game.quality', { gamePath }).catch(() => null)
-      if (get().settings.gamePath === gamePath) set({ detectedQuality })
+      const detection = await request('game.quality', { gamePath }).catch(() => null)
+      if (get().settings.gamePath === gamePath)
+        set({
+          detectedQuality: detection?.selected ?? null,
+          localTiers: detection?.localTiers ?? [],
+        })
     },
     setQuality: (quality) =>
       set((state) => {
@@ -164,6 +170,7 @@ export const useDesktopStore = create<DesktopStore>()(
       }),
     setGamePath: (path) =>
       set((state) => {
+        state.localTiers = []
         state.detectedQuality = undefined
         state.settings.gamePath = path
       }),
@@ -186,7 +193,7 @@ export const useDesktopStore = create<DesktopStore>()(
         const result = await request('export.start')
         if (result === 'qualityRequired') {
           needsQuality = true
-          set({ detectedQuality: null })
+          set({ detectedQuality: null, localTiers: [] })
           wMessage.info(tr('desktop.quality.choose'))
         } else if (result) set({ detectedQuality: result })
       })

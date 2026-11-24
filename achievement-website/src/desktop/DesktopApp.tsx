@@ -31,6 +31,7 @@ export default function DesktopApp() {
     exportLogs,
     setGamePath,
     detectedQuality,
+    localTiers,
     refreshQuality,
     setQuality,
     detectPath,
@@ -162,7 +163,22 @@ export default function DesktopApp() {
                 )}
               </WOption>
               {(['sd', 'hd', 'uhd'] as const).map((tier) => (
-                <WOption key={tier} value={tier}>
+                <WOption
+                  key={tier}
+                  value={tier}
+                  indicator={
+                    localTiers.includes(tier) && (
+                      <WTooltip text={t('desktop.quality.detected')}>
+                        <span
+                          className="ms-2 inline-flex align-middle text-(--color-muted)"
+                          data-testid="local-resource-icon"
+                        >
+                          <WSvg name="folder-open" size={15} />
+                        </span>
+                      </WTooltip>
+                    )
+                  }
+                >
                   {t(`desktop.quality.${tier}`)}
                 </WOption>
               ))}

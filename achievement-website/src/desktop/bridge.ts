@@ -58,7 +58,7 @@ export type UpdateDownload = { attemptId: string; received: number } & (
   | { status: 'downloading' | 'ready' | 'cancelled' }
   | { status: 'failed'; failure: 'integrityFailed' | 'saveFailed' | 'downloadFailed' }
 )
-type Methods = {
+export type Methods = {
   'zoom.get': { params: undefined; result: number }
   'zoom.adjust': { params: { direction: 'in' | 'out' | 'reset' }; result: number }
   'update.check': { params: undefined; result: UpdateCheck }
@@ -74,7 +74,10 @@ type Methods = {
   'history.delete': { params: { id: string }; result: DesktopState }
   'settings.get': { params: undefined; result: DesktopSettings }
   'settings.save': { params: DesktopSettings; result: DesktopSettings }
-  'game.quality': { params: { gamePath: string }; result: ResourceTier | null }
+  'game.quality': {
+    params: { gamePath: string }
+    result: { selected: ResourceTier | null; localTiers: ResourceTier[] } | null
+  }
   'game.detect': { params: undefined; result: string | null }
   'game.choose': { params: undefined; result: string | null }
   'export.start': { params: undefined; result: ResourceTier | 'qualityRequired' | null }
@@ -88,7 +91,7 @@ type Methods = {
   'collection.exportLogs': { params: { gamePath: string }; result: boolean }
   'state.get': { params: undefined; result: DesktopState }
 }
-type Message = {
+export type Message = {
   id?: string
   result?: unknown
   error?: string
@@ -108,7 +111,14 @@ declare global {
   }
 }
 const webview = window.chrome?.webview
-export { isDesktop } from '../lib/environment'
+const mockEnabled =
+  !import.meta.env.VITE_DESKTOP_BUILD &&
+  !webview &&
+  new URLSearchParams(window.location.search).get('mock') === '1'
+export const isDesktop = !!webview || mockEnabled
+const mockHost = mockEnabled
+  ? import('./mock-host').then(({ createMockHost }) => createMockHost(receiveMessage))
+  : null
 let initialSettings: Promise<DesktopSettings> | undefined
 export const getInitialDesktopSettings = () =>
   (initialSettings ??=
@@ -128,7 +138,7 @@ export function subscribeZoom(listener: (percent: number) => void) {
   }
 }
 const updateListeners = new Set<(state: UpdateDownload) => void>()
-webview?.addEventListener('message', ({ data }) => {
+function receiveMessage(data: Message) {
   if (data.event === 'zoom') zoomListeners.forEach((listener) => listener(data.data))
   if (data.event === 'state') listeners.forEach((listener) => listener(data.data))
   if (data.event === 'updateDownload') updateListeners.forEach((listener) => listener(data.data))
@@ -138,11 +148,13 @@ webview?.addEventListener('message', ({ data }) => {
   pending.delete(data.id)
   if (data.error) request.reject(new Error(data.error))
   else request.resolve(data.result)
-})
+}
+webview?.addEventListener('message', ({ data }) => receiveMessage(data))
 export function request<K extends keyof Methods>(
   method: K,
   params?: Methods[K]['params'],
 ): Promise<Methods[K]['result']> {
+  if (mockHost) return mockHost.then((request) => request(method, params))
   if (!webview) {
     try {
       return Promise.resolve(browserRequest(method, params) as Methods[K]['result'])

@@ -2,8 +2,8 @@ import { useContext, type ReactNode } from 'react'
 import { WSelectContext } from './WSelect.context'
 import { WSvg } from './WSvg'
 import { WButton } from './WButton'
-export type WOptionProps = { value: string; disabled?: boolean; children: ReactNode }
-export function WOption({ value, disabled = false, children }: WOptionProps) {
+export type WOptionProps = { value: string; disabled?: boolean; indicator?: ReactNode; children: ReactNode }
+export function WOption({ value, disabled = false, indicator, children }: WOptionProps) {
   const context = useContext(WSelectContext)
   if (!context) throw new Error('WOption must be inside WSelect')
   const selected = Object.is(context.value, value)
@@ -28,7 +28,7 @@ export function WOption({ value, disabled = false, children }: WOptionProps) {
         if (!disabled) context.selectValue(value)
       }}
     >
-      <span className="wrap-anywhere">{children}</span>
+      <span className="wrap-anywhere">{children}{indicator}</span>
       {selected && <WSvg name="check" size={14} />}
     </WButton>
   )

@@ -60,6 +60,7 @@
     "web": "Export to website",
     "subtitle": "Wuthering Waves · Desktop",
     "quality": {
+      "detected": "Local resources detected",
       "choose": "Could not detect asset quality. Select the tier you have installed",
       "label": "Asset quality",
       "auto": "Automatic ({{tier}})",

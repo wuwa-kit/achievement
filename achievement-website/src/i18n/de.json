@@ -60,6 +60,7 @@
     "web": "Zur Website exportieren",
     "subtitle": "Wuthering Waves · Desktop",
     "quality": {
+      "detected": "Lokale Ressourcen erkannt",
       "choose": "Die Ressourcenqualität konnte nicht erkannt werden. Bitte die installierte Stufe auswählen",
       "label": "Ressourcenqualität",
       "auto": "Automatisch ({{tier}})",

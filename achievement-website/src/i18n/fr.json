@@ -60,6 +60,7 @@
     "web": "Exporter vers le site web",
     "subtitle": "Wuthering Waves · Bureau",
     "quality": {
+      "detected": "Ressources locales détectées",
       "choose": "La qualité des ressources est indétectable. Sélectionnez la qualité installée",
       "label": "Qualité des ressources",
       "auto": "Automatique ({{tier}})",

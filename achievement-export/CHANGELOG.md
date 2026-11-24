@@ -7,6 +7,17 @@ Release notes rules
 - Keep the Lite edition requirements section at the bottom of this file. The release script appends it to every release. Use Microsoft's link to the latest .NET 10 Desktop Runtime (x64) installer so the footer always points to the current patch.
 -->
 
+## [0.1.6] - 2026-11-24
+
+### Desktop
+
+- When the launcher has no recorded selection, the exporter checks the game directory for local resource packs and can use a detected tier for capture.
+- The resource tier menu marks detected local packs with a folder icon. Hover over the icon for details.
+
+### Website
+
+- Open `/desktop?mock=1` to preview the desktop interface in a browser with simulated game resources and capture state.
+
 ## [0.1.5] - 2026-11-24
 
 ### Desktop
