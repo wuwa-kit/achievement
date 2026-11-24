@@ -26,7 +26,7 @@ export function WPopover({
   ...props
 }: WPopoverProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const present = useOverlayPresence(open, ref)
+  const { present, content } = useOverlayPresence(open, ref, children)
   const change = useRef(onOpenChange)
   change.current = onOpenChange
 
@@ -112,7 +112,7 @@ export function WPopover({
       className={`w-popover fixed inset-auto m-0 overflow-hidden rounded-lg border-[length:var(--popover-border-width,1px)] border-(--color-border) bg-[var(--popover-bg,var(--color-surface))] p-[var(--popover-padding,0px)] text-[color:var(--popover-text,var(--color-text))] shadow-[0_8px_28px] shadow-(color:--color-shadow)/20 ${className}`}
       data-state={open ? 'open' : 'closing'}
     >
-      {children}
+      {content}
     </div>
   )
 }

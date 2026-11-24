@@ -8,6 +8,8 @@ namespace Wuwa.Desktop;
 
 public partial class App : Application
 {
+    private EventWaitHandle? activationEvent;
+    private RegisteredWaitHandle? activationListener;
     internal const string UpdateParentArgument = "--update-parent";
     internal static string UpdateReadyEvent(Guid handoff) => $@"Local\WuwaAchievementUpdate-{handoff:D}";
 
@@ -29,9 +31,25 @@ public partial class App : Application
             return;
         }
 
+        activationEvent = new EventWaitHandle(false, EventResetMode.AutoReset,
+            @"Local\WuwaAchievementExport.Desktop.Activate", out bool firstInstance);
+        if (!firstInstance)
+        {
+            activationEvent.Set();
+            Shutdown();
+            return;
+        }
+
         var window = new MainWindow();
         MainWindow = window;
         window.Show();
+        activationListener = ThreadPool.RegisterWaitForSingleObject(activationEvent,
+            (_, _) => Dispatcher.BeginInvoke(() =>
+            {
+                if (!window.IsVisible) return;
+                if (window.WindowState == WindowState.Minimized) SystemCommands.RestoreWindow(window);
+                window.Activate();
+            }), null, Timeout.Infinite, false);
 
         if (!window.IsActive && !window.Activate())
         {
@@ -39,6 +57,13 @@ public partial class App : Application
             window.Topmost = true;
             window.Topmost = false;
         }
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        activationListener?.Unregister(null);
+        activationEvent?.Dispose();
+        base.OnExit(e);
     }
 
     private static async Task<bool> WaitForUpdateParentAsync(string parentId, string startedAt, string handoff)

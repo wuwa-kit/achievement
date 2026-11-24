@@ -119,8 +119,8 @@ async function configureViewerCatalog(websiteBuild: boolean) {
   }
 }
 
-export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
-  const desktopBuild = mode === 'desktop'
+export default defineConfig(async ({ command }): Promise<UserConfig> => {
+  const desktopBuild = process.env.WUWA_BUILD_TARGET === 'desktop'
   const websiteBuild = command === 'build' && !desktopBuild
   const catalog = desktopBuild ? undefined : await configureViewerCatalog(websiteBuild)
   const imageLinks = websiteBuild
@@ -128,7 +128,10 @@ export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
     : undefined
   const assetUrl = imageLinks && ((filename: string) => externalAssetUrl(filename, imageLinks))
   return {
-    define: catalog?.define,
+    define: {
+      ...catalog?.define,
+      'import.meta.env.VITE_DESKTOP_BUILD': JSON.stringify(desktopBuild),
+    },
     publicDir: desktopBuild ? false : undefined,
     experimental: assetUrl ? { renderBuiltUrl: assetUrl } : undefined,
     plugins: [

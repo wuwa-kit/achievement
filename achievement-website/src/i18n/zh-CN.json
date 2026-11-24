@@ -59,6 +59,21 @@
     "achievementPoints": "成就点数",
     "web": "导出到网页",
     "subtitle": "鸣潮 · 桌面助手",
+    "quality": {
+      "choose": "无法识别资源档位，请选择已安装的档位",
+      "label": "资源档位",
+      "auto": "自动（{{tier}}）",
+      "unknown": "未识别",
+      "sd": "标清",
+      "hd": "高清",
+      "uhd": "超高清"
+    },
+    "zoom": {
+      "label": "界面缩放",
+      "out": "缩小",
+      "in": "放大",
+      "reset": "重置"
+    },
     "capture": "采集成就",
     "start": "开始采集",
     "cancel": "停止采集",

@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { WButton } from './WButton'
 import { WDialog } from './WDialog'
@@ -32,9 +31,6 @@ export function WConfirmDialog({
   onOpenChange,
   onConfirm,
 }: WConfirmDialogProps) {
-  const lastMessage = useRef(message)
-  if (open) lastMessage.current = message
-
   return createPortal(
     <WDialog
       className="w-confirm-dialog w-[440px] text-[14px] [--dialog-padding:20px]"
@@ -44,7 +40,7 @@ export function WConfirmDialog({
     >
       <div className="w-confirm-dialog-heading mb-2 text-[16px] font-semibold">{heading}</div>
       <div className="w-confirm-dialog-message leading-[1.6] wrap-anywhere">
-        {lastMessage.current}
+        {message}
       </div>
       <div className="w-confirm-dialog-actions mt-5 flex flex-wrap justify-end gap-2">
         <WButton

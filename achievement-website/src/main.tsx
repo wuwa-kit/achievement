@@ -10,8 +10,9 @@ import './theme.css'
 if (window.chrome?.webview) {
   document.documentElement.classList.replace('font-sans', 'font-desktop')
 }
-const desktopBuild = import.meta.env.MODE === 'desktop'
-const Desktop = lazy(() => import('./desktop/DesktopApp.tsx'))
+const desktopBuild = import.meta.env.VITE_DESKTOP_BUILD
+const loadDesktop = () => import('./desktop/DesktopApp.tsx')
+const Desktop = desktopBuild ? (await loadDesktop()).default : lazy(loadDesktop)
 const websitePages = desktopBuild
   ? null
   : {

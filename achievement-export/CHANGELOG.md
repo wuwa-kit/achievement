@@ -7,6 +7,19 @@ Release notes rules
 - Keep the Lite edition requirements section at the bottom of this file. The release script appends it to every release. Use Microsoft's link to the latest .NET 10 Desktop Runtime (x64) installer so the footer always points to the current patch.
 -->
 
+## [0.1.5] - 2026-11-24
+
+### Desktop
+
+- Select the installed resource tier or let the exporter detect it. Starting a capture checks the automatic selection again and opens the selector if a choice is needed.
+- Adjust interface zoom from the toolbar. The app restores zoom, window size, position, and maximized state on the next launch.
+- Opening the app again brings back the existing window. The desktop interface also appears sooner at startup.
+- Export a diagnostic ZIP directly from a capture error dialog.
+
+### Interface
+
+- Dialogs, tooltips, and dropdowns keep their displayed content throughout the closing animation.
+
 ## [0.1.4] - 2026-11-21
 
 ### Desktop

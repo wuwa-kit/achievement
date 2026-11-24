@@ -59,6 +59,21 @@
     "achievementPoints": "Achievement points",
     "web": "Export to website",
     "subtitle": "Wuthering Waves · Desktop",
+    "quality": {
+      "choose": "Could not detect asset quality. Select the tier you have installed",
+      "label": "Asset quality",
+      "auto": "Automatic ({{tier}})",
+      "unknown": "Unrecognized",
+      "sd": "Standard definition",
+      "hd": "High definition",
+      "uhd": "Ultra high definition"
+    },
+    "zoom": {
+      "label": "Interface zoom",
+      "out": "Zoom out",
+      "in": "Zoom in",
+      "reset": "Reset"
+    },
     "capture": "Capture achievements",
     "start": "Start capture",
     "cancel": "Stop capture",

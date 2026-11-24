@@ -59,6 +59,21 @@
     "achievementPoints": "업적 점수",
     "web": "웹사이트로 내보내기",
     "subtitle": "명조 · 데스크톱",
+    "quality": {
+      "choose": "리소스 화질을 감지할 수 없습니다. 설치된 화질을 선택하세요",
+      "label": "리소스 화질",
+      "auto": "자동 ({{tier}})",
+      "unknown": "감지되지 않음",
+      "sd": "표준 화질",
+      "hd": "고화질",
+      "uhd": "초고화질"
+    },
+    "zoom": {
+      "label": "화면 배율",
+      "out": "축소",
+      "in": "확대",
+      "reset": "초기화"
+    },
     "capture": "업적 수집",
     "start": "수집 시작",
     "cancel": "수집 중지",

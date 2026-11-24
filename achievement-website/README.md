@@ -37,7 +37,7 @@ mise exec -- pnpm format:check
 
 `build` 先运行 TypeScript 严格检查，再输出 `dist/`。生产网页通过 `website-catalog.json` 中的库街区直链加载公开图鉴，解压 PNG 的 `iTXt` 块供预览和 v3 账号档案共用。游戏图片直链记录在 `website-images.json`，字体使用库洛 CDN。将 `dist/` 部署到任意 HTTPS 静态托管服务即可。生产预览地址为 <http://127.0.0.1:4173>。
 
-桌面构建以 `--mode desktop` 生成并打包本地图鉴 `dist/assets/achievement-catalog-<哈希>.png`、图片与字体。图鉴数据更新后，在仓库根目录运行 `mise exec -- pnpm upload:catalog`。脚本读取根目录 `.env` 的 `KURO_TOKEN` 和 `KURO_DEVCODE`，生成 PNG 并上传，验证库街区原图和 `iTXt` 数据后更新 `website-catalog.json`。
+桌面发布脚本通过环境变量 `WUWA_BUILD_TARGET=desktop` 选择桌面入口，打包本地图片和字体并跳过网页图鉴。默认构建保留全部网页路由，两种构建均可独立指定 Vite 的 `--mode`。图鉴数据更新后，在仓库根目录运行 `mise exec -- pnpm upload:catalog`。脚本读取根目录 `.env` 的 `KURO_TOKEN` 和 `KURO_DEVCODE`，生成 PNG 并上传，验证库街区原图和 `iTXt` 数据后更新 `website-catalog.json`。
 
 浏览器将解压并校验过的图鉴 JSON 对象保存在 IndexedDB。图鉴版本相同时会直接读取缓存。
 

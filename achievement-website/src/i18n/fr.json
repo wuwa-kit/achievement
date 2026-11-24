@@ -59,6 +59,21 @@
     "achievementPoints": "Points de succès",
     "web": "Exporter vers le site web",
     "subtitle": "Wuthering Waves · Bureau",
+    "quality": {
+      "choose": "La qualité des ressources est indétectable. Sélectionnez la qualité installée",
+      "label": "Qualité des ressources",
+      "auto": "Automatique ({{tier}})",
+      "unknown": "Non détectée",
+      "sd": "Définition standard",
+      "hd": "Haute définition",
+      "uhd": "Ultra haute définition"
+    },
+    "zoom": {
+      "label": "Zoom de l’interface",
+      "out": "Réduire",
+      "in": "Agrandir",
+      "reset": "Réinitialiser"
+    },
     "capture": "Collecter les succès",
     "start": "Démarrer la collecte",
     "cancel": "Arrêter la collecte",

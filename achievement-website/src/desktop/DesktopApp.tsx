@@ -1,4 +1,7 @@
 import { useDesktopStore } from '../stores/desktop'
+import { useDebounceEffect } from 'ahooks'
+import { WSelect } from '../components/ui/WSelect'
+import { WOption } from '../components/ui/WOption'
 import { WThemeSwitch } from '../components/ui/WThemeSwitch'
 import { WTooltip } from '../components/ui/WTooltip'
 import { WSvg } from '../components/ui/WSvg'
@@ -12,6 +15,8 @@ import { WIconButton } from '../components/ui/WIconButton'
 import { WLanguageSwitch } from '../components/ui/WLanguageSwitch'
 import { useTranslation } from 'react-i18next'
 import { HistoryCard } from './HistoryCard'
+import { DesktopZoom } from './DesktopZoom'
+import { isDesktop } from './bridge'
 import { DesktopUpdate } from './DesktopUpdate'
 
 export default function DesktopApp() {
@@ -23,10 +28,11 @@ export default function DesktopApp() {
     notice,
     connect,
     dismissNotice,
-    openCollectionDiagnostics,
-    copyCollectionDiagnostics,
     exportLogs,
     setGamePath,
+    detectedQuality,
+    refreshQuality,
+    setQuality,
     detectPath,
     choosePath,
     startExport,
@@ -37,9 +43,29 @@ export default function DesktopApp() {
   } = useDesktopStore()
   const { t } = useTranslation()
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; uid: string } | null>(null)
-  const lastTransferUrl = useRef<string | null>(null)
   useEffect(connect, [connect])
-  if (state.transferUrl) lastTransferUrl.current = state.transferUrl
+  useDebounceEffect(
+    () => {
+      if (loaded) void refreshQuality()
+    },
+    [loaded, settings.gamePath, refreshQuality],
+    { wait: 250 },
+  )
+  const qualityRef = useRef<HTMLButtonElement>(null)
+  const [promptQuality, setPromptQuality] = useState(false)
+  useEffect(() => {
+    if (!promptQuality || pending) return
+    const trigger = qualityRef.current
+    trigger?.focus()
+    if (trigger?.dataset.expanded === 'false') trigger.click()
+    setPromptQuality(false)
+  }, [promptQuality, pending])
+  const autoLabel =
+    detectedQuality === undefined
+      ? t('common.auto')
+      : t('desktop.quality.auto', { tier: t(`desktop.quality.${detectedQuality ?? 'unknown'}`) })
+  const unknownTier = t('desktop.quality.unknown')
+  const [autoPrefix, autoSuffix] = autoLabel.split(unknownTier)
 
   const disabled = !loaded || pending || state.busy
   const sending = state.stage === 'sending'
@@ -56,9 +82,9 @@ export default function DesktopApp() {
   return (
     <div className="desktop-page m-auto max-w-[760px] p-7 text-(--color-text) desktop-narrow:p-5">
       <div className="desktop-settings mb-4" data-testid={t('desktop.settings')}>
-        <div className="desktop-header mb-2 flex items-center justify-between gap-3">
+        <div className="desktop-header mb-2 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0 text-[16px] wrap-anywhere">{t('desktop.game')}</div>
-          <div className="desktop-tools flex shrink-0 items-center gap-2">
+          <div className="desktop-tools flex min-w-0 flex-wrap items-center gap-2">
             <DesktopUpdate />
             <WTooltip text={t('desktop.exportLogs')}>
               <WIconButton
@@ -69,6 +95,7 @@ export default function DesktopApp() {
                 <WSvg name="file-export" size={20} />
               </WIconButton>
             </WTooltip>
+            {isDesktop && <DesktopZoom />}
             <WThemeSwitch />
             <WLanguageSwitch />
             <OpenSourceLink />
@@ -106,7 +133,43 @@ export default function DesktopApp() {
           </WTooltip>
         </div>
       </div>
-      {loaded && <div className="mb-2 text-[16px]">{t('desktop.capture')}</div>}
+      {loaded && (
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <span className="text-[16px]">{t('desktop.capture')}</span>
+          <div className="flex min-w-0 items-center gap-1 text-[13px] text-(--color-muted)">
+            <span>{t('desktop.quality.label')}</span>
+            <WSelect
+              ref={qualityRef}
+              data-testid="resource-quality"
+              className="h-7 border-transparent bg-transparent px-1 text-[13px]"
+              placement="bottom-end"
+              disabled={disabled}
+              value={settings.quality ?? 'auto'}
+              onValueChange={(value) => {
+                if (value === 'auto' || value === 'sd' || value === 'hd' || value === 'uhd')
+                  setQuality(value)
+              }}
+            >
+              <WOption value="auto">
+                {detectedQuality === null ? (
+                  <>
+                    {autoPrefix}
+                    <span className="text-(--color-gold)">{unknownTier}</span>
+                    {autoSuffix}
+                  </>
+                ) : (
+                  autoLabel
+                )}
+              </WOption>
+              {(['sd', 'hd', 'uhd'] as const).map((tier) => (
+                <WOption key={tier} value={tier}>
+                  {t(`desktop.quality.${tier}`)}
+                </WOption>
+              ))}
+            </WSelect>
+          </div>
+        </div>
+      )}
       {loaded && (
         <div className="ui-section desktop-card flex items-center gap-4 rounded-[9px] border border-(--color-border) bg-(--color-surface) px-4 py-3.5">
           <div className="min-w-0 flex-1">
@@ -136,7 +199,10 @@ export default function DesktopApp() {
               }
               data-testid={exportAction}
               data-running={exportRunning || undefined}
-              onClick={() => void (exportRunning ? cancelExport() : startExport())}
+              onClick={async () => {
+                if (exportRunning) await cancelExport()
+                else if (await startExport()) setPromptQuality(true)
+              }}
             >
               <WSvg name={exportRunning ? 'stop' : 'play'} size={20} />
             </WButton>
@@ -181,7 +247,7 @@ export default function DesktopApp() {
             className="min-w-0 flex-1 select-all wrap-anywhere px-1 py-1 text-[13px]"
             data-testid="transfer-url"
           >
-            {lastTransferUrl.current}
+            {state.transferUrl}
           </div>
           <WTooltip text={t('desktop.transfer.copyLink')}>
             <WButton
@@ -232,9 +298,6 @@ export default function DesktopApp() {
             {diagnostic.nativeErrorCode !== null && (
               <div>{t(`${diagnosticCopy}.nativeCode`, { code: diagnostic.nativeErrorCode })}</div>
             )}
-            {diagnostic.directory && (
-              <div data-testid="collection-diagnostics-directory">{diagnostic.directory}</div>
-            )}
             {[
               'unexpected',
               'invalidModel',
@@ -248,24 +311,13 @@ export default function DesktopApp() {
           </div>
         )}
         <div className="mt-5 flex flex-wrap justify-end gap-2">
-          {diagnostic && (
-            <WButton
-              className="rounded-md px-3 py-[7px] enabled:hover:bg-(--color-surface-hover)"
-              disabled={pending}
-              onClick={() => void copyCollectionDiagnostics()}
-            >
-              {t(`${diagnosticCopy}.copy`)}
-            </WButton>
-          )}
-          {diagnostic?.directory && (
-            <WButton
-              className="rounded-md px-3 py-[7px] enabled:hover:bg-(--color-surface-hover)"
-              disabled={pending}
-              onClick={() => void openCollectionDiagnostics()}
-            >
-              {t(`${diagnosticCopy}.open`)}
-            </WButton>
-          )}
+          <WButton
+            className="rounded-md px-3 py-[7px] enabled:hover:bg-(--color-surface-hover)"
+            disabled={pending || state.busy}
+            onClick={() => void exportLogs()}
+          >
+            {t('desktop.exportLogs')}
+          </WButton>
           <WButton
             autoFocus
             className="rounded-md bg-(--color-accent) px-3 py-[7px] text-(--color-on-accent) enabled:hover:bg-(--color-accent-hover)"

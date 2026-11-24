@@ -1,7 +1,9 @@
 import { tr, isLanguage, type AppLanguage } from '../i18n/index.ts'
 import { defaultLanguage } from '../i18n/resources'
 import { desktopBootstrap } from '../lib/bootstrap'
+export type ResourceTier = 'sd' | 'hd' | 'uhd'
 export interface DesktopSettings {
+  quality?: ResourceTier | 'auto'
   gamePath: string
   language: AppLanguage
   theme?: 'auto' | 'light' | 'dark'
@@ -57,6 +59,8 @@ export type UpdateDownload = { attemptId: string; received: number } & (
   | { status: 'failed'; failure: 'integrityFailed' | 'saveFailed' | 'downloadFailed' }
 )
 type Methods = {
+  'zoom.get': { params: undefined; result: number }
+  'zoom.adjust': { params: { direction: 'in' | 'out' | 'reset' }; result: number }
   'update.check': { params: undefined; result: UpdateCheck }
   'update.download': { params: UpdateTarget & { attemptId: string }; result: null }
   'update.cancel': { params: undefined; result: null }
@@ -70,9 +74,10 @@ type Methods = {
   'history.delete': { params: { id: string }; result: DesktopState }
   'settings.get': { params: undefined; result: DesktopSettings }
   'settings.save': { params: DesktopSettings; result: DesktopSettings }
+  'game.quality': { params: { gamePath: string }; result: ResourceTier | null }
   'game.detect': { params: undefined; result: string | null }
   'game.choose': { params: undefined; result: string | null }
-  'export.start': { params: undefined; result: null }
+  'export.start': { params: undefined; result: ResourceTier | 'qualityRequired' | null }
   'export.resend': { params: undefined; result: null }
   'export.cancel': { params: undefined; result: null }
   'transfer.copyLink': { params: undefined; result: boolean }
@@ -89,6 +94,7 @@ type Message = {
   error?: string
 } & (
   | { event?: undefined; data?: undefined }
+  | { event: 'zoom'; data: number }
   | { event: 'state'; data: DesktopState }
   | { event: 'updateDownload'; data: UpdateDownload }
 )
@@ -114,8 +120,16 @@ export const getInitialDesktopSettings = () =>
       : request('settings.get'))
 const pending = new Map<string, { resolve(value: unknown): void; reject(error: Error): void }>()
 const listeners = new Set<(state: DesktopState) => void>()
+const zoomListeners = new Set<(percent: number) => void>()
+export function subscribeZoom(listener: (percent: number) => void) {
+  zoomListeners.add(listener)
+  return () => {
+    zoomListeners.delete(listener)
+  }
+}
 const updateListeners = new Set<(state: UpdateDownload) => void>()
 webview?.addEventListener('message', ({ data }) => {
+  if (data.event === 'zoom') zoomListeners.forEach((listener) => listener(data.data))
   if (data.event === 'state') listeners.forEach((listener) => listener(data.data))
   if (data.event === 'updateDownload') updateListeners.forEach((listener) => listener(data.data))
   if (!data.id) return
@@ -181,7 +195,12 @@ function browserRequest(method: keyof Methods, params?: Methods[keyof Methods]['
         sessionStorage.getItem(previewKey) ?? 'null',
       ) as Partial<DesktopSettings> | null
       if (saved && typeof saved.gamePath === 'string' && isLanguage(saved.language)) {
-        previewSettings = { gamePath: saved.gamePath, language: saved.language, theme: saved.theme }
+        previewSettings = {
+          quality: saved.quality,
+          gamePath: saved.gamePath,
+          language: saved.language,
+          theme: saved.theme,
+        }
       }
     } catch {
       /* Storage is optional for browser preview. */
@@ -197,6 +216,7 @@ function browserRequest(method: keyof Methods, params?: Methods[keyof Methods]['
     }
     return { ...previewSettings }
   }
+  if (method === 'game.quality') return null
   if (method === 'state.get')
     return {
       stage: 'ready',

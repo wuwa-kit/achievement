@@ -73,6 +73,7 @@ for (const language of appLanguages)
         uid: '10001',
         incoming: '2020-01-01',
         existing: '2020-01-02',
+        tier: 'HD',
         stage: 'STAGE',
         code: 'CODE',
         field: 'FIELD',

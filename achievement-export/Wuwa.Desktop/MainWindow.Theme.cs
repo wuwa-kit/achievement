@@ -30,6 +30,7 @@ public partial class MainWindow
             Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
                 "AppsUseLightTheme", 1) is 0);
         ApplyTheme(dark);
+        RestoreWindowPlacement();
         SystemParameters.StaticPropertyChanged += OnSystemParameterChanged;
     }
 

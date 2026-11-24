@@ -13,12 +13,13 @@ export function WDialog({
   onOpenChange,
   closeOnBackdrop = false,
   className = '',
+  children,
   onCancel,
   onClose,
   ...props
 }: WDialogProps) {
   const ref = useRef<HTMLDialogElement>(null)
-  const present = useOverlayPresence(open, ref)
+  const { present, content } = useOverlayPresence(open, ref, children)
 
   useLayoutEffect(() => {
     const dialog = ref.current
@@ -51,6 +52,8 @@ export function WDialog({
         if (event.target === event.currentTarget && open && !event.currentTarget.open)
           onOpenChange(false)
       }}
-    />
+    >
+      {content}
+    </dialog>
   )
 }

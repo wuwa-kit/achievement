@@ -3,9 +3,12 @@ import { immer } from 'zustand/middleware/immer'
 import {
   request,
   subscribe,
+  subscribeZoom,
+  isDesktop,
   getInitialDesktopSettings,
   type CollectionNotice,
   type DesktopSettings,
+  type ResourceTier,
   type DesktopState,
   type HistoryExportFormat,
 } from '../desktop/bridge'
@@ -15,6 +18,8 @@ import { usePreferencesStore } from './preferences'
 import { wMessage } from './message'
 
 interface DesktopStore {
+  zoom: number
+  adjustZoom(direction: 'in' | 'out' | 'reset'): Promise<void>
   settings: DesktopSettings
   state: DesktopState
   loaded: boolean
@@ -23,13 +28,14 @@ interface DesktopStore {
   connect(): () => void
   acceptState(state: DesktopState): void
   dismissNotice(): void
-  openCollectionDiagnostics(): Promise<void>
-  copyCollectionDiagnostics(): Promise<void>
   exportLogs(): Promise<void>
+  detectedQuality: ResourceTier | null | undefined
+  refreshQuality(): Promise<void>
+  setQuality(value: ResourceTier | 'auto'): void
   setGamePath(path: string): void
   detectPath(): Promise<void>
   choosePath(): Promise<void>
-  startExport(): Promise<void>
+  startExport(): Promise<boolean>
   cancelExport(): Promise<void>
   copyTransferLink(): Promise<void>
   exportHistory(id: string, format: HistoryExportFormat): Promise<void>
@@ -38,6 +44,14 @@ interface DesktopStore {
 }
 export const useDesktopStore = create<DesktopStore>()(
   immer((set, get) => ({
+    zoom: 100,
+    async adjustZoom(direction) {
+      try {
+        set({ zoom: await request('zoom.adjust', { direction }) })
+      } catch (error) {
+        wMessage.error(String(error))
+      }
+    },
     settings: {
       gamePath: desktopBootstrap?.gamePath ?? '',
       language: usePreferencesStore.getState().language,
@@ -71,12 +85,6 @@ export const useDesktopStore = create<DesktopStore>()(
       }
     },
     dismissNotice: () => set({ notice: null }),
-    openCollectionDiagnostics: () => get().act(() => request('collection.openDiagnostics')),
-    copyCollectionDiagnostics: () =>
-      get().act(async () => {
-        await request('collection.copyDiagnostics')
-        wMessage.success(tr('desktop.captureDiagnostics.copied'))
-      }),
     exportLogs: () =>
       get().act(async () => {
         if (get().state.busy) return
@@ -85,6 +93,19 @@ export const useDesktopStore = create<DesktopStore>()(
       }),
     connect() {
       let active = true
+      let receivedZoom = false
+      const unsubscribeZoom = subscribeZoom((zoom) => {
+        receivedZoom = true
+        set({ zoom })
+      })
+      if (isDesktop)
+        void request('zoom.get')
+          .then((zoom) => {
+            if (active && !receivedZoom && zoom > 0) set({ zoom })
+          })
+          .catch((error) => {
+            if (active) wMessage.error(String(error))
+          })
       let receivedState = false
       const unsubscribePreferences = usePreferencesStore.subscribe(({ language, mode }) => {
         set((state) => {
@@ -116,6 +137,7 @@ export const useDesktopStore = create<DesktopStore>()(
         active = false
         unsubscribe()
         unsubscribePreferences()
+        unsubscribeZoom()
       }
     },
     async act(action) {
@@ -129,8 +151,20 @@ export const useDesktopStore = create<DesktopStore>()(
         set({ pending: false })
       }
     },
+    detectedQuality: undefined,
+    async refreshQuality() {
+      const gamePath = get().settings.gamePath
+      if (!gamePath.trim()) return
+      const detectedQuality = await request('game.quality', { gamePath }).catch(() => null)
+      if (get().settings.gamePath === gamePath) set({ detectedQuality })
+    },
+    setQuality: (quality) =>
+      set((state) => {
+        state.settings.quality = quality
+      }),
     setGamePath: (path) =>
       set((state) => {
+        state.detectedQuality = undefined
         state.settings.gamePath = path
       }),
     detectPath: () =>
@@ -144,12 +178,20 @@ export const useDesktopStore = create<DesktopStore>()(
         const path = await request('game.choose')
         if (path) get().setGamePath(path)
       }),
-    startExport: () =>
-      get().act(async () => {
+    async startExport() {
+      let needsQuality = false
+      await get().act(async () => {
         if (get().state.busy || get().notice) return
         await request('settings.save', get().settings)
-        await request('export.start')
-      }),
+        const result = await request('export.start')
+        if (result === 'qualityRequired') {
+          needsQuality = true
+          set({ detectedQuality: null })
+          wMessage.info(tr('desktop.quality.choose'))
+        } else if (result) set({ detectedQuality: result })
+      })
+      return needsQuality
+    },
     cancelExport: () =>
       get().act(async () => {
         if (get().state.busy) await request('export.cancel')

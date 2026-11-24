@@ -59,6 +59,21 @@
     "achievementPoints": "Erfolgspunkte",
     "web": "Zur Website exportieren",
     "subtitle": "Wuthering Waves · Desktop",
+    "quality": {
+      "choose": "Die Ressourcenqualität konnte nicht erkannt werden. Bitte die installierte Stufe auswählen",
+      "label": "Ressourcenqualität",
+      "auto": "Automatisch ({{tier}})",
+      "unknown": "Nicht erkannt",
+      "sd": "Standardauflösung",
+      "hd": "Hohe Auflösung",
+      "uhd": "Ultrahohe Auflösung"
+    },
+    "zoom": {
+      "label": "Ansichtszoom",
+      "out": "Verkleinern",
+      "in": "Vergrößern",
+      "reset": "Zurücksetzen"
+    },
     "capture": "Erfolge erfassen",
     "start": "Erfassung starten",
     "cancel": "Erfassung stoppen",

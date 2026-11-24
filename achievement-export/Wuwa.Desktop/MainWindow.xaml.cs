@@ -27,6 +27,7 @@ public partial class MainWindow : Window
     private static readonly string SettingsPath = Path.Combine(DataPath, "settings.json");
     private static readonly string AccountsPath = Path.Combine(DataPath, "accounts");
     private static readonly string DiagnosticsPath = Path.Combine(DataPath, "diagnostics");
+    private readonly Task<CoreWebView2Environment> browserEnvironment;
     private CancellationTokenSource? operation;
     private TransferSession? transfer;
     private bool closeRequested;
@@ -36,7 +37,7 @@ public partial class MainWindow : Window
     private CollectionDiagnostic? collectionDiagnostic;
     private Settings settings = new(Options.DefaultGame);
     private readonly ExportHistory history = new(AccountsPath);
-    private sealed record Settings(string GamePath, string Language = "", string Theme = "auto");
+    private sealed record Settings(string GamePath, string Language = "", string Theme = "auto", string Quality = "auto", SavedWindow? Window = null, double Zoom = 1);
     private static readonly Dictionary<string, JsonElement> Locales = Assembly.GetExecutingAssembly().GetManifestResourceNames()
         .Where(name => name.StartsWith("Locale.", StringComparison.Ordinal) && name.EndsWith(".json", StringComparison.Ordinal))
         .ToDictionary(name => name["Locale.".Length..^".json".Length], name =>
@@ -57,16 +58,19 @@ public partial class MainWindow : Window
     private void UpdateWindowTitle() => Title = $"{Text("desktopTitle", "common")} {CurrentReleaseTag}";
     public MainWindow()
     {
+        browserEnvironment = CoreWebView2Environment.CreateAsync(userDataFolder: Path.Combine(DataPath, "WebView2"));
         InitializeComponent();
         try { if (File.Exists(SettingsPath)) settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(SettingsPath), JsonOptions) ?? settings; }
         catch (Exception e) when (e is IOException or JsonException) { error = e.Message; }
         settings = settings with
         {
             Language = settings.Language is not null && Locales.ContainsKey(settings.Language) ? settings.Language : SystemLanguage(),
+            Quality = settings.Quality is "sd" or "hd" or "uhd" ? settings.Quality : "auto",
             GamePath = settings.GamePath ?? Options.DefaultGame
         };
         UpdateWindowTitle();
         settings = settings with { Theme = settings.Theme is "light" or "dark" ? settings.Theme : "auto" };
+        if (settings.Window is not null) WindowStartupLocation = WindowStartupLocation.Manual;
         Loaded += InitializeBrowser;
         Closed += (_, _) => { windowClosed = true; Browser.Dispose(); };
     }
@@ -77,8 +81,9 @@ public partial class MainWindow : Window
             if (typeof(MainWindow).Assembly.GetManifestResourceInfo(UiResourcePrefix + DesktopEntryPath) is null)
                 throw new FileNotFoundException(Text("assetsMissing"));
 
-            var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: Path.Combine(DataPath, "WebView2"));
+            var environment = await browserEnvironment;
             await Browser.EnsureCoreWebView2Async(environment);
+            Browser.ZoomFactor = settings.Zoom is >= 0.25 and <= 5 ? settings.Zoom : 1;
             var core = Browser.CoreWebView2;
             core.AddWebResourceRequestedFilter(Origin + "/*", CoreWebView2WebResourceContext.All, CoreWebView2WebResourceRequestSourceKinds.All);
             core.WebResourceRequested += ServeUiResource;
@@ -93,6 +98,7 @@ public partial class MainWindow : Window
             };
             core.PermissionRequested += (_, e) => e.State = CoreWebView2PermissionState.Deny;
             core.WebMessageReceived += OnMessage;
+            Browser.ZoomFactorChanged += (_, _) => Reply(new { @event = "zoom", data = ZoomPercent });
             await RegisterBootstrap();
             core.Navigate(Origin + DesktopEntryPath);
         }
@@ -135,6 +141,8 @@ public partial class MainWindow : Window
             : environment.CreateWebResourceResponse(stream, 200, "OK",
                 $"Content-Type: {contentType}\r\nCache-Control: no-store\r\nX-Content-Type-Options: nosniff");
     }
+    private int ZoomPercent => (int)Math.Round(Browser.ZoomFactor * 100);
+    private static readonly int[] ZoomLevels = [25, 33, 50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200, 250, 300, 400, 500];
     private object State() => new { stage, busy = operation is not null, transferUrl = transfer?.BrowserUrl.AbsoluteUri, error, collectionDiagnostic, history = history.List() };
     private void Emit(string? next = null)
     {
@@ -158,6 +166,19 @@ public partial class MainWindow : Window
             {
                 case "theme.set": ApplyTheme(message.GetProperty("params").GetProperty("dark").GetBoolean()); break;
                 case "settings.get": result = settings; break;
+                case "zoom.get": result = ZoomPercent; break;
+                case "zoom.adjust":
+                    var direction = message.GetProperty("params").GetProperty("direction").GetString();
+                    var percent = ZoomPercent;
+                    var target = direction switch
+                    {
+                        "in" => ZoomLevels.FirstOrDefault(level => level > percent, ZoomLevels[^1]),
+                        "out" => ZoomLevels.LastOrDefault(level => level < percent, ZoomLevels[0]),
+                        "reset" => 100,
+                        _ => throw new ArgumentException(Text("invalidSettings"))
+                    };
+                    Browser.ZoomFactor = target / 100d;
+                    result = ZoomPercent; break;
                 case "state.get": result = State(); break;
                 case "update.check": result = await CheckUpdateAsync(); break;
                 case "update.download":
@@ -178,10 +199,14 @@ public partial class MainWindow : Window
                     result = settings; break;
                 case "settings.save":
                     var next = message.GetProperty("params").Deserialize<Settings>(JsonOptions) ?? throw new ArgumentException(Text("invalidSettings"));
-                    if (next.Language is null || !Locales.ContainsKey(next.Language) || next.GamePath is null) throw new ArgumentException(Text("invalidSettings"));
-                    if (operation is not null && next.GamePath != settings.GamePath) throw new InvalidOperationException(Text("running"));
-                    await SaveSettings(next with { Language = settings.Language, Theme = settings.Theme });
+                    if (next.Language is null || !Locales.ContainsKey(next.Language) || next.GamePath is null || next.Quality is not ("auto" or "sd" or "hd" or "uhd")) throw new ArgumentException(Text("invalidSettings"));
+                    if (operation is not null && (next.GamePath != settings.GamePath || next.Quality != settings.Quality)) throw new InvalidOperationException(Text("running"));
+                    await SaveSettings(settings with { GamePath = next.GamePath, Quality = next.Quality });
                     result = settings; break;
+                case "game.quality":
+                    var path = message.GetProperty("params").GetProperty("gamePath").GetString()?.Trim();
+                    result = await Task.Run(() => File.Exists(path) ? DetectQuality(path) : null);
+                    break;
                 case "game.detect":
                     EnsureIdle(); result = await Task.Run(() => GamePathDetector.Detect(settings.GamePath)); break;
                 case "game.choose":
@@ -189,7 +214,19 @@ public partial class MainWindow : Window
                     var gameDialog = new OpenFileDialog { Filter = Text("gameFilter"), FileName = "Wuthering Waves.exe" };
                     if (gameDialog.ShowDialog(this) == true) result = gameDialog.FileName;
                     break;
-                case "export.start": EnsureIdle(); _ = RunExport(); break;
+                case "export.start":
+                    EnsureIdle();
+                    var gamePath = settings.GamePath.Trim();
+                    var quality = settings.Quality;
+                    if (quality == "auto" && File.Exists(gamePath))
+                    {
+                        var detected = await Task.Run(() => DetectQuality(gamePath));
+                        if (detected is null) { result = "qualityRequired"; break; }
+                        result = quality = detected;
+                    }
+                    EnsureIdle();
+                    _ = RunExport(gamePath, quality);
+                    break;
                 case "history.export":
                     EnsureIdle();
                     var parameters = message.GetProperty("params");
@@ -292,9 +329,15 @@ public partial class MainWindow : Window
         }
         return true;
     }
-    private Task RunExport() => Execute(async token =>
+    private static string? DetectQuality(string gamePath)
     {
-        var options = new Options("export", DataPath, settings.GamePath.Trim(), DiagnosticsPath, "auto", 900, new());
+        try { return Launcher.Quality(Path.GetFullPath(gamePath), "auto"); }
+        catch (Exception error) when (error is IOException or InvalidDataException or UnauthorizedAccessException or JsonException or InvalidOperationException or NullReferenceException) { return null; }
+    }
+
+    private Task RunExport(string gamePath, string quality) => Execute(async token =>
+    {
+        var options = new Options("export", DataPath, gamePath, DiagnosticsPath, quality, 900, new());
         var progress = new Progress<CollectionStage>(phase =>
         {
             if (operation is null || operation.Token != token) return;
@@ -370,7 +413,11 @@ public partial class MainWindow : Window
             updateDownload.Cancel();
             return;
         }
-        if (operation is null) return;
+        if (operation is null)
+        {
+            SaveWindowState();
+            return;
+        }
         e.Cancel = true; closeRequested = true;
         StopOperation();
     }

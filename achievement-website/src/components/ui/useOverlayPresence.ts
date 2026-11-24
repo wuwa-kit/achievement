@@ -1,7 +1,17 @@
-import { useLayoutEffect, useState, type RefObject } from 'react'
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 
-export function useOverlayPresence(open: boolean, ref: RefObject<HTMLElement | null>) {
+export function useOverlayPresence(
+  open: boolean,
+  ref: RefObject<HTMLElement | null>,
+  children: ReactNode,
+) {
   const [present, setPresent] = useState(open)
+
+  const lastContent = useRef<ReactNode>(null)
+  useLayoutEffect(() => {
+    if (open) lastContent.current = children
+    else if (!present) lastContent.current = null
+  }, [open, children, present])
 
   useLayoutEffect(() => {
     const element = ref.current
@@ -29,5 +39,5 @@ export function useOverlayPresence(open: boolean, ref: RefObject<HTMLElement | n
     }
   }, [open, ref])
 
-  return open || present
+  return { present: open || present, content: open ? children : lastContent.current }
 }

@@ -17,6 +17,63 @@ test('desktop route supports browser preview and persists preview language', asy
   )
 })
 
+test('desktop zoom follows host changes and stays open across adjustments', async ({ page }) => {
+  await page.setViewportSize({ width: 580, height: 480 })
+  await page.addInitScript(() => {
+    let receive: (event: { data: unknown }) => void
+    let zoom = 110
+    Object.defineProperty(window, 'chrome', {
+      configurable: true,
+      value: {
+        webview: {
+          addEventListener: (_: string, callback: typeof receive) => {
+            receive = callback
+          },
+          postMessage: ({
+            id,
+            method,
+            params,
+          }: {
+            id: string
+            method: string
+            params?: { direction: string }
+          }) => {
+            let result: unknown = null
+            if (method === 'settings.get') result = { gamePath: '', language: 'zh-CN' }
+            if (method === 'state.get') result = { stage: 'ready', busy: false }
+            if (method === 'zoom.get') result = zoom
+            if (method === 'zoom.adjust') {
+              zoom =
+                params?.direction === 'reset' ? 100 : zoom + (params?.direction === 'in' ? 25 : -25)
+              result = zoom
+            }
+            queueMicrotask(() => receive({ data: { id, result } }))
+          },
+        },
+      },
+    })
+    window.addEventListener('test-host-zoom', () => {
+      zoom = 150
+      receive({ data: { event: 'zoom', data: zoom } })
+    })
+  })
+  await page.goto('/desktop')
+  await page.getByTestId('desktop-zoom').click()
+  const panel = page.locator('[popover]:popover-open').filter({ has: page.getByTestId('zoom-in') })
+  await expect(panel).toContainText('110%')
+  await page.evaluate(() => window.dispatchEvent(new Event('test-host-zoom')))
+  await expect(panel).toContainText('150%')
+  await page.getByTestId('zoom-in').click()
+  await expect(panel).toContainText('175%')
+  await page.getByTestId('zoom-out').click()
+  await expect(panel).toContainText('150%')
+  const reset = panel.getByText('150%', { exact: true })
+  await reset.hover()
+  await expect(page.locator('.w-tooltip')).toHaveText('重置')
+  await reset.click()
+  await expect(panel).toContainText('100%')
+})
+
 test('desktop bridge preserves progress while switching language and supports cancellation', async ({
   page,
 }) => {
@@ -24,6 +81,7 @@ test('desktop bridge preserves progress while switching language and supports ca
     let listener: (event: { data: unknown }) => void
     let settings = {
       gamePath: 'C:/Game/Wuthering Waves.exe',
+      quality: 'auto',
       language: 'zh-CN',
     }
     let state = { stage: 'ready', busy: false, transferUrl: null, error: null }
@@ -40,13 +98,17 @@ test('desktop bridge preserves progress while switching language and supports ca
           },
           postMessage: (message: { id: string; method: string; params: typeof settings }) => {
             let result: unknown = null
+            if (message.method === 'game.quality')
+              result = message.params.gamePath.startsWith('D:') ? null : 'hd'
             if (message.method === 'game.detect') result = 'D:/Games/Wuthering Waves.exe'
             if (message.method === 'game.choose') result = 'E:/Game/Wuthering Waves.exe'
             if (message.method === 'settings.get') result = settings
             if (message.method === 'state.get') result = state
             if (message.method === 'settings.save') result = settings = message.params
-            if (message.method === 'export.start')
-              state = { ...state, stage: 'starting', busy: true }
+            if (message.method === 'export.start') {
+              if (settings.gamePath.startsWith('D:') && (settings.quality ?? 'auto') === 'auto') result = 'qualityRequired'
+              else state = { ...state, stage: 'starting', busy: true }
+            }
             if (message.method === 'export.cancel')
               state = { ...state, stage: 'cancelled', busy: false }
             if (message.method === 'collection.exportLogs')
@@ -82,8 +144,21 @@ test('desktop bridge preserves progress while switching language and supports ca
   await expect(page.locator('.w-tooltip')).toHaveCount(0)
   await detect.click()
   await expect(pathInput).toHaveValue('D:/Games/Wuthering Waves.exe')
+  const quality = page.getByTestId('resource-quality')
+  await expect(quality).toHaveText('自动（未识别）')
+  await page.getByTestId('开始采集').click()
+  await expect(page.locator('.w-message')).toContainText('无法识别资源档位，请选择已安装的档位')
+  await expect(quality).toHaveAttribute('data-expanded', 'true')
+  await page.locator('[popover]:popover-open [data-value="sd"]').click()
+  await expect(quality).toHaveText('标清')
+  await page.getByTestId('开始采集').click()
+  await page.locator('.desktop-export-toggle[data-running="true"]').click()
+  await selectValue(page, quality, 'auto')
   await page.getByTestId('打开系统文件选择器').click()
   await expect(pathInput).toHaveValue('E:/Game/Wuthering Waves.exe')
+  await expect(quality).toHaveText('自动（高清）')
+  await selectValue(page, quality, 'uhd')
+  await expect(quality).toHaveText('超高清')
   await page.getByTestId('开始采集').click()
   const stage = page.locator('.desktop-stage')
   const body = page.locator('.desktop-description')
@@ -168,18 +243,26 @@ test('desktop bridge preserves progress while switching language and supports ca
   await emitFailure()
   await expect(notice).toContainText('Required field AchievementMap is missing')
   await expect(notice).toContainText('Locating and reading the achievement model')
-  await expect(notice.getByTestId('collection-diagnostics-directory')).toHaveText(
-    failed.collectionDiagnostic.directory,
-  )
-  await notice.getByText('Open diagnostics folder', { exact: true }).click()
+  await expect(notice).not.toContainText(failed.collectionDiagnostic.directory)
+  await page.evaluate(() => localStorage.removeItem('collection-diagnostic-action'))
+  await notice.getByText('Export logs', { exact: true }).click()
   await expect
     .poll(() => page.evaluate(() => localStorage.getItem('collection-diagnostic-action')))
-    .toBe('collection.openDiagnostics')
-  await notice.getByText('Copy diagnostic information', { exact: true }).click()
-  await expect
-    .poll(() => page.evaluate(() => localStorage.getItem('collection-diagnostic-action')))
-    .toBe('collection.copyDiagnostics')
-  await notice.getByText('Got it', { exact: true }).click()
+    .toBe('collection.exportLogs')
+  const beforeClose = await notice.textContent()
+  const duringClose = await notice.evaluate(async (dialog) => {
+    const result = new Promise<string | null>((resolve) => {
+      const observer = new MutationObserver(() => {
+        if (dialog.dataset.state !== 'closing') return
+        resolve(dialog.textContent)
+        observer.disconnect()
+      })
+      observer.observe(dialog, { attributes: true })
+    })
+    dialog.querySelectorAll('button').item(dialog.querySelectorAll('button').length - 1).click()
+    return result
+  })
+  expect(duringClose).toBe(beforeClose)
   await emitFailure()
   await expect(notice).toHaveCount(0)
   await expect(page.getByTestId('Start capture')).toBeEnabled()

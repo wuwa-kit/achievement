@@ -59,6 +59,21 @@
     "achievementPoints": "成就點數",
     "web": "匯出至網頁",
     "subtitle": "鳴潮 · 桌面助手",
+    "quality": {
+      "choose": "無法辨識資源畫質，請選擇已安裝的畫質",
+      "label": "資源畫質",
+      "auto": "自動（{{tier}}）",
+      "unknown": "未辨識",
+      "sd": "標準畫質",
+      "hd": "高畫質",
+      "uhd": "超高畫質"
+    },
+    "zoom": {
+      "label": "介面縮放",
+      "out": "縮小",
+      "in": "放大",
+      "reset": "重設"
+    },
     "capture": "擷取成就",
     "start": "開始擷取",
     "cancel": "停止擷取",

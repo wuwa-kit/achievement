@@ -59,6 +59,21 @@
     "achievementPoints": "Pontos de conquista",
     "web": "Exportar para o site",
     "subtitle": "Wuthering Waves · Desktop",
+    "quality": {
+      "choose": "Não foi possível detectar a qualidade dos recursos. Selecione a qualidade instalada",
+      "label": "Qualidade dos recursos",
+      "auto": "Automática ({{tier}})",
+      "unknown": "Não detectada",
+      "sd": "Definição padrão",
+      "hd": "Alta definição",
+      "uhd": "Ultra-alta definição"
+    },
+    "zoom": {
+      "label": "Zoom da interface",
+      "out": "Diminuir",
+      "in": "Aumentar",
+      "reset": "Redefinir"
+    },
     "capture": "Capturar conquistas",
     "start": "Iniciar captura",
     "cancel": "Parar captura",
