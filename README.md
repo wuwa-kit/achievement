@@ -6,7 +6,7 @@
 
 [在线预览](https://wu.songe.li)
 
-下载 Windows x64 [标准版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.4/WuwaAchievementExport-Full-v0.1.4.exe)或 [Lite 版](https://github.com/wuwa-kit/achievement/releases/download/v0.1.4/WuwaAchievementExport-Lite-v0.1.4.exe)。标准版内置 .NET，Lite 版需要另行下载并安装 [.NET 10 Desktop Runtime（x64）](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe)。
+从[最新稳定版发布页](https://github.com/wuwa-kit/achievement/releases/latest)下载 Windows x64 标准版（Full）或 Lite 版。标准版内置 .NET，Lite 版需要另行下载并安装 [.NET 10 Desktop Runtime（x64）](https://dotnet.microsoft.com/zh-cn/download/dotnet/thank-you/runtime-desktop-10.0.15-windows-x64-installer)。
 
 ## 快速开始
 

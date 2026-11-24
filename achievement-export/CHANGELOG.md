@@ -58,4 +58,4 @@ If you are using an older version, download this release manually to enable in-a
 
 ## Lite edition requirements
 
-Before running the Lite edition, download and install the [.NET 10 Desktop Runtime (x64)](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe) separately.
+Before running the Lite edition, download and install the [.NET 10 Desktop Runtime (x64)](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-10.0.15-windows-x64-installer) separately.
