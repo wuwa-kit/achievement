@@ -49,6 +49,7 @@
       "restartFailed": "無法啟動新版本，目前的視窗仍保持開啟",
       "busy": "擷取或傳輸完成後即可重新啟動"
     },
+    "openWebsite": "開啟成就網頁",
     "exportLogs": "匯出日誌",
     "logsSaved": "日誌已儲存",
     "exportOptions": "匯出選項",
@@ -256,6 +257,22 @@
     }
   },
   "ui": {
+    "moreActions": "更多操作",
+    "exportTool": {
+      "title": "成就匯出工具介紹",
+      "description": "使用 Windows 桌面工具讀取《鳴潮》的帳號成就進度，匯出後即可在這裡查看、篩選和管理檔案",
+      "step1": "下載並開啟 Windows 匯出工具",
+      "step2": "透過工具啟動遊戲並登入，成就進度會自動讀取並儲存",
+      "step3": "將檔案傳送到網頁，或儲存為 JSON 後在此匯入",
+      "watchVideo": "觀看介紹影片",
+      "closeDownload": "關閉下載視窗",
+      "github": "GitHub",
+      "quark": "夸克網盤",
+      "baidu": "百度網盤",
+      "accessCode": "提取碼：{{code}}",
+      "download": "下載匯出工具",
+      "close": "關閉介紹"
+    },
     "allVersions": "所有版本",
     "searchAchievementOn": "在 {{site}} 搜尋此成就",
     "hideCompleted": "只看未完成",

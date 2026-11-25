@@ -95,7 +95,7 @@ public partial class MainWindow : Window
             core.NewWindowRequested += (_, e) =>
             {
                 e.Handled = true;
-                if (e.Uri == "https://github.com/wuwa-kit/achievement")
+                if (e.Uri is "https://github.com/wuwa-kit/achievement" or "https://wu.songe.li/")
                     Process.Start(new ProcessStartInfo(e.Uri) { UseShellExecute = true });
             };
             core.PermissionRequested += (_, e) => e.State = CoreWebView2PermissionState.Deny;

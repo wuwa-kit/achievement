@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { selectValue } from './select-helpers'
+import { revealArchiveActions, revealToolbarActions, selectValue } from './select-helpers'
 import {
   appLanguages,
   languageOptions,
@@ -23,6 +23,7 @@ for (const { route, locales, expected } of [
     }, locales)
     await page.goto(route)
     await expect(page.locator('html')).toHaveAttribute('lang', expected)
+    await revealToolbarActions(page)
     await expect(page.locator('.w-language-switch')).toBeVisible()
 
     await selectValue(page, page.locator('.w-language-switch'), 'ko')
@@ -47,7 +48,7 @@ for (const route of ['/', '/desktop']) {
     )
     if (route === '/') {
       await expect(page.locator('.hide-completed')).toHaveText('Incomplete only')
-      await expect(page.locator('.topbar-actions > .open-source-link:last-child')).toBeVisible()
+      await expect(page.locator('.topbar-actions .open-source-link')).toBeVisible()
       const openSourceLink = page.locator('.topbar-actions .open-source-link')
       await expect(openSourceLink).toHaveAttribute(
         'href',
@@ -55,14 +56,24 @@ for (const route of ['/', '/desktop']) {
       )
       await page.keyboard.press('Tab')
       await openSourceLink.focus()
-      await expect(page.locator('.w-tooltip')).toHaveText('Open source')
+      if (page.viewportSize()!.width < 768) {
+        await expect(openSourceLink).toHaveText('Open source')
+        await expect(page.locator('.w-tooltip')).toHaveCount(0)
+      } else await expect(page.locator('.w-tooltip')).toHaveText('Open source')
       await openSourceLink.press('Escape')
       await expect(page.locator('.w-tooltip')).toHaveCount(0)
+      await revealArchiveActions(page)
       await page.getByTestId('import-achievement-file').hover()
-      await expect(page.locator('.w-tooltip')).toHaveText('Import achievement file')
+      if (page.viewportSize()!.width < 768) {
+        await expect(page.getByTestId('import-achievement-file')).toHaveText(
+          'Import achievement file',
+        )
+        await expect(page.locator('.w-tooltip')).toHaveCount(0)
+      } else
+        await expect(page.locator('.w-tooltip:popover-open')).toHaveText('Import achievement file')
       await page.getByTestId('搜索成就').fill('100101')
       await expect(page.getByTestId('文本语言')).toHaveCount(0)
-      await expect(page.locator('.achievement-title')).toHaveText(['POWER!'])
+      await expect(page.locator('.achievement-title-text')).toHaveText(['POWER!'])
     } else {
       await expect(page.getByTestId('Game path')).toHaveAttribute(
         'placeholder',
@@ -74,6 +85,7 @@ for (const route of ['/', '/desktop']) {
       await page.locator('.w-message-close').click()
       await expect(page.locator('.w-message-host')).toHaveCount(0)
     }
+    await revealToolbarActions(page)
     await page.getByTestId('theme-switch').click()
     await expect(page.locator('.w-select-option')).toHaveText(['Automatic', 'Light', 'Dark'])
     await page.getByTestId('theme-switch').press('Escape')
@@ -113,6 +125,7 @@ for (const route of ['/', '/desktop']) {
     await other.goto(route === '/' ? '/desktop' : '/')
     await expect(other.locator(route === '/' ? '.desktop-page' : '.app-shell')).toBeVisible()
     const picker = page.locator('.w-language-switch')
+    await revealToolbarActions(page)
     await picker.click()
     await expect(page.locator('.w-select-option')).toHaveText(
       languageOptions.map((option) => option.label),
@@ -134,7 +147,7 @@ for (const route of ['/', '/desktop']) {
           contentLanguageCodes[language]
         ]
         await expect(page.locator('.achievement-row')).toHaveCount(1)
-        await expect(page.locator('.achievement-title')).toHaveText(text.title)
+        await expect(page.locator('.achievement-title-text')).toHaveText(text.title)
         await page.getByTestId('查看成就详情 100101').click()
         await expect(page.locator('#detail-title')).toHaveText(text.title)
         const searchLink = page.getByTestId('search-achievement-online')
@@ -184,6 +197,7 @@ for (const route of ['/', '/desktop']) {
         await page.locator('.w-message-close').click()
         await expect(page.locator('.w-message-host')).toHaveCount(0)
       }
+      await revealToolbarActions(page)
       await page.getByTestId('theme-switch').click()
       await expect(page.locator('.w-select-option')).toHaveText([
         resource.common.auto,

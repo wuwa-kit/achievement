@@ -2,9 +2,7 @@ import { formatDate } from './i18n/index.ts'
 import { contentLanguageCodes } from './i18n/resources'
 import { usePreferencesStore } from './stores/preferences'
 import { useTranslation } from 'react-i18next'
-import { WLanguageSwitch } from './components/ui/WLanguageSwitch'
 import { useViewerStore } from './stores/viewer'
-import { WThemeSwitch } from './components/ui/WThemeSwitch'
 import { WTooltip } from './components/ui/WTooltip'
 import { WOption } from './components/ui/WOption'
 import { WSvg } from './components/ui/WSvg'
@@ -16,9 +14,9 @@ import { WIconButton } from './components/ui/WIconButton'
 import { WCheckBox } from './components/ui/WCheckBox'
 import { WDialog } from './components/ui/WDialog'
 import { WConfirmDialog } from './components/ui/WConfirmDialog'
+import { ViewerActions } from './components/ViewerActions'
 import { ArchiveActions } from './components/ArchiveActions'
 import { CatalogStatistics } from './components/CatalogStatistics'
-import { OpenSourceLink } from './components/OpenSourceLink'
 import { ViewerLayout } from './components/ViewerLayout'
 import { HomeButterflies } from './components/HomeButterflies'
 import { AchievementEmblem } from './components/AchievementEmblem'
@@ -597,17 +595,17 @@ export default function App() {
       <div className="workspace relative isolate ml-(--sidebar-width) flex h-dvh flex-col overflow-hidden sidebar-overlay:ml-0 sidebar-overlay:bg-none">
         <HomeButterflies />
         <div className="topbar flex h-[69px] flex-none items-center justify-between gap-3 border-b border-b-(--line) bg-(--color-surface) px-10 compact:px-[25px] narrow:h-[60px] narrow:gap-1.5 narrow:px-3.5">
-          <div className="topbar-records flex min-w-0 items-center gap-2 narrow:gap-1">
+          <div className="topbar-records flex min-w-0 items-center gap-2 max-md:flex-1 narrow:gap-1">
             <WIconButton
               variant="ghost"
-              className="icon-button mobile-menu text-(--color-muted) hover:text-(--color-text) min-[901px]:hidden"
+              className="icon-button mobile-menu text-(--color-muted) hover:text-(--color-text) max-md:size-11 min-[901px]:hidden"
               data-testid="打开导航"
               onClick={() => setNavigationOpen(true)}
             >
               <WSvg name="menu" size={20} />
             </WIconButton>
             <WSelect
-              className="topbar-account narrow:[--select-gap:4px] narrow:[--select-px:6px] narrow:[&_.archive-account-time]:hidden"
+              className="topbar-account max-md:min-h-11 max-md:flex-1 narrow:[--select-gap:4px] narrow:[--select-px:6px] narrow:[&_.archive-account-time]:hidden"
               data-testid="账号档案"
               value={activeKey}
               disabled={busy || receiving}
@@ -630,16 +628,7 @@ export default function App() {
                   </WOption>
                 ))}
             </WSelect>
-            <WTooltip text={tr('ui.importAchievementFile')}>
-              <WIconButton
-                className="topbar-icon text-(--color-accent)"
-                data-testid="import-achievement-file"
-                onClick={() => fileInput.current?.click()}
-                disabled={busy || receiving}
-              >
-                <WSvg name="upload" size={20} />
-              </WIconButton>
-            </WTooltip>
+            <ArchiveActions onImport={() => fileInput.current?.click()} />
             <WInput
               ref={fileInput}
               type="file"
@@ -652,13 +641,8 @@ export default function App() {
                 void importFile(file)
               }}
             />
-            <ArchiveActions />
           </div>
-          <div className="topbar-actions flex flex-none items-center gap-2 narrow:gap-1">
-            <WThemeSwitch />
-            <WLanguageSwitch />
-            <OpenSourceLink />
-          </div>
+          <ViewerActions />
         </div>
         <div className="main-content mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col px-10 pb-4 compact:px-[25px] narrow:px-3.5 narrow:pb-2.5">
           {ticket && receipt && !busy && !receiving && (

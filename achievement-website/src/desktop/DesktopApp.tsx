@@ -8,10 +8,11 @@ import { WSvg } from '../components/ui/WSvg'
 import { useEffect, useRef, useState } from 'react'
 import { ArchiveDeleteDialog } from '../components/ArchiveDeleteDialog'
 import { OpenSourceLink } from '../components/OpenSourceLink'
+import { HomeButterflies } from '../components/HomeButterflies'
 import { WButton } from '../components/ui/WButton'
 import { WDialog } from '../components/ui/WDialog'
 import { WInput } from '../components/ui/WInput'
-import { WIconButton } from '../components/ui/WIconButton'
+import { WIconButton, iconButtonClass } from '../components/ui/WIconButton'
 import { WLanguageSwitch } from '../components/ui/WLanguageSwitch'
 import { useTranslation } from 'react-i18next'
 import { HistoryCard } from './HistoryCard'
@@ -90,6 +91,7 @@ export default function DesktopApp() {
   const exportAction = t(exportRunning ? 'desktop.cancel' : 'desktop.start')
   return (
     <div className="desktop-page m-auto max-w-[760px] p-7 text-(--color-text) desktop-narrow:p-5">
+      <HomeButterflies fixed />
       <div className="desktop-settings mb-4" data-testid={t('desktop.settings')}>
         <div className="desktop-header mb-2 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0 text-[16px] wrap-anywhere">{t('desktop.game')}</div>
@@ -107,6 +109,20 @@ export default function DesktopApp() {
             {isDesktop && <DesktopZoom />}
             <WThemeSwitch />
             <WLanguageSwitch />
+            <WTooltip text={t('desktop.openWebsite')}>
+              <a
+                className={`${iconButtonClass} text-(--color-accent)`}
+                href="https://wu.songe.li/"
+                target="_blank"
+                rel="noreferrer"
+                data-testid="desktop-website"
+                onClick={(event) => {
+                  if (event.detail > 0) event.currentTarget.blur()
+                }}
+              >
+                <WSvg name="panels-top-left" size={20} />
+              </a>
+            </WTooltip>
             <OpenSourceLink />
           </div>
         </div>

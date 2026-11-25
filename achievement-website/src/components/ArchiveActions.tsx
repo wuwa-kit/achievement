@@ -1,15 +1,17 @@
 import { useRef, useState } from 'react'
-import { useUnmount } from 'ahooks'
+import { useResponsive, useUnmount } from 'ahooks'
 import { useTranslation } from 'react-i18next'
 import { useViewerStore } from '../stores/viewer'
-import { WIconButton } from './ui/WIconButton'
+import { WIconButton, iconButtonClass } from './ui/WIconButton'
 import { ArchiveDeleteDialog } from './ArchiveDeleteDialog'
 import { WPopover } from './ui/WPopover'
 import { WSvg } from './ui/WSvg'
 import { WTooltip } from './ui/WTooltip'
+import { WButton } from './ui/WButton'
 
-export function ArchiveActions() {
+export function ArchiveActions({ onImport }: { onImport: () => void }) {
   const { t } = useTranslation()
+  const compact = !useResponsive().md
   const { data, activeKey, busy, receiving, download, deleteAccount } = useViewerStore()
   const [expanded, setExpanded] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ key: string; uid: string | null } | null>(null)
@@ -17,6 +19,9 @@ export function ArchiveActions() {
   const anchorRef = useRef<HTMLButtonElement>(null)
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const disabled = busy || receiving
+  const actionClass = compact
+    ? 'flex min-h-11 items-center gap-2 rounded-md px-3 py-2 text-start text-sm enabled:hover:bg-(--color-surface-soft)'
+    : `topbar-icon text-(--color-accent) ${iconButtonClass}`
   useUnmount(() => clearTimeout(hoverTimer.current))
 
   function openMenu() {
@@ -31,7 +36,19 @@ export function ArchiveActions() {
 
   return (
     <>
-      {data && (
+      {!compact && (
+        <WTooltip text={t('ui.importAchievementFile')}>
+          <WIconButton
+            className="topbar-icon text-(--color-accent)"
+            data-testid="import-achievement-file"
+            onClick={onImport}
+            disabled={disabled}
+          >
+            <WSvg name="upload" size={20} />
+          </WIconButton>
+        </WTooltip>
+      )}
+      {(data || compact) && (
         <div
           className="archive-actions flex-none"
           onPointerEnter={(event) => {
@@ -49,7 +66,7 @@ export function ArchiveActions() {
             if (!event.currentTarget.contains(event.relatedTarget)) closeMenu()
           }}
           onKeyDown={(event) => {
-            if (event.key !== 'Escape') return
+            if (event.key !== 'Escape' || event.defaultPrevented) return
             closeMenu()
             anchorRef.current?.focus()
           }}
@@ -57,11 +74,11 @@ export function ArchiveActions() {
           <WTooltip text={t('common.archiveActions')}>
             <WIconButton
               ref={anchorRef}
-              className="topbar-icon text-(--color-accent)"
+              className="topbar-icon text-(--color-accent) max-md:size-11"
               data-testid="档案更多操作"
               disabled={disabled}
               data-expanded={expanded && !disabled}
-              onClick={openMenu}
+              onClick={() => (expanded ? closeMenu() : openMenu())}
             >
               <WSvg name="ellipsis" size={20} />
             </WIconButton>
@@ -73,34 +90,56 @@ export function ArchiveActions() {
             className="archive-actions-menu"
             offset={4}
           >
-            <div className="archive-actions-buttons flex gap-1 p-1">
-              <WTooltip text={t('common.deleteArchive')}>
-                <WIconButton
-                  className="topbar-icon text-(--color-accent)"
-                  data-testid="删除档案"
+            <div
+              className={`archive-actions-buttons flex gap-1 p-1 ${compact ? 'w-[240px] flex-col' : ''}`}
+            >
+              {compact && (
+                <WButton
+                  className={actionClass}
+                  data-testid="import-achievement-file"
                   disabled={disabled}
                   onClick={() => {
                     closeMenu()
-                    setDeleteTarget({ key: activeKey, uid: data.uid })
-                    setConfirmDelete(true)
+                    onImport()
                   }}
                 >
-                  <WSvg name="trash-2" size={20} />
-                </WIconButton>
-              </WTooltip>
-              <WTooltip text={t('common.exportAchievementFile')}>
-                <WIconButton
-                  className="topbar-icon text-(--color-accent)"
-                  data-testid="export-achievement-file"
-                  disabled={disabled}
-                  onClick={() => {
-                    closeMenu()
-                    download()
-                  }}
-                >
-                  <WSvg name="arrow-down-to-line" size={20} />
-                </WIconButton>
-              </WTooltip>
+                  <WSvg name="upload" size={20} />
+                  <span>{t('ui.importAchievementFile')}</span>
+                </WButton>
+              )}
+              {data && (
+                <>
+                  <WTooltip text={compact ? '' : t('common.deleteArchive')}>
+                    <WButton
+                      className={actionClass}
+                      data-testid="删除档案"
+                      disabled={disabled}
+                      onClick={() => {
+                        closeMenu()
+                        setDeleteTarget({ key: activeKey, uid: data.uid })
+                        setConfirmDelete(true)
+                      }}
+                    >
+                      <WSvg name="trash-2" size={20} />
+                      {compact && <span>{t('common.deleteArchive')}</span>}
+                    </WButton>
+                  </WTooltip>
+                  <WTooltip text={compact ? '' : t('common.exportAchievementFile')}>
+                    <WButton
+                      className={actionClass}
+                      data-testid="export-achievement-file"
+                      disabled={disabled}
+                      onClick={() => {
+                        closeMenu()
+                        download()
+                      }}
+                    >
+                      <WSvg name="arrow-down-to-line" size={20} />
+                      {compact && <span>{t('common.exportAchievementFile')}</span>}
+                    </WButton>
+                  </WTooltip>
+                </>
+              )}
             </div>
           </WPopover>
         </div>

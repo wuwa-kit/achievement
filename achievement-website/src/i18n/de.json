@@ -49,6 +49,7 @@
       "restartFailed": "Die neue Version konnte nicht gestartet werden. Das aktuelle Fenster bleibt offen",
       "busy": "Der Neustart ist nach Abschluss der Erfassung oder Übertragung möglich"
     },
+    "openWebsite": "Erfolgswebseite öffnen",
     "exportLogs": "Protokolle exportieren",
     "logsSaved": "Protokolle gespeichert",
     "exportOptions": "Exportoptionen",
@@ -256,6 +257,22 @@
     }
   },
   "ui": {
+    "moreActions": "Weitere Aktionen",
+    "exportTool": {
+      "title": "Tool zum Exportieren von Erfolgen",
+      "description": "Lies deinen Erfolgsfortschritt in Wuthering Waves mit dem Windows-Tool aus und durchsuche, filtere und verwalte deine Archive hier",
+      "step1": "Lade das Windows-Exporttool herunter und öffne es",
+      "step2": "Starte das Spiel über das Tool und melde dich an, um deinen Erfolgsfortschritt automatisch auszulesen und zu speichern",
+      "step3": "Sende dein Archiv an die Webseite oder speichere es als JSON und importiere es hier",
+      "watchVideo": "Video ansehen",
+      "closeDownload": "Downloads schließen",
+      "github": "GitHub",
+      "quark": "Quark Drive",
+      "baidu": "Baidu Netdisk",
+      "accessCode": "Zugangscode: {{code}}",
+      "download": "Exporttool herunterladen",
+      "close": "Einführung schließen"
+    },
     "allVersions": "Alle Versionen",
     "searchAchievementOn": "Diesen Erfolg auf {{site}} suchen",
     "hideCompleted": "Nur offene Erfolge",

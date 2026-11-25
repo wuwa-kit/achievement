@@ -49,6 +49,7 @@
       "restartFailed": "Impossible de lancer la nouvelle version. La fenêtre actuelle reste ouverte",
       "busy": "Attendez la fin de la capture ou du transfert pour redémarrer"
     },
+    "openWebsite": "Ouvrir le site des succès",
     "exportLogs": "Exporter les journaux",
     "logsSaved": "Journaux enregistrés",
     "exportOptions": "Options d’exportation",
@@ -256,6 +257,22 @@
     }
   },
   "ui": {
+    "moreActions": "Plus d’actions",
+    "exportTool": {
+      "title": "Outil d’exportation des succès",
+      "description": "Utilisez l’outil Windows pour lire votre progression dans les succès de Wuthering Waves, puis consultez, filtrez et gérez vos archives ici",
+      "step1": "Téléchargez et ouvrez l’outil d’exportation pour Windows",
+      "step2": "Lancez le jeu depuis l’outil et connectez-vous pour lire et enregistrer automatiquement votre progression",
+      "step3": "Envoyez votre archive au site ou enregistrez-la au format JSON pour l’importer ici",
+      "watchVideo": "Voir la vidéo",
+      "closeDownload": "Fermer les téléchargements",
+      "github": "GitHub",
+      "quark": "Quark Drive",
+      "baidu": "Baidu Netdisk",
+      "accessCode": "Code d’accès : {{code}}",
+      "download": "Télécharger l’outil",
+      "close": "Fermer la présentation"
+    },
     "allVersions": "Toutes les versions",
     "searchAchievementOn": "Rechercher ce succès sur {{site}}",
     "hideCompleted": "Succès non accomplis uniquement",

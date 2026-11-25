@@ -49,6 +49,7 @@
       "restartFailed": "Could not start the new version. The current window is still open",
       "busy": "Wait for capture or transfer to finish before restarting"
     },
+    "openWebsite": "Open achievement website",
     "exportLogs": "Export logs",
     "logsSaved": "Logs saved",
     "exportOptions": "Export options",
@@ -256,6 +257,22 @@
     }
   },
   "ui": {
+    "moreActions": "More actions",
+    "exportTool": {
+      "title": "Achievement export tool",
+      "description": "Use the Windows desktop tool to read your Wuthering Waves achievement progress, then browse, filter and manage your archives here",
+      "step1": "Download and open the Windows export tool",
+      "step2": "Launch the game through the tool and sign in to automatically read and save your achievement progress",
+      "step3": "Send your archive to the website, or save it as JSON and import it here",
+      "watchVideo": "Watch video",
+      "closeDownload": "Close downloads",
+      "github": "GitHub",
+      "quark": "Quark Drive",
+      "baidu": "Baidu Netdisk",
+      "accessCode": "Access code: {{code}}",
+      "download": "Download export tool",
+      "close": "Close introduction"
+    },
     "allVersions": "All versions",
     "searchAchievementOn": "Search for this achievement on {{site}}",
     "hideCompleted": "Incomplete only",

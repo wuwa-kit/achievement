@@ -3,13 +3,13 @@ import { WSvg } from './ui/WSvg'
 import { WTooltip } from './ui/WTooltip'
 import { iconButtonClass } from './ui/WIconButton'
 
-export function OpenSourceLink() {
+export function OpenSourceLink({ showLabel = false }: { showLabel?: boolean }) {
   const { t } = useTranslation()
 
   return (
-    <WTooltip text={t('common.openSource')}>
+    <WTooltip text={showLabel ? '' : t('common.openSource')}>
       <a
-        className={`open-source-link ${iconButtonClass}`}
+        className={`open-source-link ${showLabel ? 'flex min-h-11 items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-(--color-surface-soft)' : iconButtonClass}`}
         href="https://github.com/wuwa-kit/achievement"
         target="_blank"
         rel="noreferrer"
@@ -18,6 +18,7 @@ export function OpenSourceLink() {
         }}
       >
         <WSvg name="github" size={20} />
+        {showLabel && <span>{t('common.openSource')}</span>}
       </a>
     </WTooltip>
   )

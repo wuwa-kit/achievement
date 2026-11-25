@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { revealToolbarActions } from './select-helpers'
 
 test('WSvg loads bundled icons once and keeps cloned nodes independent', async ({ page }) => {
   const errors: string[] = []
@@ -51,10 +52,11 @@ test('WSvg loads bundled icons once and keeps cloned nodes independent', async (
       Promise.all(images.map((image) => (image as HTMLImageElement).decode())),
     )
   const trigger = page.getByTestId('theme-switch')
+  await revealToolbarActions(page)
   await trigger.click()
   await expect(page.locator('[popover] svg[data-icon="check"] > path')).toHaveCount(1)
   await page.locator('.w-select-option[data-value="dark"]').click()
-  await expect(page.locator('[popover]')).toHaveCount(0)
+  await expect(page.locator('.w-select-popover')).toHaveCount(0)
   await trigger.click()
   await expect(page.locator('.w-select-option[data-value="dark"]')).toHaveAttribute(
     'data-selected',

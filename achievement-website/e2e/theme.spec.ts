@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { selectValue } from './select-helpers'
+import { revealToolbarActions, selectValue } from './select-helpers'
 for (const route of ['/', '/desktop']) {
   test(`theme modes follow system and persist on ${route}`, async ({ page, context }, testInfo) => {
     await page.emulateMedia({ colorScheme: 'dark' })
@@ -9,6 +9,7 @@ for (const route of ['/', '/desktop']) {
     const trigger = page.getByTestId('theme-switch')
     await expect(root).toHaveAttribute('data-theme-mode', 'auto')
     await expect(root).toHaveAttribute('data-theme', 'dark')
+    await revealToolbarActions(page)
     await expect(trigger).toBeVisible()
     await trigger.click()
     await expect(page.locator('.w-select-option')).toHaveCount(3)

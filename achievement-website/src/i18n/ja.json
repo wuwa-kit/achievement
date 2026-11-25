@@ -49,6 +49,7 @@
       "restartFailed": "新しいバージョンを起動できませんでした。現在のウィンドウは開いたままです",
       "busy": "再起動するには、取得または転送の完了をお待ちください"
     },
+    "openWebsite": "実績サイトを開く",
     "exportLogs": "ログをエクスポート",
     "logsSaved": "ログを保存しました",
     "exportOptions": "エクスポートオプション",
@@ -256,6 +257,22 @@
     }
   },
   "ui": {
+    "moreActions": "その他の操作",
+    "exportTool": {
+      "title": "実績エクスポートツールの紹介",
+      "description": "Windows 用デスクトップツールで『鳴潮』の実績進捗を読み取り、エクスポートしたデータをここで閲覧・絞り込み・管理できます",
+      "step1": "Windows 用エクスポートツールをダウンロードして開く",
+      "step2": "ツールからゲームを起動してログインすると、実績進捗が自動で読み取られ保存されます",
+      "step3": "データをウェブに送信するか、JSON として保存してここにインポートする",
+      "watchVideo": "紹介動画を見る",
+      "closeDownload": "ダウンロード画面を閉じる",
+      "github": "GitHub",
+      "quark": "Quark Drive",
+      "baidu": "Baidu Netdisk",
+      "accessCode": "アクセスコード：{{code}}",
+      "download": "ツールをダウンロード",
+      "close": "紹介を閉じる"
+    },
     "allVersions": "すべてのバージョン",
     "searchAchievementOn": "{{site}} でこの実績を検索",
     "hideCompleted": "未達成のみ表示",

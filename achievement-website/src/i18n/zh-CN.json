@@ -49,6 +49,7 @@
       "restartFailed": "无法启动新版本，当前窗口仍保持打开",
       "busy": "采集或传输完成后即可重启"
     },
+    "openWebsite": "打开成就网页",
     "exportLogs": "导出日志",
     "logsSaved": "日志已保存",
     "exportOptions": "导出选项",
@@ -256,6 +257,22 @@
     }
   },
   "ui": {
+    "moreActions": "更多操作",
+    "exportTool": {
+      "title": "成就导出工具介绍",
+      "description": "使用 Windows 桌面工具读取《鸣潮》的账号成就进度，导出后即可在这里查看、筛选和管理档案",
+      "step1": "下载并打开 Windows 导出工具",
+      "step2": "通过工具启动游戏并登录，成就进度会自动读取并保存",
+      "step3": "将档案发送到网页，或保存为 JSON 后在此导入",
+      "watchVideo": "观看介绍视频",
+      "closeDownload": "关闭下载窗口",
+      "github": "GitHub",
+      "quark": "夸克网盘",
+      "baidu": "百度网盘",
+      "accessCode": "提取码：{{code}}",
+      "download": "下载导出工具",
+      "close": "关闭介绍"
+    },
     "allVersions": "全部版本",
     "searchAchievementOn": "在 {{site}} 搜索此成就",
     "hideCompleted": "只看未完成",

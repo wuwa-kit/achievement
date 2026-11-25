@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { selectValue } from './select-helpers'
+import { revealToolbarActions, selectValue } from './select-helpers'
 
 for (const path of ['/', '/desktop'])
   test(`shows the saved theme and waits for the real toolbar on ${path}`, async ({ page }) => {
@@ -25,6 +25,7 @@ for (const path of ['/', '/desktop'])
       release()
     }
     const toolbar = page.locator(path === '/' ? '.topbar' : '.desktop-header')
+    await revealToolbarActions(page)
     await expect(toolbar.getByTestId('theme-switch')).toBeEnabled()
     await selectValue(page, toolbar.locator('.w-language-switch'), 'ja')
     await expect(page.locator('html')).toHaveAttribute('lang', 'ja')

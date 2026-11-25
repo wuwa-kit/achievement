@@ -49,6 +49,7 @@
       "restartFailed": "새 버전을 시작할 수 없습니다. 현재 창은 열린 상태로 유지됩니다",
       "busy": "수집 또는 전송이 끝난 후 다시 시작할 수 있습니다"
     },
+    "openWebsite": "업적 웹사이트 열기",
     "exportLogs": "로그 내보내기",
     "logsSaved": "로그가 저장되었습니다",
     "exportOptions": "내보내기 옵션",
@@ -256,6 +257,22 @@
     }
   },
   "ui": {
+    "moreActions": "더 보기",
+    "exportTool": {
+      "title": "업적 내보내기 도구 소개",
+      "description": "Windows 데스크톱 도구로 명조의 계정 업적 진행도를 읽고, 내보낸 기록을 여기서 조회하고 필터링하며 관리할 수 있습니다",
+      "step1": "Windows 내보내기 도구를 다운로드하고 실행하세요",
+      "step2": "도구를 통해 게임을 실행하고 로그인하면 업적 진행도를 자동으로 읽고 저장합니다",
+      "step3": "기록을 웹으로 보내거나 JSON으로 저장한 뒤 여기서 가져오세요",
+      "watchVideo": "소개 영상 보기",
+      "closeDownload": "다운로드 창 닫기",
+      "github": "GitHub",
+      "quark": "Quark Drive",
+      "baidu": "Baidu Netdisk",
+      "accessCode": "접근 코드: {{code}}",
+      "download": "도구 다운로드",
+      "close": "소개 닫기"
+    },
     "allVersions": "모든 버전",
     "searchAchievementOn": "{{site}}에서 이 업적 검색",
     "hideCompleted": "미완료 업적만 보기",

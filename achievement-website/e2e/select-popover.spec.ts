@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test'
+import { revealToolbarActions } from './select-helpers'
 
 for (const route of ['/', '/desktop']) {
   test(`select closes on repeated trigger clicks on ${route}`, async ({ page, isMobile }) => {
     await page.goto(route)
+    await revealToolbarActions(page)
     const trigger = page.getByTestId('theme-switch')
     const popover = page.locator('.w-select-popover')
     await expect(trigger).toBeEnabled()
@@ -29,6 +31,7 @@ test('popover mounts only for entry, open and exit; supports keyboard and interr
   await page.goto('/')
   await expect(page.locator('.workspace')).toBeVisible()
   const trigger = page.getByTestId('theme-switch')
+  await revealToolbarActions(page)
   await expect(trigger).toBeVisible()
   await expect(page.locator('select')).toHaveCount(0)
   const popover = page.locator('.w-select-popover')
@@ -65,9 +68,10 @@ test('popover mounts only for entry, open and exit; supports keyboard and interr
   await trigger.click()
   await expect(trigger).toHaveAttribute('data-expanded', 'true')
   await expect(page.locator('.w-select-popover:popover-open')).toHaveCount(1)
-  await page.getByTestId('搜索成就').click()
+  await page.mouse.click(2, page.viewportSize()!.height - 2)
   await expect(popover).toHaveCount(0)
-  await expect(trigger).toHaveAttribute('data-expanded', 'false')
+  if (page.viewportSize()!.width < 768) await expect(trigger).toHaveCount(0)
+  else await expect(trigger).toHaveAttribute('data-expanded', 'false')
   expect(errors).toEqual([])
 })
 
@@ -80,8 +84,9 @@ test('reduced motion closes without retaining hidden DOM and popover stays withi
   await page.goto('/')
   await expect(page.locator('.workspace')).toBeVisible()
   const trigger = page.locator('.w-language-switch')
+  await revealToolbarActions(page)
   await trigger.click()
-  const popover = page.locator('[popover]:popover-open')
+  const popover = page.locator('.w-select-popover:popover-open')
   await expect(popover).toBeVisible()
   const bounds = await popover.boundingBox()
   const viewport = page.viewportSize()!
@@ -91,5 +96,5 @@ test('reduced motion closes without retaining hidden DOM and popover stays withi
   await page.screenshot({ path: test.info().outputPath('select-open.png') })
   expect(errors).toEqual([])
   await trigger.press('Tab')
-  await expect(page.locator('[popover]')).toHaveCount(0)
+  await expect(page.locator('.w-select-popover')).toHaveCount(0)
 })

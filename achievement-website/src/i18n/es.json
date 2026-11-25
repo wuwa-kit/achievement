@@ -49,6 +49,7 @@
       "restartFailed": "No se pudo iniciar la nueva versión. La ventana actual sigue abierta",
       "busy": "Espera a que termine la captura o la transferencia para reiniciar"
     },
+    "openWebsite": "Abrir sitio de logros",
     "exportLogs": "Exportar registros",
     "logsSaved": "Registros guardados",
     "exportOptions": "Opciones de exportación",
@@ -256,6 +257,22 @@
     }
   },
   "ui": {
+    "moreActions": "Más acciones",
+    "exportTool": {
+      "title": "Herramienta de exportación de logros",
+      "description": "Usa la herramienta de Windows para leer tu progreso de logros en Wuthering Waves y luego consulta, filtra y gestiona tus archivos aquí",
+      "step1": "Descarga y abre la herramienta de exportación para Windows",
+      "step2": "Inicia el juego desde la herramienta e inicia sesión para leer y guardar automáticamente tu progreso de logros",
+      "step3": "Envía tu archivo a la web o guárdalo como JSON e impórtalo aquí",
+      "watchVideo": "Ver vídeo",
+      "closeDownload": "Cerrar descargas",
+      "github": "GitHub",
+      "quark": "Quark Drive",
+      "baidu": "Baidu Netdisk",
+      "accessCode": "Código de acceso: {{code}}",
+      "download": "Descargar herramienta",
+      "close": "Cerrar introducción"
+    },
     "allVersions": "Todas las versiones",
     "searchAchievementOn": "Buscar este logro en {{site}}",
     "hideCompleted": "Solo logros pendientes",

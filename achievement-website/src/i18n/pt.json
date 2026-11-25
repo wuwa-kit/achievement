@@ -49,6 +49,7 @@
       "restartFailed": "Não foi possível iniciar a nova versão. A janela atual continua aberta",
       "busy": "Aguarde o fim da captura ou transferência para reiniciar"
     },
+    "openWebsite": "Abrir site de conquistas",
     "exportLogs": "Exportar logs",
     "logsSaved": "Logs salvos",
     "exportOptions": "Opções de exportação",
@@ -256,6 +257,22 @@
     }
   },
   "ui": {
+    "moreActions": "Mais ações",
+    "exportTool": {
+      "title": "Ferramenta de exportação de conquistas",
+      "description": "Use a ferramenta para Windows para ler seu progresso nas conquistas de Wuthering Waves e depois consulte, filtre e gerencie seus arquivos aqui",
+      "step1": "Baixe e abra a ferramenta de exportação para Windows",
+      "step2": "Inicie o jogo pela ferramenta e faça login para ler e salvar automaticamente seu progresso nas conquistas",
+      "step3": "Envie seu arquivo para o site ou salve-o como JSON e importe-o aqui",
+      "watchVideo": "Ver vídeo",
+      "closeDownload": "Fechar downloads",
+      "github": "GitHub",
+      "quark": "Quark Drive",
+      "baidu": "Baidu Netdisk",
+      "accessCode": "Código de acesso: {{code}}",
+      "download": "Baixar ferramenta",
+      "close": "Fechar apresentação"
+    },
     "allVersions": "Todas as versões",
     "searchAchievementOn": "Pesquisar esta conquista no {{site}}",
     "hideCompleted": "Apenas conquistas pendentes",

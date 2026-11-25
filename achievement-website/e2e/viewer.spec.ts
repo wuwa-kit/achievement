@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises'
 import { catalogPng } from '../build/catalog-png'
 import { localFixture } from '../test/local-fixtures'
 import { skipIfMissingLocalFixtures } from './local-fixtures'
+import { revealArchiveActions } from './select-helpers'
 
 const fixtureName = 'achievements.json'
 const fixture = localFixture(fixtureName)
@@ -236,6 +237,7 @@ test('JSON import is validated and errors preserve the previous snapshot', async
   await page.goto('/')
   await expect(page.getByTestId('成就列表')).toHaveAttribute('data-count', '1303')
   const input = page.getByTestId('导入成就 JSON 文件')
+  await revealArchiveActions(page)
   const fileChooser = page.waitForEvent('filechooser')
   await page.getByTestId('import-achievement-file').click()
   await (
@@ -251,7 +253,10 @@ test('JSON import is validated and errors preserve the previous snapshot', async
   await expect(page.locator('.w-message[data-type="error"]')).toHaveCount(0)
   await page.getByTestId('档案更多操作').click()
   await page.getByTestId('export-achievement-file').hover()
-  await expect(page.locator('.w-tooltip')).toHaveText('导出成就文件')
+  if (page.viewportSize()!.width < 768) {
+    await expect(page.getByTestId('export-achievement-file')).toHaveText('导出成就文件')
+    await expect(page.locator('.w-tooltip')).toHaveCount(0)
+  } else await expect(page.locator('.w-tooltip')).toHaveText('导出成就文件')
   const download = page.waitForEvent('download')
   await page.getByTestId('export-achievement-file').click()
   expect((await download).suggestedFilename()).toBe(

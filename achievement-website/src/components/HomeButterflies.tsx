@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import butterflyB1 from '../assets/home-butterflies/butterfly-b1.png?no-inline'
 import butterflyC1 from '../assets/home-butterflies/butterfly-c1.png?no-inline'
 import butterflyBig from '../assets/home-butterflies/butterfly-big.png?no-inline'
+import './HomeButterflies.css'
 
 // Original game textures: github.com/555me/Wuthering-Waves-GameAssets, Heihaian UI folders.
 const butterflies = [
@@ -36,10 +37,10 @@ const butterflyMotion: Partial<Record<string, ButterflyMotion>> = {
   [butterflyB1]: { duration: 10.3, delay: -6.4, drift: -0.6, lift: 1.7, sway: -1.1 },
 }
 
-export function HomeButterflies() {
+export function HomeButterflies({ fixed = false }: { fixed?: boolean }) {
   return (
     <div
-      className="home-butterflies pointer-events-none absolute inset-0 z-20 overflow-hidden select-none narrow:[--butterfly-motion-scale:0.6]"
+      className={`home-butterflies pointer-events-none inset-0 z-20 overflow-hidden select-none narrow:[--butterfly-motion-scale:0.6] ${fixed ? 'fixed' : 'absolute'}`}
       data-placement="corner"
     >
       {butterflies.map(({ src, className }) => {
