@@ -8,6 +8,8 @@
 
 从[最新稳定版发布页](https://github.com/wuwa-kit/achievement/releases/latest)下载 Windows x64 标准版（Full）或 Lite 版。标准版内置 .NET，Lite 版需要另行下载并安装 [.NET 10 Desktop Runtime（x64）](https://dotnet.microsoft.com/zh-cn/download/dotnet/thank-you/runtime-desktop-10.0.15-windows-x64-installer)。
 
+网盘下载：[夸克网盘](https://pan.quark.cn/s/2174c2b68b2c) · [百度网盘](https://pan.baidu.com/s/1gGEZLyB4nThy8zWKj4DIyw?pwd=w88p)（提取码：`w88p`）
+
 ## 快速开始
 
 1. 打开桌面导出器，点击运行图标，在工具启动的游戏中登录。
