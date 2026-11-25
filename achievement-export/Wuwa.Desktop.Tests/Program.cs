@@ -2,6 +2,28 @@ using System.IO.Compression;
 using System.Text.Json.Nodes;
 using Wuwa.Desktop;
 
+if (args.Length == 3 && args[0] == "--wegame-cancel")
+{
+    using var cancellation = new CancellationTokenSource();
+    try
+    {
+        await WeGameEnvironment.Prepare(args[1], args[2], new Progress<string>(Console.WriteLine), cancellation.Token,
+            report: state => { if (state.Received > 65536) cancellation.Cancel(); });
+        throw new Exception("Expected download interruption");
+    }
+    catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { Console.WriteLine("Live SDK download cancelled successfully"); }
+    return;
+}
+if (args.Length == 3 && args[0] == "--wegame-check")
+{
+    Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(await WeGameEnvironment.Check(args[1], args[2], CancellationToken.None)));
+    return;
+}
+if (args.Length == 3 && args[0] == "--wegame-prepare")
+{
+    Console.WriteLine(await WeGameEnvironment.Prepare(args[1], args[2], new Progress<string>(Console.WriteLine), CancellationToken.None));
+    return;
+}
 var directory = Path.Combine(Path.GetTempPath(), "wuwa-history-test-" + Guid.NewGuid().ToString("N"));
 Directory.CreateDirectory(directory);
 try
@@ -83,5 +105,8 @@ try
     Check(metadata?["scriptPakMount"]?.GetValue<string>() == scriptPak);
     Console.WriteLine("Diagnostic archive contents, epoch filename, and log redaction passed.");
     await DesktopUpdaterTests.RunAsync(directory);
+    await WeGameEnvironmentTests.RunAsync(directory);
+    DiagnosticRetentionTests.Run(directory);
 }
+catch (Exception error) { Console.Error.WriteLine(error); throw; }
 finally { Directory.Delete(directory, true); }

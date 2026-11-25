@@ -15,7 +15,8 @@
     "previewOnly": "此操作需要桌面客户端；浏览器中可调试界面和设置",
     "requestTimeout": "桌面请求超时",
     "openSource": "开放源代码",
-    "desktopTitle": "鸣潮 · 成就导出"
+    "desktopTitle": "鸣潮 · 成就导出",
+    "confirm": "确认"
   },
   "notFound": {
     "title": "找不到页面",
@@ -67,7 +68,10 @@
       "unknown": "未识别",
       "sd": "标清",
       "hd": "高清",
-      "uhd": "超高清"
+      "uhd": "超高清",
+      "unavailableTitle": "未检测到所选资源档位",
+      "unavailableBody": "未检测到所选档位的本地资源，游戏启动可能报错或要求下载额外资源，仍要切换吗？",
+      "continueSwitch": "仍然切换"
     },
     "zoom": {
       "label": "界面缩放",
@@ -116,6 +120,18 @@
       "stopping": {
         "title": "正在停止采集",
         "body": "请稍候"
+      },
+      "wegamePreparing": {
+        "title": "准备 WeGame 采集环境",
+        "body": "正在检查官方 SDK 和已安装游戏版本"
+      },
+      "wegameDownloading": {
+        "title": "下载官方 SDK",
+        "body": "已校验组件会复用，可取消后重试"
+      },
+      "wegameLinking": {
+        "title": "创建独立采集环境",
+        "body": "共享游戏资源，独立保存 SDK 和登录数据"
       }
     },
     "captureDiagnostics": {
@@ -186,7 +202,58 @@
     "completed": "操作完成",
     "cancelled": "已停止采集，再次采集前请先退出鸣潮",
     "failed": "操作未完成，请重试",
-    "loading": "正在连接客户端…"
+    "loading": "正在连接客户端…",
+    "wegame": "WeGame",
+    "wegameHint": "采集使用独立官方 SDK，共享游戏资源；请使用库洛账号登录",
+    "sdk": {
+      "channel": "游戏渠道",
+      "official": "官方渠道",
+      "unknown": "未识别",
+      "label": "辅助 SDK",
+      "details": "查看 SDK 状态和下载详情",
+      "title": "需要准备采集环境",
+      "description": "WeGame 版本需要额外的登录组件，下载完成后即可启动游戏并采集成就",
+      "size": "需下载约 {{total}} MB",
+      "checking": "检查中",
+      "checkFailed": "检查失败",
+      "missing": "未下载",
+      "outdated": "需要准备",
+      "downloading": "下载中",
+      "preparing": "准备中",
+      "ready": "准备完毕",
+      "close": "关闭",
+      "retry": "重新检查",
+      "prepare": "下载并准备",
+      "cancelDownload": "取消下载",
+      "stopPreparing": "中断准备",
+      "versionMismatch": "当前游戏程序与官方版本不一致，暂无法确认兼容性，请检查游戏更新或稍后重试",
+      "incompatible": "兼容性待确认",
+      "readyTitle": "采集环境已就绪",
+      "readyDescription": "点击「开始采集」启动游戏，进入游戏后将自动采集成就",
+      "compatibilityTitle": "暂无法准备采集环境",
+      "checkingTitle": "正在检查采集环境",
+      "checkingDescription": "正在确认所需登录组件和下载内容，请稍候",
+      "checkFailedTitle": "无法检查采集环境",
+      "checkFailedDescription": "未能获取登录组件信息，请检查网络后重试",
+      "updateTitle": "需要更新采集环境",
+      "updateDescription": "所需登录组件已有更新，完成更新后即可继续采集",
+      "update": "更新",
+      "preparingTitle": "正在准备采集环境",
+      "downloadDescription": "下载完成后将自动配置所需组件，关闭此窗口不会中断下载",
+      "downloadResumeDescription": "准备完成后将自动开始采集，关闭此窗口不会中断下载",
+      "preparingDescription": "正在配置所需组件，完成后即可开始采集",
+      "prepareResumeDescription": "正在配置所需组件，准备完成后将自动开始采集",
+      "downloadTitle": "正在下载登录组件",
+      "failed": "准备失败",
+      "cancelled": "已中断",
+      "stopping": "正在中断",
+      "failedTitle": "未能准备采集环境",
+      "stoppingTitle": "正在中断准备",
+      "failedDescription": "准备未完成，请重试",
+      "stoppingDescription": "正在停止当前任务，请稍候",
+      "retryPreparation": "重试",
+      "continuedDescription": "准备已完成，采集流程已继续，请在游戏中完成后续操作"
+    }
   },
   "ui": {
     "allVersions": "全部版本",
@@ -322,7 +389,9 @@
     "gameFilter": "鸣潮可执行文件|*.exe",
     "unknownCommand": "未知桌面命令",
     "chooseGame": "请选择 Wuthering Waves.exe",
-    "tooLarge": "导出文件超过 32 MB"
+    "tooLarge": "导出文件超过 32 MB",
+    "wegameVersionMismatch": "当前游戏程序与官方版本不一致，暂无法自动准备采集环境。请检查游戏更新或稍后重试",
+    "wegameGameRunning": "请退出当前运行的鸣潮，再重新采集"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

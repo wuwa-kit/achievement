@@ -7,6 +7,17 @@ Release notes rules
 - Keep the Lite edition requirements section at the bottom of this file. The release script appends it to every release. Use Microsoft's link to the latest .NET 10 Desktop Runtime (x64) installer so the footer always points to the current patch.
 -->
 
+## [0.1.7] - 2026-11-25
+
+### Desktop
+
+- Support achievement collection from WeGame installations. Download the required official sign-in components into a separate capture environment that shares the installed game resources.
+- Show the game channel, resource tier, and sign-in component status together below the game path. Ask for confirmation before selecting a resource tier that was not detected locally.
+- Keep SDK checks, download progress, setup, and results in one dialog that stays open until dismissed. Closing the dialog lets the task continue; cancelling the download removes its temporary files and restores the actual component status.
+- Reuse checked download plans and matching local files, and retain the capture environment's settings and runtime data across component updates. Clean up obsolete environment directories after successful preparation.
+- Fix resource and channel indicators being cleared when selecting the same game path again.
+- Limit retained diagnostic sessions to five and a 1 GiB budget, always keeping the newest session even if it exceeds the budget.
+
 ## [0.1.6] - 2026-11-24
 
 ### Desktop

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type ComponentPropsWithoutRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, type ComponentPropsWithoutRef } from 'react'
 import { useOverlayPresence } from './useOverlayPresence'
 import './WDialog.css'
 
@@ -6,12 +6,14 @@ export type WDialogProps = Omit<ComponentPropsWithoutRef<'dialog'>, 'open'> & {
   open: boolean
   onOpenChange: (open: boolean) => void
   closeOnBackdrop?: boolean
+  onAfterClose?: () => void
 }
 
 export function WDialog({
   open,
   onOpenChange,
   closeOnBackdrop = false,
+  onAfterClose,
   className = '',
   children,
   onCancel,
@@ -20,6 +22,14 @@ export function WDialog({
 }: WDialogProps) {
   const ref = useRef<HTMLDialogElement>(null)
   const { present, content } = useOverlayPresence(open, ref, children)
+  const wasPresent = useRef(false)
+  useEffect(() => {
+    if (present) wasPresent.current = true
+    else if (wasPresent.current) {
+      wasPresent.current = false
+      onAfterClose?.()
+    }
+  }, [present, onAfterClose])
 
   useLayoutEffect(() => {
     const dialog = ref.current

@@ -15,7 +15,8 @@
     "previewOnly": "This action requires the desktop client. Browser preview supports UI and settings only",
     "requestTimeout": "Desktop request timed out",
     "openSource": "Open source",
-    "desktopTitle": "Wuthering Waves · Achievement Export"
+    "desktopTitle": "Wuthering Waves · Achievement Export",
+    "confirm": "Confirm"
   },
   "notFound": {
     "title": "Page not found",
@@ -67,7 +68,10 @@
       "unknown": "Unrecognized",
       "sd": "Standard definition",
       "hd": "High definition",
-      "uhd": "Ultra high definition"
+      "uhd": "Ultra high definition",
+      "unavailableTitle": "Selected resources not detected",
+      "unavailableBody": "Local resources for this tier were not detected. The game may fail to start or require additional downloads. Switch anyway?",
+      "continueSwitch": "Switch anyway"
     },
     "zoom": {
       "label": "Interface zoom",
@@ -116,6 +120,18 @@
       "stopping": {
         "title": "Stopping capture",
         "body": "Please wait"
+      },
+      "wegamePreparing": {
+        "title": "Preparing WeGame capture",
+        "body": "Checking official SDK and installed game version"
+      },
+      "wegameDownloading": {
+        "title": "Downloading official SDK",
+        "body": "Verified components are reused; you can cancel and retry"
+      },
+      "wegameLinking": {
+        "title": "Creating independent capture environment",
+        "body": "Sharing game resources while keeping SDK and sign-in data separate"
       }
     },
     "captureDiagnostics": {
@@ -186,7 +202,58 @@
     "completed": "Complete",
     "cancelled": "Capture stopped. Exit Wuthering Waves before starting another capture",
     "failed": "Operation failed. Please try again",
-    "loading": "Connecting to desktop…"
+    "loading": "Connecting to desktop…",
+    "wegame": "WeGame",
+    "wegameHint": "Uses an independent official SDK for capture and shares game resources; sign in with your Kuro account",
+    "sdk": {
+      "channel": "Game channel",
+      "official": "Official",
+      "unknown": "Unknown",
+      "label": "Helper SDK",
+      "details": "View SDK status and download details",
+      "title": "Collection setup required",
+      "description": "The WeGame version requires additional sign-in components; once downloaded, you can launch the game and collect achievements",
+      "size": "About {{total}} MB to download",
+      "checking": "Checking",
+      "checkFailed": "Check failed",
+      "missing": "Not downloaded",
+      "outdated": "Preparation needed",
+      "downloading": "Downloading",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "close": "Close",
+      "retry": "Check again",
+      "prepare": "Download and set up",
+      "cancelDownload": "Cancel download",
+      "stopPreparing": "Stop preparation",
+      "versionMismatch": "The game executable differs from the official version, so compatibility cannot be confirmed yet; check for game updates or try again later",
+      "incompatible": "Compatibility unconfirmed",
+      "readyTitle": "Ready to capture",
+      "readyDescription": "Click “Start collection” to launch the game; achievements will be collected automatically after you enter the game",
+      "compatibilityTitle": "Unable to set up collection yet",
+      "checkingTitle": "Checking collection setup",
+      "checkingDescription": "Checking required sign-in components and downloads, please wait",
+      "checkFailedTitle": "Unable to check collection setup",
+      "checkFailedDescription": "Could not retrieve sign-in component information; check your connection and try again",
+      "updateTitle": "Collection setup needs an update",
+      "updateDescription": "The required sign-in components have an update; update them to continue collecting",
+      "update": "Update",
+      "preparingTitle": "Preparing collection setup",
+      "downloadDescription": "Required components will be configured after downloading; closing this window will not interrupt the download",
+      "downloadResumeDescription": "Collection will start automatically after setup; closing this window will not interrupt the download",
+      "preparingDescription": "Configuring required components; you can start collecting when setup is complete",
+      "prepareResumeDescription": "Configuring required components; collection will start automatically after setup",
+      "downloadTitle": "Downloading sign-in components",
+      "failed": "Setup failed",
+      "cancelled": "Interrupted",
+      "stopping": "Stopping",
+      "failedTitle": "Could not prepare collection setup",
+      "stoppingTitle": "Stopping setup",
+      "failedDescription": "Setup did not complete; please try again",
+      "stoppingDescription": "Stopping the current task, please wait",
+      "retryPreparation": "Retry",
+      "continuedDescription": "Setup is complete and collection has resumed; continue in the game"
+    }
   },
   "ui": {
     "allVersions": "All versions",
@@ -322,7 +389,9 @@
     "gameFilter": "Wuthering Waves executable|*.exe",
     "unknownCommand": "Unknown desktop command",
     "chooseGame": "Select Wuthering Waves.exe",
-    "tooLarge": "The export file exceeds 32 MB"
+    "tooLarge": "The export file exceeds 32 MB",
+    "wegameVersionMismatch": "The installed game executable differs from the official version, so the capture environment cannot be prepared automatically. Check for game updates or try again later",
+    "wegameGameRunning": "Exit Wuthering Waves and start a new capture"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

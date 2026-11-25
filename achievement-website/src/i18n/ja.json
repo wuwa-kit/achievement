@@ -15,7 +15,8 @@
     "previewOnly": "この操作にはデスクトップアプリが必要です。ブラウザーでは画面と設定を確認できます",
     "requestTimeout": "デスクトップへのリクエストがタイムアウトしました",
     "openSource": "オープンソース",
-    "desktopTitle": "鳴潮 · 実績エクスポート"
+    "desktopTitle": "鳴潮 · 実績エクスポート",
+    "confirm": "確認"
   },
   "notFound": {
     "title": "ページが見つかりません",
@@ -67,7 +68,10 @@
       "unknown": "未検出",
       "sd": "標準画質",
       "hd": "高画質",
-      "uhd": "超高画質"
+      "uhd": "超高画質",
+      "unavailableTitle": "選択したリソースが見つかりません",
+      "unavailableBody": "この品質のローカルリソースが見つかりません。ゲーム起動時にエラーや追加ダウンロードが発生する可能性があります。切り替えますか？",
+      "continueSwitch": "切り替える"
     },
     "zoom": {
       "label": "画面のズーム",
@@ -116,6 +120,18 @@
       "stopping": {
         "title": "取得を停止中",
         "body": "しばらくお待ちください"
+      },
+      "wegamePreparing": {
+        "title": "WeGame の収集環境を準備中",
+        "body": "公式 SDK とゲームのバージョンを確認中"
+      },
+      "wegameDownloading": {
+        "title": "公式 SDK をダウンロード中",
+        "body": "検証済みのファイルは再利用されます。キャンセル後に再試行できます"
+      },
+      "wegameLinking": {
+        "title": "独立した収集環境を作成中",
+        "body": "ゲームリソースを共有し、SDK とログインデータは個別に保存します"
       }
     },
     "captureDiagnostics": {
@@ -186,7 +202,58 @@
     "completed": "完了しました",
     "cancelled": "取得を停止しました。再度取得する前に鳴潮を終了してください",
     "failed": "操作に失敗しました。もう一度お試しください",
-    "loading": "デスクトップに接続中…"
+    "loading": "デスクトップに接続中…",
+    "wegame": "WeGame",
+    "wegameHint": "独立した公式 SDK と共有リソースを使用します。KURO アカウントでログインしてください",
+    "sdk": {
+      "channel": "ゲーム配信元",
+      "official": "公式",
+      "unknown": "不明",
+      "label": "補助 SDK",
+      "details": "SDK の状態とダウンロード詳細",
+      "title": "収集環境の準備が必要です",
+      "description": "WeGame 版には追加のログインコンポーネントが必要です。ダウンロード完了後、ゲームを起動して実績を収集できます",
+      "size": "約 {{total}} MB のダウンロード",
+      "checking": "確認中",
+      "checkFailed": "確認失敗",
+      "missing": "未ダウンロード",
+      "outdated": "準備が必要",
+      "downloading": "ダウンロード中",
+      "preparing": "準備中",
+      "ready": "準備完了",
+      "close": "閉じる",
+      "retry": "再確認",
+      "prepare": "ダウンロードして準備",
+      "cancelDownload": "ダウンロードをキャンセル",
+      "stopPreparing": "準備を中断",
+      "versionMismatch": "ゲームの実行ファイルが公式版と異なるため、互換性を確認できません。ゲームの更新を確認するか、後でもう一度お試しください",
+      "incompatible": "互換性未確認",
+      "readyTitle": "収集の準備ができました",
+      "readyDescription": "「収集開始」でゲームを起動すると、ゲームに入った後に実績が自動収集されます",
+      "compatibilityTitle": "収集環境をまだ準備できません",
+      "checkingTitle": "収集環境を確認中",
+      "checkingDescription": "必要なログインコンポーネントとダウンロード内容を確認しています。しばらくお待ちください",
+      "checkFailedTitle": "収集環境を確認できません",
+      "checkFailedDescription": "ログインコンポーネントの情報を取得できませんでした。ネットワークを確認して再試行してください",
+      "updateTitle": "収集環境の更新が必要です",
+      "updateDescription": "ログインコンポーネントの更新があります。更新後に収集を続行できます",
+      "update": "更新",
+      "preparingTitle": "収集環境を準備中",
+      "downloadDescription": "ダウンロード後に自動設定します。このウィンドウを閉じてもダウンロードは続行します",
+      "downloadResumeDescription": "準備完了後に自動で収集を開始します。このウィンドウを閉じてもダウンロードは続行します",
+      "preparingDescription": "必要なコンポーネントを設定しています。完了後に収集を開始できます",
+      "prepareResumeDescription": "必要なコンポーネントを設定しています。準備完了後に自動で収集を開始します",
+      "downloadTitle": "ログインコンポーネントをダウンロード中",
+      "failed": "準備失敗",
+      "cancelled": "中断済み",
+      "stopping": "中断中",
+      "failedTitle": "収集環境を準備できませんでした",
+      "stoppingTitle": "準備を中断中",
+      "failedDescription": "準備が完了しませんでした。再試行してください",
+      "stoppingDescription": "現在の処理を停止しています。しばらくお待ちください",
+      "retryPreparation": "再試行",
+      "continuedDescription": "準備が完了し、収集処理を再開しました。ゲーム内で操作を続けてください"
+    }
   },
   "ui": {
     "allVersions": "すべてのバージョン",
@@ -322,7 +389,9 @@
     "gameFilter": "鳴潮の実行ファイル|*.exe",
     "unknownCommand": "不明なデスクトップコマンドです",
     "chooseGame": "Wuthering Waves.exe を選択してください",
-    "tooLarge": "エクスポートファイルが 32 MB を超えています"
+    "tooLarge": "エクスポートファイルが 32 MB を超えています",
+    "wegameVersionMismatch": "インストール済みのゲームプログラムが公式版と異なるため、収集環境を自動で準備できません。ゲームの更新を確認するか、後で再試行してください",
+    "wegameGameRunning": "鳴潮を終了してから取得をやり直してください"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

@@ -34,7 +34,7 @@ internal static class GamePathDetector
         foreach (var drive in DriveInfo.GetDrives())
         {
             if (drive.DriveType != DriveType.Fixed) continue;
-            foreach (var folder in new[] { "Wuthering Waves", "Wuthering Waves Game", "鸣潮", @"Games\Wuthering Waves", @"Program Files\Wuthering Waves", @"Program Files (x86)\Wuthering Waves" })
+            foreach (var folder in new[] { @"WeGameApps\rail_apps\Wuthering Waves(2002137)", "Wuthering Waves", "Wuthering Waves Game", "鸣潮", @"Games\Wuthering Waves", @"Program Files\Wuthering Waves", @"Program Files (x86)\Wuthering Waves" })
                 roots.Add(Path.Combine(drive.RootDirectory.FullName, folder));
         }
         foreach (var root in roots.Distinct(StringComparer.OrdinalIgnoreCase))

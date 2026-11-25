@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { HistoryCard } from './HistoryCard'
 import { DesktopZoom } from './DesktopZoom'
 import { isDesktop } from './bridge'
+import { SdkDialog, SdkStatusButton } from './SdkEnvironment'
 import { DesktopUpdate } from './DesktopUpdate'
 
 export default function DesktopApp() {
@@ -32,6 +33,10 @@ export default function DesktopApp() {
     setGamePath,
     detectedQuality,
     localTiers,
+    wegame,
+    gameDetected,
+    refreshSdk,
+    sdkPreparing,
     refreshQuality,
     setQuality,
     detectPath,
@@ -52,6 +57,9 @@ export default function DesktopApp() {
     [loaded, settings.gamePath, refreshQuality],
     { wait: 250 },
   )
+  useEffect(() => {
+    if (wegame) void refreshSdk()
+  }, [wegame, settings.gamePath, refreshSdk])
   const qualityRef = useRef<HTMLButtonElement>(null)
   const [promptQuality, setPromptQuality] = useState(false)
   useEffect(() => {
@@ -70,7 +78,7 @@ export default function DesktopApp() {
 
   const disabled = !loaded || pending || state.busy
   const sending = state.stage === 'sending'
-  const exportRunning = state.busy && !sending
+  const exportRunning = state.busy && !sending && !sdkPreparing
   const status = `desktop.captureStatus.${exportRunning ? state.stage : 'ready'}`
   const diagnostic = state.collectionDiagnostic
   const noticeCopy = `desktop.captureNotice.${notice ?? 'failed'}`
@@ -135,8 +143,23 @@ export default function DesktopApp() {
         </div>
       </div>
       {loaded && (
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <span className="text-[16px]">{t('desktop.capture')}</span>
+        <div
+          className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md bg-(--color-surface) px-3 py-2 text-[13px]"
+          data-testid="game-environment"
+        >
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span className="text-(--color-muted)">{t('desktop.sdk.channel')}</span>
+            <span>
+              {t(
+                wegame
+                  ? 'desktop.wegame'
+                  : gameDetected
+                    ? 'desktop.sdk.official'
+                    : 'desktop.sdk.unknown',
+              )}
+            </span>
+            {wegame && <SdkStatusButton />}
+          </div>
           <div className="flex min-w-0 items-center gap-1 text-[13px] text-(--color-muted)">
             <span>{t('desktop.quality.label')}</span>
             <WSelect
@@ -186,6 +209,8 @@ export default function DesktopApp() {
           </div>
         </div>
       )}
+      <SdkDialog />
+      {loaded && <div className="mb-2 text-[16px]">{t('desktop.capture')}</div>}
       {loaded && (
         <div className="ui-section desktop-card flex items-center gap-4 rounded-[9px] border border-(--color-border) bg-(--color-surface) px-4 py-3.5">
           <div className="min-w-0 flex-1">

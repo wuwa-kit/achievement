@@ -15,7 +15,8 @@
     "previewOnly": "此操作需要桌面用戶端；瀏覽器中可預覽介面和設定",
     "requestTimeout": "桌面請求逾時",
     "openSource": "開放原始碼",
-    "desktopTitle": "鳴潮 · 成就匯出"
+    "desktopTitle": "鳴潮 · 成就匯出",
+    "confirm": "確認"
   },
   "notFound": {
     "title": "找不到頁面",
@@ -67,7 +68,10 @@
       "unknown": "未辨識",
       "sd": "標準畫質",
       "hd": "高畫質",
-      "uhd": "超高畫質"
+      "uhd": "超高畫質",
+      "unavailableTitle": "未偵測到所選資源等級",
+      "unavailableBody": "未偵測到所選等級的本機資源，遊戲啟動可能出錯或要求下載額外資源，仍要切換嗎？",
+      "continueSwitch": "仍然切換"
     },
     "zoom": {
       "label": "介面縮放",
@@ -116,6 +120,18 @@
       "stopping": {
         "title": "正在停止擷取",
         "body": "請稍候"
+      },
+      "wegamePreparing": {
+        "title": "準備 WeGame 擷取環境",
+        "body": "正在檢查官方 SDK 和已安裝遊戲版本"
+      },
+      "wegameDownloading": {
+        "title": "下載官方 SDK",
+        "body": "已驗證元件會重用，可取消後重試"
+      },
+      "wegameLinking": {
+        "title": "建立獨立擷取環境",
+        "body": "共用遊戲資源，獨立儲存 SDK 和登入資料"
       }
     },
     "captureDiagnostics": {
@@ -186,7 +202,58 @@
     "completed": "操作完成",
     "cancelled": "已停止擷取，再次擷取前請先退出鳴潮",
     "failed": "操作未完成，請重試",
-    "loading": "正在連線至用戶端…"
+    "loading": "正在連線至用戶端…",
+    "wegame": "WeGame",
+    "wegameHint": "擷取使用獨立官方 SDK，共用遊戲資源；請使用庫洛帳號登入",
+    "sdk": {
+      "channel": "遊戲通路",
+      "official": "官方通路",
+      "unknown": "未識別",
+      "label": "輔助 SDK",
+      "details": "查看 SDK 狀態與下載詳情",
+      "title": "需要準備採集環境",
+      "description": "WeGame 版本需要額外的登入元件，下載完成後即可啟動遊戲並採集成就",
+      "size": "需下載約 {{total}} MB",
+      "checking": "檢查中",
+      "checkFailed": "檢查失敗",
+      "missing": "未下載",
+      "outdated": "需要準備",
+      "downloading": "下載中",
+      "preparing": "準備中",
+      "ready": "準備完成",
+      "close": "關閉",
+      "retry": "重新檢查",
+      "prepare": "下載並準備",
+      "cancelDownload": "取消下載",
+      "stopPreparing": "中斷準備",
+      "versionMismatch": "目前遊戲程式與官方版本不一致，暫時無法確認相容性，請檢查遊戲更新或稍後重試",
+      "incompatible": "相容性待確認",
+      "readyTitle": "擷取環境已就緒",
+      "readyDescription": "點擊「開始採集」啟動遊戲，進入遊戲後將自動採集成就",
+      "compatibilityTitle": "暫時無法準備採集環境",
+      "checkingTitle": "正在檢查採集環境",
+      "checkingDescription": "正在確認所需登入元件和下載內容，請稍候",
+      "checkFailedTitle": "無法檢查採集環境",
+      "checkFailedDescription": "未能取得登入元件資訊，請檢查網路後重試",
+      "updateTitle": "需要更新採集環境",
+      "updateDescription": "所需登入元件已有更新，完成更新後即可繼續採集",
+      "update": "更新",
+      "preparingTitle": "正在準備採集環境",
+      "downloadDescription": "下載完成後將自動設定所需元件，關閉此視窗不會中斷下載",
+      "downloadResumeDescription": "準備完成後將自動開始採集，關閉此視窗不會中斷下載",
+      "preparingDescription": "正在設定所需元件，完成後即可開始採集",
+      "prepareResumeDescription": "正在設定所需元件，準備完成後將自動開始採集",
+      "downloadTitle": "正在下載登入元件",
+      "failed": "準備失敗",
+      "cancelled": "已中斷",
+      "stopping": "正在中斷",
+      "failedTitle": "未能準備採集環境",
+      "stoppingTitle": "正在中斷準備",
+      "failedDescription": "準備未完成，請重試",
+      "stoppingDescription": "正在停止目前任務，請稍候",
+      "retryPreparation": "重試",
+      "continuedDescription": "準備已完成，採集流程已繼續，請在遊戲中完成後續操作"
+    }
   },
   "ui": {
     "allVersions": "所有版本",
@@ -322,7 +389,9 @@
     "gameFilter": "鳴潮執行檔|*.exe",
     "unknownCommand": "未知桌面命令",
     "chooseGame": "請選擇 Wuthering Waves.exe",
-    "tooLarge": "匯出檔案超過 32 MB"
+    "tooLarge": "匯出檔案超過 32 MB",
+    "wegameVersionMismatch": "目前遊戲程式與官方版本不一致，暫時無法自動準備擷取環境。請檢查遊戲更新或稍後重試",
+    "wegameGameRunning": "請關閉正在執行的鳴潮，再重新擷取"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

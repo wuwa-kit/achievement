@@ -166,6 +166,7 @@ test('desktop bridge preserves progress while switching language and supports ca
   await expect(page.locator('.w-message')).toContainText('无法识别资源档位，请选择已安装的档位')
   await expect(quality).toHaveAttribute('data-expanded', 'true')
   await page.locator('[popover]:popover-open [data-value="sd"]').click()
+  await page.getByTestId('command-confirm-accept').click()
   await expect(quality).toHaveText('标清')
   await page.getByTestId('开始采集').click()
   await page.locator('.desktop-export-toggle[data-running="true"]').click()
@@ -451,3 +452,334 @@ test('action messages replace repeats and unmount after dismissal or timeout', a
   await expect(page.locator('.w-message')).toBeVisible()
   await expect(page.locator('.w-message-host')).toHaveCount(0, { timeout: 8000 })
 })
+
+test('rediscovering the selected game preserves resource and channel detection', async ({
+  page,
+}) => {
+  await page.goto('/desktop?mock=1')
+  const quality = page.getByTestId('resource-quality')
+  await expect(quality).toHaveText('自动（高清）')
+  await expect(page.getByText('WeGame', { exact: true })).toBeVisible()
+  await page.locator('.desktop-path-action').first().click()
+  await expect(quality).toHaveText('自动（高清）')
+  await expect(page.getByText('WeGame', { exact: true })).toBeVisible()
+  await page.locator('.desktop-path-action').last().click()
+  await quality.click()
+  await expect(
+    page.locator('.w-select-popover:popover-open').getByTestId('local-resource-icon'),
+  ).toHaveCount(2)
+})
+
+test('missing resource tier requires confirmation and cancel preserves selection', async ({
+  page,
+}) => {
+  await page.goto('/desktop?mock=1')
+  const quality = page.getByTestId('resource-quality')
+  await expect(quality).toHaveText('自动（高清）')
+  await selectValue(page, quality, 'sd')
+  const dialog = page.getByTestId('command-confirm-dialog')
+  await expect(dialog).toContainText('游戏启动可能报错')
+  await expect(quality).toHaveText('自动（高清）')
+  await page.getByTestId('command-confirm-cancel').click()
+  await expect(dialog).toHaveCount(0)
+  await expect(quality).toHaveText('自动（高清）')
+  await selectValue(page, quality, 'sd')
+  await page.keyboard.press('Escape')
+  await expect(dialog).toHaveCount(0)
+  await expect(quality).toHaveText('自动（高清）')
+  await selectValue(page, quality, 'sd')
+  await page.getByTestId('command-confirm-accept').click()
+  await expect(dialog).toHaveCount(0)
+  await expect(quality).toHaveText('标清')
+  await selectValue(page, quality, 'hd')
+  await expect(quality).toHaveText('高清')
+  await expect(dialog).toHaveCount(0)
+  await selectValue(page, quality, 'auto')
+  await expect(quality).toHaveText('自动（高清）')
+  await expect(dialog).toHaveCount(0)
+})
+
+test('SDK can be prepared separately and capture offers the same dialog', async ({ page }) => {
+  await page.goto('/desktop?mock=1')
+  const environment = page.getByTestId('game-environment')
+  await expect(environment).toContainText('WeGame')
+  await expect(environment.getByTestId('resource-quality')).toBeVisible()
+  await expect(page.getByTestId('sdk-status')).toHaveText('未下载')
+  await page.getByTestId('sdk-status').click()
+  await expect(page.getByTestId('sdk-dialog')).toContainText('279 MB')
+  await page.getByTestId('sdk-prepare').click()
+  await expect(page.getByTestId('sdk-status')).toHaveText('准备完毕')
+  const readyDialog = page.getByTestId('sdk-dialog')
+  await expect(readyDialog).toContainText('采集环境已就绪')
+  await expect(readyDialog).toContainText('点击「开始采集」启动游戏，进入游戏后将自动采集成就')
+  await expect(readyDialog).not.toContainText('准备完毕')
+  await expect(readyDialog).not.toContainText('库洛账号')
+  await expect(readyDialog.locator('button')).toHaveCount(1)
+  await readyDialog.getByText('知道了', { exact: true }).click()
+  await expect(page.getByTestId('开始采集')).toBeEnabled()
+  await page.reload()
+  await expect(page.getByTestId('sdk-status')).toHaveText('未下载')
+  await page.getByTestId('开始采集').click()
+  await expect(page.getByTestId('sdk-dialog')).toBeVisible()
+  await page.getByTestId('sdk-prepare').click()
+  await expect(page.getByTestId('sdk-dialog')).toContainText('准备已完成，采集流程已继续')
+  await expect(page.getByTestId('停止采集')).toBeVisible()
+})
+
+test('SDK download progress can be reopened and cancelled; check failure can retry', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    let listener: (event: { data: unknown }) => void
+    let preparationId = ''
+    const initialStatus = localStorage.getItem('sdk-first-install') ? 'missing' : 'outdated'
+    let sdk = { status: initialStatus, received: 0, total: 100 }
+    const settings = {
+      gamePath: 'C:/WeGame/Wuthering Waves.exe',
+      language: 'zh-CN',
+      quality: 'auto',
+    }
+    let state = { stage: 'ready', busy: false, error: null, transferUrl: null, sdkStatus: sdk }
+    const send = (data: unknown) => listener({ data })
+    Object.defineProperty(window, 'chrome', {
+      configurable: true,
+      value: {
+        webview: {
+          addEventListener: (_: string, callback: typeof listener) => {
+            listener = callback
+          },
+          postMessage: (message: { id: string; method: string }) => {
+            if (message.method === 'sdk.check' && localStorage.getItem('sdk-check-fail')) {
+              queueMicrotask(() => send({ id: message.id, error: 'Network unavailable' }))
+              return
+            }
+            let result: unknown = null
+            if (message.method === 'settings.get') result = settings
+            if (message.method === 'state.get') result = state
+            if (message.method === 'game.quality')
+              result = { selected: 'sd', localTiers: ['sd'], wegame: true }
+            if (message.method === 'sdk.check')
+              result = {
+                ...sdk,
+                status: localStorage.getItem('sdk-incompatible') ? 'incompatible' : sdk.status,
+                total: localStorage.getItem('sdk-zero') ? 0 : sdk.total,
+              }
+            if (message.method === 'sdk.prepare') {
+              preparationId = message.id
+              sdk = { status: 'downloading', received: 50, total: 100 }
+              state = { ...state, stage: 'wegameDownloading', busy: true, sdkStatus: sdk }
+              queueMicrotask(() => send({ event: 'state', data: state }))
+              return
+            }
+            if (message.method === 'export.cancel') {
+              sdk = { status: initialStatus, received: 0, total: 100 }
+              state = { ...state, stage: 'cancelled', busy: false, sdkStatus: sdk }
+              queueMicrotask(() => {
+                send({ event: 'state', data: state })
+                send({ id: preparationId, result: false })
+              })
+            }
+            queueMicrotask(() => send({ id: message.id, result }))
+          },
+        },
+      },
+    })
+  })
+  await page.goto('/desktop')
+  await expect(page.getByTestId('sdk-status')).toHaveText('需要准备')
+  await page.getByTestId('sdk-status').click()
+  await page.getByTestId('sdk-prepare').click()
+  await expect(page.getByTestId('sdk-download-progress')).toHaveText('下载中 50%')
+  await expect(page.getByTestId('sdk-download-summary')).toContainText('下载中 50%')
+  await expect(page.getByTestId('sdk-dialog')).toContainText('关闭此窗口不会中断下载')
+  await page.getByTestId('sdk-dialog').getByText('关闭', { exact: true }).click()
+  await expect(page.getByTestId('sdk-dialog')).toHaveCount(0)
+  await page.getByTestId('sdk-status').click()
+  await expect(page.getByTestId('sdk-download-progress')).toHaveText('下载中 50%')
+  await page.getByTestId('sdk-dialog').getByText('取消下载', { exact: true }).click()
+  await expect(page.getByTestId('sdk-status')).toHaveText('需要准备')
+  await expect(page.getByTestId('sdk-dialog')).toContainText('需要更新采集环境')
+  await expect(page.getByTestId('sdk-prepare')).toBeEnabled()
+  await page.evaluate(() => localStorage.setItem('sdk-zero', '1'))
+  await page.reload()
+  await expect(page.getByTestId('sdk-status')).toHaveText('需要准备')
+  await page.getByTestId('sdk-status').click()
+  await expect(page.getByTestId('sdk-download-summary')).toHaveCount(0)
+  await expect(page.getByTestId('sdk-dialog')).not.toContainText('复用')
+  await expect(page.getByTestId('sdk-dialog')).not.toContainText('0 MB')
+  await expect(page.getByTestId('sdk-prepare')).toHaveText('更新')
+  await page.evaluate(() => localStorage.setItem('sdk-check-fail', '1'))
+  await page.reload()
+  await expect(page.getByTestId('sdk-status')).toHaveText('检查失败')
+  await page.getByTestId('sdk-status').click()
+  await expect(page.getByTestId('sdk-prepare')).toHaveCount(0)
+  await page.evaluate(() => localStorage.removeItem('sdk-check-fail'))
+  await page.getByText('重新检查', { exact: true }).click()
+  await expect(page.getByTestId('sdk-status')).toHaveText('需要准备')
+  await page.evaluate(() => localStorage.setItem('sdk-incompatible', '1'))
+  await page.reload()
+  await expect(page.getByTestId('sdk-status')).toHaveText('兼容性待确认')
+  await page.getByTestId('sdk-status').click()
+  await expect(page.getByTestId('sdk-dialog')).toContainText('暂无法准备采集环境')
+  await expect(page.getByTestId('sdk-prepare')).toHaveCount(0)
+  await expect(page.getByTestId('sdk-dialog').getByText('重新检查', { exact: true })).toBeVisible()
+  await page.evaluate(() => localStorage.removeItem('sdk-incompatible'))
+  await page.getByTestId('sdk-dialog').getByText('重新检查', { exact: true }).click()
+  await expect(page.getByTestId('sdk-status')).toHaveText('需要准备')
+  await expect(page.getByTestId('sdk-download-progress')).toHaveCount(0)
+  await expect(page.getByTestId('sdk-prepare')).toBeEnabled()
+  await page.evaluate(() => {
+    localStorage.setItem('sdk-first-install', '1')
+    localStorage.removeItem('sdk-zero')
+  })
+  await page.reload()
+  await expect(page.getByTestId('sdk-status')).toHaveText('未下载')
+  await page.getByTestId('sdk-status').click()
+  await page.getByTestId('sdk-prepare').click()
+  await expect(page.getByTestId('sdk-download-progress')).toHaveText('下载中 50%')
+  await page.getByTestId('sdk-dialog').getByText('取消下载', { exact: true }).click()
+  await expect(page.getByTestId('sdk-status')).toHaveText('未下载')
+  await expect(page.getByTestId('sdk-dialog')).toContainText('需要准备采集环境')
+  await expect(page.getByTestId('sdk-dialog')).not.toContainText('准备已中断')
+  await expect(page.getByTestId('sdk-prepare')).toHaveText('下载并准备')
+  await page.reload()
+  await expect(page.getByTestId('sdk-status')).toHaveText('未下载')
+})
+
+for (const closeDuringPreparation of [false, true]) {
+  test(`SDK lifecycle keeps user-controlled visibility (closed=${closeDuringPreparation})`, async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      let listener: (event: { data: unknown }) => void
+      let preparationId = ''
+      let sdk = { status: 'missing', received: 0, total: 100 }
+      let state = {
+        stage: 'ready',
+        busy: false,
+        transferUrl: null,
+        error: null as string | null,
+        sdkStatus: sdk,
+      }
+      const settings = {
+        gamePath: 'C:/WeGame/Wuthering Waves.exe',
+        language: 'zh-CN',
+        quality: 'auto',
+      }
+      const send = (data: unknown) => listener({ data })
+      const calls: string[] = []
+      window.addEventListener('sdk-step', (event) => {
+        const status = (event as CustomEvent<string>).detail
+        sdk = { status, received: status === 'downloading' ? 50 : 100, total: 100 }
+        const finished = status === 'ready' || status === 'failed'
+        state = {
+          ...state,
+          sdkStatus: sdk,
+          busy: !finished,
+          stage:
+            status === 'ready'
+              ? 'sdkReady'
+              : status === 'failed'
+                ? 'failed'
+                : status === 'downloading'
+                  ? 'wegameDownloading'
+                  : 'wegameLinking',
+          error: status === 'failed' ? 'Test download failure' : null,
+        }
+        send({ event: 'state', data: state })
+        if (finished) send({ id: preparationId, result: status === 'ready' })
+      })
+      Object.defineProperty(window, 'chrome', {
+        configurable: true,
+        value: {
+          webview: {
+            addEventListener: (_: string, callback: typeof listener) => {
+              listener = callback
+            },
+            postMessage: (message: { id: string; method: string }) => {
+              calls.push(message.method)
+              localStorage.setItem('sdk-calls', JSON.stringify(calls))
+              let result: unknown = null
+              if (message.method === 'settings.get') result = settings
+              if (message.method === 'state.get') result = state
+              if (message.method === 'game.quality')
+                result = { selected: 'sd', localTiers: ['sd'], wegame: true }
+              if (message.method === 'sdk.check') result = sdk
+              if (message.method === 'sdk.prepare') {
+                preparationId = message.id
+                sdk = { status: 'downloading', received: 0, total: 100 }
+                state = {
+                  ...state,
+                  sdkStatus: sdk,
+                  stage: 'wegameDownloading',
+                  busy: true,
+                  error: null,
+                }
+                queueMicrotask(() => send({ event: 'state', data: state }))
+                return
+              }
+              if (message.method === 'export.start') {
+                state = { ...state, stage: 'login', busy: true }
+                queueMicrotask(() => send({ event: 'state', data: state }))
+              }
+              queueMicrotask(() => send({ id: message.id, result }))
+            },
+          },
+        },
+      })
+    })
+    await page.goto('/desktop')
+    await expect(page.getByTestId('sdk-status')).toHaveText('未下载')
+    await page.getByTestId(closeDuringPreparation ? '开始采集' : 'sdk-status').click()
+    const dialog = page.getByTestId('sdk-dialog')
+    await page.getByTestId('sdk-prepare').click()
+    await expect(dialog).toContainText('正在下载登录组件')
+    await expect(dialog).not.toContainText('正在检查采集环境')
+    await expect(dialog).not.toContainText('正在配置')
+    const callsBefore = await page.evaluate(
+      () => JSON.parse(localStorage.getItem('sdk-calls')!) as string[],
+    )
+    const step = (status: string) =>
+      page.evaluate(
+        (detail) => window.dispatchEvent(new CustomEvent('sdk-step', { detail })),
+        status,
+      )
+    if (closeDuringPreparation) {
+      await dialog.getByText('关闭', { exact: true }).click()
+      await expect(dialog).toHaveCount(0)
+    } else {
+      await step('failed')
+      await expect(dialog).toContainText('未能准备采集环境')
+      await dialog.getByText('重试', { exact: true }).click()
+      await expect(dialog).toContainText('正在下载登录组件')
+      await expect(dialog).not.toContainText('正在检查采集环境')
+    }
+    await step('downloading')
+    await expect(page.getByTestId('sdk-status')).toHaveText('下载中 50%')
+    if (!closeDuringPreparation) await expect(dialog).toContainText('正在下载登录组件')
+    await step('preparing')
+    await expect(page.getByTestId('sdk-status')).toHaveText('准备中')
+    if (!closeDuringPreparation) await expect(dialog).toContainText('正在配置所需组件')
+    await step('ready')
+    await expect(page.getByTestId('sdk-status')).toHaveText('准备完毕')
+    if (closeDuringPreparation) {
+      await expect(page.getByTestId('停止采集')).toBeVisible()
+      await expect(dialog).toHaveCount(0)
+      await page.getByTestId('sdk-status').click()
+      await expect(dialog).toContainText('准备已完成，采集流程已继续')
+    } else {
+      await expect(dialog).toContainText('采集环境已就绪')
+    }
+    const callsAfter = await page.evaluate(
+      () => JSON.parse(localStorage.getItem('sdk-calls')!) as string[],
+    )
+    expect(callsAfter.filter((method) => method === 'sdk.check')).toEqual(
+      callsBefore.filter((method) => method === 'sdk.check'),
+    )
+    expect(callsAfter.filter((method) => method === 'export.start')).toHaveLength(
+      closeDuringPreparation ? 1 : 0,
+    )
+    await dialog.getByText('知道了', { exact: true }).click()
+    await expect(dialog).toHaveCount(0)
+  })
+}

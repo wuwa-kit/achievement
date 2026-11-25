@@ -15,7 +15,8 @@
     "previewOnly": "Diese Aktion erfordert die Desktop-App. Im Browser können Oberfläche und Einstellungen getestet werden",
     "requestTimeout": "Zeitüberschreitung bei der Desktop-Anfrage",
     "openSource": "Quelloffen",
-    "desktopTitle": "Wuthering Waves · Erfolgsexport"
+    "desktopTitle": "Wuthering Waves · Erfolgsexport",
+    "confirm": "Bestätigen"
   },
   "notFound": {
     "title": "Seite nicht gefunden",
@@ -67,7 +68,10 @@
       "unknown": "Nicht erkannt",
       "sd": "Standardauflösung",
       "hd": "Hohe Auflösung",
-      "uhd": "Ultrahohe Auflösung"
+      "uhd": "Ultrahohe Auflösung",
+      "unavailableTitle": "Gewählte Ressourcen nicht erkannt",
+      "unavailableBody": "Lokale Ressourcen für diese Stufe wurden nicht erkannt. Der Spielstart kann fehlschlagen oder weitere Downloads erfordern. Trotzdem wechseln?",
+      "continueSwitch": "Trotzdem wechseln"
     },
     "zoom": {
       "label": "Ansichtszoom",
@@ -116,6 +120,18 @@
       "stopping": {
         "title": "Erfassung wird gestoppt",
         "body": "Bitte warten"
+      },
+      "wegamePreparing": {
+        "title": "WeGame-Erfassung wird vorbereitet",
+        "body": "Offizielles SDK und Spielversion werden geprüft"
+      },
+      "wegameDownloading": {
+        "title": "Offizielles SDK wird heruntergeladen",
+        "body": "Geprüfte Dateien werden wiederverwendet; Abbrechen und Wiederholen ist möglich"
+      },
+      "wegameLinking": {
+        "title": "Separate Erfassungsumgebung wird erstellt",
+        "body": "Spielressourcen werden geteilt, SDK und Anmeldedaten separat gespeichert"
       }
     },
     "captureDiagnostics": {
@@ -186,7 +202,58 @@
     "completed": "Abgeschlossen",
     "cancelled": "Erfassung gestoppt. Beende Wuthering Waves vor der nächsten Erfassung",
     "failed": "Vorgang fehlgeschlagen. Bitte erneut versuchen",
-    "loading": "Verbindung zur Desktop-App wird hergestellt…"
+    "loading": "Verbindung zur Desktop-App wird hergestellt…",
+    "wegame": "WeGame",
+    "wegameHint": "Verwendet ein separates offizielles SDK mit gemeinsamen Ressourcen; mit KURO-Konto anmelden",
+    "sdk": {
+      "channel": "Spielkanal",
+      "official": "Offiziell",
+      "unknown": "Unbekannt",
+      "label": "Hilfs-SDK",
+      "details": "SDK-Status und Downloaddetails",
+      "title": "Erfassung muss eingerichtet werden",
+      "description": "Die WeGame-Version benötigt zusätzliche Anmeldekomponenten; nach dem Download kannst du das Spiel starten und Erfolge erfassen",
+      "size": "Etwa {{total}} MB herunterladen",
+      "checking": "Prüfung läuft",
+      "checkFailed": "Prüfung fehlgeschlagen",
+      "missing": "Nicht heruntergeladen",
+      "outdated": "Vorbereitung nötig",
+      "downloading": "Download läuft",
+      "preparing": "Vorbereitung läuft",
+      "ready": "Bereit",
+      "close": "Schließen",
+      "retry": "Erneut prüfen",
+      "prepare": "Herunterladen und einrichten",
+      "cancelDownload": "Download abbrechen",
+      "stopPreparing": "Vorbereitung abbrechen",
+      "versionMismatch": "Die Spieldatei weicht von der offiziellen Version ab; die Kompatibilität ist noch unbestätigt. Prüfe Spielupdates oder versuche es später erneut",
+      "incompatible": "Kompatibilität ungeklärt",
+      "readyTitle": "Bereit zur Erfassung",
+      "readyDescription": "Klicke auf „Erfassung starten“, um das Spiel zu starten; nach dem Betreten des Spiels werden Erfolge automatisch erfasst",
+      "compatibilityTitle": "Erfassung kann noch nicht eingerichtet werden",
+      "checkingTitle": "Erfassungseinrichtung wird geprüft",
+      "checkingDescription": "Benötigte Anmeldekomponenten und Downloads werden geprüft, bitte warten",
+      "checkFailedTitle": "Erfassungseinrichtung konnte nicht geprüft werden",
+      "checkFailedDescription": "Informationen zu den Anmeldekomponenten konnten nicht geladen werden; prüfe die Verbindung und versuche es erneut",
+      "updateTitle": "Erfassungseinrichtung muss aktualisiert werden",
+      "updateDescription": "Für die Anmeldekomponenten ist ein Update verfügbar; aktualisiere sie, um fortzufahren",
+      "update": "Aktualisieren",
+      "preparingTitle": "Erfassung wird eingerichtet",
+      "downloadDescription": "Nach dem Download werden die Komponenten automatisch eingerichtet; das Schließen dieses Fensters unterbricht den Download nicht",
+      "downloadResumeDescription": "Nach der Einrichtung startet die Erfassung automatisch; das Schließen dieses Fensters unterbricht den Download nicht",
+      "preparingDescription": "Die Komponenten werden eingerichtet; danach kannst du die Erfassung starten",
+      "prepareResumeDescription": "Die Komponenten werden eingerichtet; danach startet die Erfassung automatisch",
+      "downloadTitle": "Anmeldekomponenten werden heruntergeladen",
+      "failed": "Einrichtung fehlgeschlagen",
+      "cancelled": "Unterbrochen",
+      "stopping": "Wird beendet",
+      "failedTitle": "Erfassung konnte nicht eingerichtet werden",
+      "stoppingTitle": "Einrichtung wird beendet",
+      "failedDescription": "Die Einrichtung wurde nicht abgeschlossen; versuche es erneut",
+      "stoppingDescription": "Die aktuelle Aufgabe wird beendet, bitte warten",
+      "retryPreparation": "Erneut versuchen",
+      "continuedDescription": "Die Einrichtung ist abgeschlossen und die Erfassung wird fortgesetzt; fahre im Spiel fort"
+    }
   },
   "ui": {
     "allVersions": "Alle Versionen",
@@ -322,7 +389,9 @@
     "gameFilter": "Wuthering-Waves-Programmdatei|*.exe",
     "unknownCommand": "Unbekannter Desktop-Befehl",
     "chooseGame": "Wuthering Waves.exe auswählen",
-    "tooLarge": "Die Exportdatei ist größer als 32 MB"
+    "tooLarge": "Die Exportdatei ist größer als 32 MB",
+    "wegameVersionMismatch": "Die installierte Spieldatei weicht von der offiziellen Version ab. Die Erfassungsumgebung kann daher nicht automatisch vorbereitet werden. Spielupdates prüfen oder später erneut versuchen",
+    "wegameGameRunning": "Beende Wuthering Waves und starte eine neue Erfassung"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

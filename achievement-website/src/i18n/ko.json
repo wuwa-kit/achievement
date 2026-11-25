@@ -15,7 +15,8 @@
     "previewOnly": "이 작업에는 데스크톱 앱이 필요합니다. 브라우저에서는 화면과 설정을 미리 볼 수 있습니다",
     "requestTimeout": "데스크톱 요청 시간이 초과되었습니다",
     "openSource": "오픈 소스",
-    "desktopTitle": "명조 · 업적 내보내기"
+    "desktopTitle": "명조 · 업적 내보내기",
+    "confirm": "확인"
   },
   "notFound": {
     "title": "페이지를 찾을 수 없습니다",
@@ -67,7 +68,10 @@
       "unknown": "감지되지 않음",
       "sd": "표준 화질",
       "hd": "고화질",
-      "uhd": "초고화질"
+      "uhd": "초고화질",
+      "unavailableTitle": "선택한 리소스를 찾을 수 없음",
+      "unavailableBody": "이 등급의 로컬 리소스를 찾지 못했습니다. 게임 시작 시 오류가 발생하거나 추가 다운로드가 필요할 수 있습니다. 그래도 변경할까요?",
+      "continueSwitch": "계속 변경"
     },
     "zoom": {
       "label": "화면 배율",
@@ -116,6 +120,18 @@
       "stopping": {
         "title": "수집 중지 중",
         "body": "잠시 기다려 주세요"
+      },
+      "wegamePreparing": {
+        "title": "WeGame 수집 환경 준비 중",
+        "body": "공식 SDK 및 설치된 게임 버전 확인 중"
+      },
+      "wegameDownloading": {
+        "title": "공식 SDK 다운로드 중",
+        "body": "검증된 파일은 재사용됩니다. 취소 후 다시 시도할 수 있습니다"
+      },
+      "wegameLinking": {
+        "title": "독립 수집 환경 생성 중",
+        "body": "게임 리소스는 공유하고 SDK 및 로그인 데이터는 별도로 저장합니다"
       }
     },
     "captureDiagnostics": {
@@ -186,7 +202,58 @@
     "completed": "완료되었습니다",
     "cancelled": "수집을 중지했습니다. 다시 수집하기 전에 명조를 종료해 주세요",
     "failed": "작업에 실패했습니다. 다시 시도해 주세요",
-    "loading": "데스크톱에 연결 중…"
+    "loading": "데스크톱에 연결 중…",
+    "wegame": "WeGame",
+    "wegameHint": "독립 공식 SDK와 공유 리소스를 사용합니다. KURO 계정으로 로그인하세요",
+    "sdk": {
+      "channel": "게임 채널",
+      "official": "공식",
+      "unknown": "알 수 없음",
+      "label": "보조 SDK",
+      "details": "SDK 상태 및 다운로드 정보",
+      "title": "수집 환경 준비 필요",
+      "description": "WeGame 버전에는 추가 로그인 구성 요소가 필요합니다. 다운로드가 완료되면 게임을 실행하고 업적을 수집할 수 있습니다",
+      "size": "약 {{total}} MB 다운로드 필요",
+      "checking": "확인 중",
+      "checkFailed": "확인 실패",
+      "missing": "미다운로드",
+      "outdated": "준비 필요",
+      "downloading": "다운로드 중",
+      "preparing": "준비 중",
+      "ready": "준비 완료",
+      "close": "닫기",
+      "retry": "다시 확인",
+      "prepare": "다운로드 및 준비",
+      "cancelDownload": "다운로드 취소",
+      "stopPreparing": "준비 중단",
+      "versionMismatch": "게임 실행 파일이 공식 버전과 달라 호환성을 확인할 수 없습니다. 게임 업데이트를 확인하거나 나중에 다시 시도하세요",
+      "incompatible": "호환성 미확인",
+      "readyTitle": "수집 준비 완료",
+      "readyDescription": "수집 시작을 눌러 게임을 실행하면 게임 진입 후 업적이 자동으로 수집됩니다",
+      "compatibilityTitle": "아직 수집 환경을 준비할 수 없음",
+      "checkingTitle": "수집 환경 확인 중",
+      "checkingDescription": "필요한 로그인 구성 요소와 다운로드 항목을 확인하고 있습니다. 잠시 기다려 주세요",
+      "checkFailedTitle": "수집 환경을 확인할 수 없음",
+      "checkFailedDescription": "로그인 구성 요소 정보를 가져오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요",
+      "updateTitle": "수집 환경 업데이트 필요",
+      "updateDescription": "로그인 구성 요소 업데이트가 있습니다. 업데이트 후 수집을 계속할 수 있습니다",
+      "update": "업데이트",
+      "preparingTitle": "수집 환경 준비 중",
+      "downloadDescription": "다운로드 후 자동으로 구성합니다. 이 창을 닫아도 다운로드는 계속됩니다",
+      "downloadResumeDescription": "준비가 완료되면 자동으로 수집을 시작합니다. 이 창을 닫아도 다운로드는 계속됩니다",
+      "preparingDescription": "필요한 구성 요소를 설정하고 있습니다. 완료 후 수집을 시작할 수 있습니다",
+      "prepareResumeDescription": "필요한 구성 요소를 설정하고 있습니다. 준비 완료 후 자동으로 수집을 시작합니다",
+      "downloadTitle": "로그인 구성 요소 다운로드 중",
+      "failed": "준비 실패",
+      "cancelled": "중단됨",
+      "stopping": "중단 중",
+      "failedTitle": "수집 환경을 준비하지 못함",
+      "stoppingTitle": "준비 중단 중",
+      "failedDescription": "준비가 완료되지 않았습니다. 다시 시도하세요",
+      "stoppingDescription": "현재 작업을 중단하고 있습니다. 잠시 기다려 주세요",
+      "retryPreparation": "다시 시도",
+      "continuedDescription": "준비가 완료되어 수집을 계속합니다. 게임에서 다음 작업을 진행하세요"
+    }
   },
   "ui": {
     "allVersions": "모든 버전",
@@ -322,7 +389,9 @@
     "gameFilter": "명조 실행 파일|*.exe",
     "unknownCommand": "알 수 없는 데스크톱 명령입니다",
     "chooseGame": "Wuthering Waves.exe를 선택해 주세요",
-    "tooLarge": "내보내기 파일이 32 MB를 초과합니다"
+    "tooLarge": "내보내기 파일이 32 MB를 초과합니다",
+    "wegameVersionMismatch": "설치된 게임 실행 파일이 공식 버전과 달라 수집 환경을 자동으로 준비할 수 없습니다. 게임 업데이트를 확인하거나 나중에 다시 시도하세요",
+    "wegameGameRunning": "명조를 종료한 후 다시 수집해 주세요"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

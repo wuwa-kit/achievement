@@ -15,7 +15,8 @@
     "previewOnly": "Esta acción requiere la aplicación de escritorio. El navegador permite previsualizar la interfaz y los ajustes",
     "requestTimeout": "Se agotó el tiempo de espera de la solicitud al escritorio",
     "openSource": "Código abierto",
-    "desktopTitle": "Wuthering Waves · Exportación de logros"
+    "desktopTitle": "Wuthering Waves · Exportación de logros",
+    "confirm": "Confirmar"
   },
   "notFound": {
     "title": "Página no encontrada",
@@ -67,7 +68,10 @@
       "unknown": "Sin detectar",
       "sd": "Definición estándar",
       "hd": "Alta definición",
-      "uhd": "Ultra alta definición"
+      "uhd": "Ultra alta definición",
+      "unavailableTitle": "Recursos seleccionados no detectados",
+      "unavailableBody": "No se detectaron recursos locales para este nivel. El juego podría fallar al iniciar o requerir descargas adicionales. ¿Cambiar de todos modos?",
+      "continueSwitch": "Cambiar igualmente"
     },
     "zoom": {
       "label": "Zoom de la interfaz",
@@ -116,6 +120,18 @@
       "stopping": {
         "title": "Deteniendo la captura",
         "body": "Espera un momento"
+      },
+      "wegamePreparing": {
+        "title": "Preparando captura de WeGame",
+        "body": "Comprobando el SDK oficial y la versión instalada"
+      },
+      "wegameDownloading": {
+        "title": "Descargando SDK oficial",
+        "body": "Los archivos verificados se reutilizan; puedes cancelar y reintentar"
+      },
+      "wegameLinking": {
+        "title": "Creando entorno de captura independiente",
+        "body": "Recursos compartidos, SDK y datos de acceso separados"
       }
     },
     "captureDiagnostics": {
@@ -186,7 +202,58 @@
     "completed": "Completado",
     "cancelled": "Captura detenida. Cierra Wuthering Waves antes de iniciar otra captura",
     "failed": "La operación falló. Inténtalo de nuevo",
-    "loading": "Conectando con el escritorio…"
+    "loading": "Conectando con el escritorio…",
+    "wegame": "WeGame",
+    "wegameHint": "Usa un SDK oficial independiente y recursos compartidos; inicia sesión con tu cuenta KURO",
+    "sdk": {
+      "channel": "Canal del juego",
+      "official": "Oficial",
+      "unknown": "Desconocido",
+      "label": "SDK auxiliar",
+      "details": "Estado del SDK y detalles de descarga",
+      "title": "Es necesario preparar la recopilación",
+      "description": "La versión de WeGame necesita componentes de inicio de sesión adicionales; una vez descargados, podrás iniciar el juego y recopilar logros",
+      "size": "Descarga de unos {{total}} MB",
+      "checking": "Comprobando",
+      "checkFailed": "Comprobación fallida",
+      "missing": "Sin descargar",
+      "outdated": "Preparación necesaria",
+      "downloading": "Descargando",
+      "preparing": "Preparando",
+      "ready": "Listo",
+      "close": "Cerrar",
+      "retry": "Volver a comprobar",
+      "prepare": "Descargar y preparar",
+      "cancelDownload": "Cancelar descarga",
+      "stopPreparing": "Detener preparación",
+      "versionMismatch": "El ejecutable difiere de la versión oficial y aún no se puede confirmar la compatibilidad; busca actualizaciones del juego o inténtalo más tarde",
+      "incompatible": "Compatibilidad sin confirmar",
+      "readyTitle": "Listo para capturar",
+      "readyDescription": "Pulsa «Iniciar recopilación» para abrir el juego; los logros se recopilarán automáticamente al entrar",
+      "compatibilityTitle": "Aún no se puede preparar la recopilación",
+      "checkingTitle": "Comprobando el entorno de recopilación",
+      "checkingDescription": "Comprobando los componentes de inicio de sesión y las descargas necesarias, espera un momento",
+      "checkFailedTitle": "No se pudo comprobar el entorno",
+      "checkFailedDescription": "No se pudo obtener información de los componentes; comprueba la conexión e inténtalo de nuevo",
+      "updateTitle": "Es necesario actualizar el entorno",
+      "updateDescription": "Hay una actualización de los componentes de inicio de sesión; actualízalos para continuar",
+      "update": "Actualizar",
+      "preparingTitle": "Preparando el entorno de recopilación",
+      "downloadDescription": "Los componentes se configurarán tras la descarga; cerrar esta ventana no la interrumpirá",
+      "downloadResumeDescription": "La recopilación comenzará automáticamente tras la preparación; cerrar esta ventana no interrumpirá la descarga",
+      "preparingDescription": "Configurando los componentes necesarios; podrás iniciar la recopilación al terminar",
+      "prepareResumeDescription": "Configurando los componentes necesarios; la recopilación comenzará automáticamente al terminar",
+      "downloadTitle": "Descargando componentes de inicio de sesión",
+      "failed": "Preparación fallida",
+      "cancelled": "Interrumpida",
+      "stopping": "Deteniendo",
+      "failedTitle": "No se pudo preparar la recopilación",
+      "stoppingTitle": "Deteniendo la preparación",
+      "failedDescription": "La preparación no se completó; inténtalo de nuevo",
+      "stoppingDescription": "Deteniendo la tarea actual, espera un momento",
+      "retryPreparation": "Reintentar",
+      "continuedDescription": "La preparación terminó y la recopilación ha continuado; sigue los pasos en el juego"
+    }
   },
   "ui": {
     "allVersions": "Todas las versiones",
@@ -322,7 +389,9 @@
     "gameFilter": "Ejecutable de Wuthering Waves|*.exe",
     "unknownCommand": "Comando de escritorio desconocido",
     "chooseGame": "Selecciona Wuthering Waves.exe",
-    "tooLarge": "El archivo de exportación supera los 32 MB"
+    "tooLarge": "El archivo de exportación supera los 32 MB",
+    "wegameVersionMismatch": "El ejecutable instalado difiere de la versión oficial y no se puede preparar automáticamente el entorno de captura. Busca actualizaciones del juego o inténtalo más tarde",
+    "wegameGameRunning": "Cierra Wuthering Waves e inicia otra captura"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

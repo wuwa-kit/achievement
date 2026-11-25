@@ -18,7 +18,15 @@ export interface HistoryEntry {
 }
 export type HistoryExportFormat = 'web' | 'json'
 export type CollectionStage =
-  'preparing' | 'starting' | 'login' | 'reading' | 'closing' | 'stopping'
+  | 'wegamePreparing'
+  | 'wegameDownloading'
+  | 'wegameLinking'
+  | 'preparing'
+  | 'starting'
+  | 'login'
+  | 'reading'
+  | 'closing'
+  | 'stopping'
 export type CollectionNotice = 'gameExited' | 'closeFailed' | 'failed'
 export interface CollectionDiagnostic {
   id: string
@@ -30,9 +38,32 @@ export interface CollectionDiagnostic {
   attempts: number | null
   nativeErrorCode: number | null
 }
+export type SdkStatus = {
+  status:
+    | 'checking'
+    | 'failed'
+    | 'stopping'
+    | 'missing'
+    | 'outdated'
+    | 'ready'
+    | 'downloading'
+    | 'preparing'
+    | 'incompatible'
+    | 'notApplicable'
+  received: number
+  total: number
+}
 export interface DesktopState {
+  sdkStatus?: SdkStatus | null
   history?: HistoryEntry[]
-  stage: CollectionStage | CollectionNotice | 'ready' | 'sending' | 'completed' | 'cancelled'
+  stage:
+    | CollectionStage
+    | CollectionNotice
+    | 'ready'
+    | 'sending'
+    | 'completed'
+    | 'cancelled'
+    | 'sdkReady'
   busy: boolean
   transferUrl: string | null
   error: string | null
@@ -76,8 +107,10 @@ export type Methods = {
   'settings.save': { params: DesktopSettings; result: DesktopSettings }
   'game.quality': {
     params: { gamePath: string }
-    result: { selected: ResourceTier | null; localTiers: ResourceTier[] } | null
+    result: { selected: ResourceTier | null; localTiers: ResourceTier[]; wegame?: boolean } | null
   }
+  'sdk.check': { params: { gamePath: string }; result: SdkStatus }
+  'sdk.prepare': { params: { gamePath: string }; result: boolean }
   'game.detect': { params: undefined; result: string | null }
   'game.choose': { params: undefined; result: string | null }
   'export.start': { params: undefined; result: ResourceTier | 'qualityRequired' | null }
@@ -169,7 +202,11 @@ export function request<K extends keyof Methods>(
         pending.delete(id)
         reject(new Error(tr('common.requestTimeout')))
       },
-      method === 'history.export' || method === 'collection.exportLogs' ? 3600000 : 30000,
+      method === 'history.export' || method === 'collection.exportLogs' || method === 'sdk.prepare'
+        ? 3600000
+        : method === 'sdk.check'
+          ? 120000
+          : 30000,
     )
     pending.set(id, {
       resolve: (value) => {

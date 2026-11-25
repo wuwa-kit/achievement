@@ -15,7 +15,8 @@
     "previewOnly": "Cette action nécessite l’application de bureau. Le navigateur permet de prévisualiser l’interface et les paramètres",
     "requestTimeout": "La demande à l’application de bureau a expiré",
     "openSource": "Code source ouvert",
-    "desktopTitle": "Wuthering Waves · Exportation des succès"
+    "desktopTitle": "Wuthering Waves · Exportation des succès",
+    "confirm": "Confirmer"
   },
   "notFound": {
     "title": "Page introuvable",
@@ -67,7 +68,10 @@
       "unknown": "Non détectée",
       "sd": "Définition standard",
       "hd": "Haute définition",
-      "uhd": "Ultra haute définition"
+      "uhd": "Ultra haute définition",
+      "unavailableTitle": "Ressources sélectionnées non détectées",
+      "unavailableBody": "Les ressources locales de ce niveau sont introuvables. Le jeu pourrait ne pas démarrer ou demander des téléchargements supplémentaires. Changer quand même ?",
+      "continueSwitch": "Changer quand même"
     },
     "zoom": {
       "label": "Zoom de l’interface",
@@ -116,6 +120,18 @@
       "stopping": {
         "title": "Arrêt de la collecte",
         "body": "Veuillez patienter"
+      },
+      "wegamePreparing": {
+        "title": "Préparation de la capture WeGame",
+        "body": "Vérification du SDK officiel et de la version du jeu"
+      },
+      "wegameDownloading": {
+        "title": "Téléchargement du SDK officiel",
+        "body": "Les fichiers vérifiés sont réutilisés ; vous pouvez annuler et réessayer"
+      },
+      "wegameLinking": {
+        "title": "Création d’un environnement de capture indépendant",
+        "body": "Ressources partagées, SDK et données de connexion séparés"
       }
     },
     "captureDiagnostics": {
@@ -186,7 +202,58 @@
     "completed": "Terminé",
     "cancelled": "Collecte arrêtée. Quittez Wuthering Waves avant de relancer la collecte",
     "failed": "L’opération a échoué. Réessayez",
-    "loading": "Connexion à l’application de bureau…"
+    "loading": "Connexion à l’application de bureau…",
+    "wegame": "WeGame",
+    "wegameHint": "Utilise un SDK officiel indépendant et des ressources partagées ; connectez-vous avec votre compte KURO",
+    "sdk": {
+      "channel": "Canal du jeu",
+      "official": "Officiel",
+      "unknown": "Inconnu",
+      "label": "SDK auxiliaire",
+      "details": "État du SDK et détails du téléchargement",
+      "title": "Préparation de la collecte requise",
+      "description": "La version WeGame nécessite des composants de connexion supplémentaires ; une fois téléchargés, vous pourrez lancer le jeu et collecter les succès",
+      "size": "Environ {{total}} Mo à télécharger",
+      "checking": "Vérification",
+      "checkFailed": "Échec de vérification",
+      "missing": "Non téléchargé",
+      "outdated": "Préparation nécessaire",
+      "downloading": "Téléchargement",
+      "preparing": "Préparation",
+      "ready": "Prêt",
+      "close": "Fermer",
+      "retry": "Revérifier",
+      "prepare": "Télécharger et préparer",
+      "cancelDownload": "Annuler le téléchargement",
+      "stopPreparing": "Arrêter la préparation",
+      "versionMismatch": "Le programme du jeu diffère de la version officielle ; sa compatibilité reste à confirmer. Vérifiez les mises à jour du jeu ou réessayez plus tard",
+      "incompatible": "Compatibilité non confirmée",
+      "readyTitle": "Prêt pour la capture",
+      "readyDescription": "Cliquez sur « Démarrer la collecte » pour lancer le jeu ; les succès seront collectés automatiquement une fois en jeu",
+      "compatibilityTitle": "Préparation de la collecte momentanément impossible",
+      "checkingTitle": "Vérification de l’environnement de collecte",
+      "checkingDescription": "Vérification des composants de connexion et des téléchargements requis, veuillez patienter",
+      "checkFailedTitle": "Impossible de vérifier l’environnement",
+      "checkFailedDescription": "Impossible de récupérer les informations des composants ; vérifiez votre connexion et réessayez",
+      "updateTitle": "Mise à jour de l’environnement requise",
+      "updateDescription": "Une mise à jour des composants de connexion est disponible ; installez-la pour continuer",
+      "update": "Mettre à jour",
+      "preparingTitle": "Préparation de l’environnement de collecte",
+      "downloadDescription": "Les composants seront configurés après le téléchargement ; fermer cette fenêtre ne l’interrompra pas",
+      "downloadResumeDescription": "La collecte démarrera automatiquement après la préparation ; fermer cette fenêtre n’interrompra pas le téléchargement",
+      "preparingDescription": "Configuration des composants requis ; vous pourrez ensuite démarrer la collecte",
+      "prepareResumeDescription": "Configuration des composants requis ; la collecte démarrera automatiquement ensuite",
+      "downloadTitle": "Téléchargement des composants de connexion",
+      "failed": "Échec de la préparation",
+      "cancelled": "Interrompue",
+      "stopping": "Arrêt en cours",
+      "failedTitle": "Impossible de préparer la collecte",
+      "stoppingTitle": "Arrêt de la préparation",
+      "failedDescription": "La préparation n’a pas abouti ; veuillez réessayer",
+      "stoppingDescription": "Arrêt de la tâche en cours, veuillez patienter",
+      "retryPreparation": "Réessayer",
+      "continuedDescription": "La préparation est terminée et la collecte a repris ; poursuivez dans le jeu"
+    }
   },
   "ui": {
     "allVersions": "Toutes les versions",
@@ -322,7 +389,9 @@
     "gameFilter": "Exécutable de Wuthering Waves|*.exe",
     "unknownCommand": "Commande de bureau inconnue",
     "chooseGame": "Sélectionnez Wuthering Waves.exe",
-    "tooLarge": "Le fichier d’exportation dépasse 32 Mo"
+    "tooLarge": "Le fichier d’exportation dépasse 32 Mo",
+    "wegameVersionMismatch": "Le programme installé diffère de la version officielle. L’environnement de capture ne peut pas être préparé automatiquement. Vérifiez les mises à jour du jeu ou réessayez plus tard",
+    "wegameGameRunning": "Quittez Wuthering Waves et relancez la collecte"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

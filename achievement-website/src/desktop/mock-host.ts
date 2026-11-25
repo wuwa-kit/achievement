@@ -10,6 +10,7 @@ export function createMockHost(emit: (message: Message) => void, overrides: Hand
   const gamePath = 'C:/WeGameApps/rail_apps/Wuthering Waves(2002137)/Wuthering Waves.exe'
   let settings: DesktopSettings = { gamePath, language: defaultLanguage, quality: 'auto' }
   let state: DesktopState = { stage: 'ready', busy: false, transferUrl: null, error: null }
+  let sdkReady = false
   let zoom = 100
   const tiers: ResourceTier[] = ['hd', 'uhd']
   function setStage(stage: DesktopState['stage'], busy: boolean) {
@@ -20,10 +21,21 @@ export function createMockHost(emit: (message: Message) => void, overrides: Hand
     'settings.get': () => settings,
     'settings.save': (next) => (settings = { ...next }),
     'state.get': () => state,
+    'sdk.check': () => ({
+      status: sdkReady ? 'ready' : 'missing',
+      received: 0,
+      total: sdkReady ? 0 : 292000000,
+    }),
+    'sdk.prepare': () => {
+      sdkReady = true
+      return true
+    },
     'game.choose': () => gamePath,
     'game.detect': () => gamePath,
     'game.quality': (params) =>
-      params.gamePath.trim() === gamePath ? { selected: 'hd', localTiers: tiers } : null,
+      params.gamePath.trim() === gamePath
+        ? { selected: 'hd', localTiers: tiers, wegame: true }
+        : null,
     'export.start': () => {
       if (
         (!settings.quality || settings.quality === 'auto') &&

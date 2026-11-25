@@ -1,5 +1,6 @@
 import { usePreferencesStore } from './stores/preferences'
 import { WMessage } from './components/ui/WMessage'
+import { WDialogHost } from './components/ui/WDialogHost'
 import { WScrollArea } from './components/ui/WScrollArea'
 import { StrictMode, lazy, Suspense, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -42,6 +43,7 @@ root.render(
   <StrictMode>
     <WScrollArea page />
     <WMessage />
+    <WDialogHost />
     <Suspense fallback={null}>
       {websitePages ? (
         <BrowserRouter>

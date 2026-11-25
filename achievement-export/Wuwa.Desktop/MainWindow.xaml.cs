@@ -33,6 +33,8 @@ public partial class MainWindow : Window
     private bool closeRequested;
     private string? bootstrapScriptId;
     private string stage = "ready";
+    private WeGameEnvironment.SdkStatus? sdkStatus;
+    private WeGameEnvironment.PreparationPlan? sdkPlan;
     private string? error;
     private CollectionDiagnostic? collectionDiagnostic;
     private Settings settings = new(Options.DefaultGame);
@@ -143,7 +145,7 @@ public partial class MainWindow : Window
     }
     private int ZoomPercent => (int)Math.Round(Browser.ZoomFactor * 100);
     private static readonly int[] ZoomLevels = [25, 33, 50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200, 250, 300, 400, 500];
-    private object State() => new { stage, busy = operation is not null, transferUrl = transfer?.BrowserUrl.AbsoluteUri, error, collectionDiagnostic, history = history.List() };
+    private object State() => new { stage, sdkStatus, busy = operation is not null, transferUrl = transfer?.BrowserUrl.AbsoluteUri, error, collectionDiagnostic, history = history.List() };
     private void Emit(string? next = null)
     {
         if (next is not null) stage = next;
@@ -210,8 +212,26 @@ public partial class MainWindow : Window
                         if (!File.Exists(path)) return null;
                         var game = Path.GetFullPath(path);
                         var localTiers = Launcher.LocalTiers(game);
-                        return new { selected = DetectQuality(game, localTiers), localTiers };
+                        return new { selected = DetectQuality(game, localTiers), localTiers, wegame = WeGameEnvironment.IsWeGame(game) };
                     });
+                    break;
+                case "sdk.check":
+                    var sdkGame = message.GetProperty("params").GetProperty("gamePath").GetString()!;
+                    sdkPlan = null;
+                    try
+                    {
+                        sdkPlan = await Task.Run(() => WeGameEnvironment.Inspect(sdkGame, DataPath, CancellationToken.None));
+                        result = sdkPlan?.Status ?? new WeGameEnvironment.SdkStatus("notApplicable");
+                    }
+                    catch (InvalidDataException mismatch) when (mismatch.Message == "wegameVersionMismatch") { result = new WeGameEnvironment.SdkStatus("incompatible"); }
+                    break;
+                case "sdk.prepare":
+                    EnsureIdle();
+                    var prepareGame = message.GetProperty("params").GetProperty("gamePath").GetString()!;
+                    sdkStatus = sdkPlan?.MatchesGame(prepareGame, DataPath) == true ? sdkPlan.StartStatus : new("checking");
+                    await Execute(async token => { await PrepareGame(prepareGame, token); }, sdkStatus.Status == "downloading" ? "wegameDownloading" : sdkStatus.Status == "preparing" ? "wegameLinking" : "wegamePreparing", "sdkReady");
+                    if (sdkPlan is not null) { sdkStatus = sdkPlan.Status; Emit(); }
+                    result = stage == "sdkReady";
                     break;
                 case "game.detect":
                     EnsureIdle(); result = await Task.Run(() => GamePathDetector.Detect(settings.GamePath)); break;
@@ -341,8 +361,28 @@ public partial class MainWindow : Window
         catch (Exception error) when (error is IOException or InvalidDataException or UnauthorizedAccessException or JsonException or InvalidOperationException or NullReferenceException) { return null; }
     }
 
+    private async Task<string> PrepareGame(string gamePath, CancellationToken token)
+    {
+        IProgress<WeGameEnvironment.SdkStatus> updates = new Progress<WeGameEnvironment.SdkStatus>(value => { sdkStatus = value; Emit(); });
+        var preparation = new Progress<string>(phase => { if (!token.IsCancellationRequested) Emit(phase); });
+        try
+        {
+            return await Task.Run(async () =>
+            {
+                if (sdkPlan is null || !sdkPlan.MatchesGame(gamePath, DataPath))
+                {
+                    updates.Report(new("checking"));
+                    sdkPlan = await WeGameEnvironment.Inspect(gamePath, DataPath, token);
+                }
+                return await WeGameEnvironment.Prepare(gamePath, DataPath, preparation, token, report: updates.Report, plan: sdkPlan);
+            }, token);
+        }
+        catch (InvalidOperationException e) when (e.Message == "wegameGameRunning") { throw new InvalidOperationException(Text("wegameGameRunning")); }
+        catch (InvalidDataException e) when (e.Message == "wegameVersionMismatch") { throw new InvalidOperationException(Text("wegameVersionMismatch")); }
+    }
     private Task RunExport(string gamePath, string quality) => Execute(async token =>
     {
+        gamePath = await PrepareGame(gamePath, token);
         var options = new Options("export", DataPath, gamePath, DiagnosticsPath, quality, 900, new());
         var progress = new Progress<CollectionStage>(phase =>
         {
@@ -352,10 +392,10 @@ public partial class MainWindow : Window
         });
         await Task.Run(() => Workflow.Run(options, token, progress, history.Add), token);
     });
-    private async Task Execute(Func<CancellationToken, Task> action, string initialStage = "preparing")
+    private async Task Execute(Func<CancellationToken, Task> action, string initialStage = "preparing", string completedStage = "completed")
     {
         operation = new(); error = null; collectionDiagnostic = null;
-        string result = "completed";
+        string result = completedStage;
         try
         {
             Emit(initialStage);
@@ -380,6 +420,7 @@ public partial class MainWindow : Window
         }
         finally
         {
+            await Task.Run(() => { try { DiagnosticRetention.Clean(DiagnosticsPath); } catch (Exception e) when (e is IOException or UnauthorizedAccessException) { System.Diagnostics.Trace.TraceWarning(e.Message); } });
             if (transfer is not null) await transfer.DisposeAsync(); transfer = null;
             operation.Dispose(); operation = null; Emit(result);
             bool shouldClose = closeRequested && collectionDiagnostic is null;
