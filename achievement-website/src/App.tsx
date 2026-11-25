@@ -605,7 +605,7 @@ export default function App() {
               <WSvg name="menu" size={20} />
             </WIconButton>
             <WSelect
-              className="topbar-account max-md:min-h-11 max-md:flex-1 narrow:[--select-gap:4px] narrow:[--select-px:6px] narrow:[&_.archive-account-time]:hidden"
+              className="topbar-account pl-4 max-md:min-h-11 max-md:flex-1 narrow:pl-3 narrow:[--select-gap:4px] narrow:[--select-px:6px] narrow:[&_.archive-account-time]:hidden"
               data-testid="账号档案"
               value={activeKey}
               disabled={busy || receiving}
