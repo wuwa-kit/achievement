@@ -9,7 +9,7 @@ test('multiple versions filter together with search and show on achievement card
   const list = page.getByTestId('成就列表')
   const search = page.getByTestId('搜索成就')
   const versionOf = (id: number) =>
-    list.getByTestId(`查看成就详情 ${id}`).locator('.achievement-title-text + .achievement-version')
+    list.getByTestId(`查看成就详情 ${id}`).locator('.achievement-version')
   const version38 = popover.locator('[data-version="3.8"]')
   const version37 = popover.locator('[data-version="3.7"]')
   const count38 = popover

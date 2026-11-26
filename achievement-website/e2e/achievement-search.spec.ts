@@ -90,7 +90,7 @@ for (const longTitle of [false, true]) {
     await expect(search).toBeVisible()
     await page.evaluate(() => document.fonts.ready)
     const bounds = (await search.boundingBox())!
-    const titleBounds = (await title.boundingBox())!
+    const titleBounds = (await title.locator('.achievement-title-text').boundingBox())!
     const edges = [
       { x: bounds.x - 6, y: bounds.y + bounds.height / 2 },
       { x: bounds.x + bounds.width + 6, y: bounds.y + bounds.height / 2 },
@@ -127,7 +127,10 @@ for (const longTitle of [false, true]) {
     await popup.close()
     await expect(row).toHaveAttribute('data-completed', completed!)
     await expect(page.locator('dialog')).toHaveCount(0)
-    await title.click({ position: { x: titleBounds.width - 1, y: titleBounds.height / 2 } })
+    await page.mouse.click(
+      titleBounds.x + titleBounds.width - 1,
+      titleBounds.y + titleBounds.height / 2,
+    )
     await expect(page.getByTestId('成就详情内容')).toBeVisible()
   })
 }

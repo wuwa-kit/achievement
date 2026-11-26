@@ -167,20 +167,20 @@ function AchievementSummary({
     <span className="achievement-info pointer-events-none z-10 col-start-2 flex min-w-0 flex-col gap-1 group-data-[muted=true]/card:text-(--color-muted)/85 narrow:gap-0.5">
       <span className="achievement-title flex items-center gap-1 text-[14px] leading-[1.6] font-[550] narrow:text-[12px]">
         <WButton
-          className="group/title pointer-events-auto min-w-0 rounded-sm text-left wrap-anywhere whitespace-pre-line"
+          className="group/title pointer-events-none min-w-0 rounded-sm text-left wrap-anywhere whitespace-pre-line"
           data-testid={`查看成就详情 ${item.id}`}
           onClick={onOpenDetails}
         >
-          <span className="box-decoration-clone border-b border-transparent pb-0.5 group-hover/title:border-current group-focus-visible/title:border-current">
+          <span className="pointer-events-auto box-decoration-clone border-b border-transparent pb-0.5 group-hover/title:border-current group-focus-visible/title:border-current">
             <span ref={titleRef} className="achievement-title-text">
               {title || t('ui.missingTitle')}
             </span>
-            {version && (
-              <span className="achievement-version ms-0.5 align-super text-[0.72em] leading-none font-semibold whitespace-nowrap text-(--color-search-match) group-data-[muted=true]/card:text-(--color-accent-muted)/85">
-                {version}
-              </span>
-            )}
           </span>
+          {version && (
+            <span className="achievement-version ms-0.5 align-super text-[0.72em] leading-none font-semibold whitespace-nowrap text-(--color-search-match) group-data-[muted=true]/card:text-(--color-accent-muted)/85">
+              {version}
+            </span>
+          )}
         </WButton>
         <AchievementSearch item={item} language={language} compact />
       </span>
