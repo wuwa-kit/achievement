@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter achievement-website dev",
-    "build": "pnpm -r build",
+    "build": "pnpm typecheck:research && pnpm -r build",
+    "typecheck:research": "tsc -p research/tsconfig.json",
     "test": "pnpm -r test",
     "test:e2e": "pnpm --filter achievement-export publish:test-host && pnpm --filter achievement-website test:e2e",
     "upload:catalog": "node scripts/upload-website-catalog.ts",

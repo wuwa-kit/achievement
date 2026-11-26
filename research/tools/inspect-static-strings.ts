@@ -1,14 +1,32 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import type {
+  MatchedPakKey,
+  PakInventoryEntry,
+  StringCandidate,
+} from "./static-string-types.ts";
+
+type DirectoryResult =
+  | {
+      file: string;
+      mount: string;
+      count: number;
+      files: number;
+      hashVerified: boolean;
+      targets: number;
+      error?: never;
+    }
+  | { file: string; error: string };
+
 const folder = "artifacts/static-strings";
-const matches = JSON.parse(
-  fs.readFileSync(path.join(folder, "matched-keys.json")),
+const matches: MatchedPakKey[] = JSON.parse(
+  fs.readFileSync(path.join(folder, "matched-keys.json"), "utf8"),
 );
-const inventory = JSON.parse(
-  fs.readFileSync(path.join(folder, "pak-inventory.json")),
+const inventory: PakInventoryEntry[] = JSON.parse(
+  fs.readFileSync(path.join(folder, "pak-inventory.json"), "utf8"),
 );
-function decrypt(buffer, key) {
+function decrypt(buffer: Buffer, key: string | undefined): Buffer {
   if (!key) return buffer;
   const d = crypto.createDecipheriv(
     "aes-256-ecb",
@@ -18,14 +36,17 @@ function decrypt(buffer, key) {
   d.setAutoPadding(false);
   return Buffer.concat([d.update(buffer), d.final()]);
 }
-function read(fd, offset, size) {
+function read(fd: number, offset: number, size: number): Buffer {
   if (size < 0 || size > 128 * 1024 * 1024) throw Error("size bound");
   const b = Buffer.alloc(size);
   if (fs.readSync(fd, b, 0, size, offset) !== size) throw Error("short read");
   return b;
 }
 class Reader {
-  constructor(b) {
+  b: Buffer;
+  p: number;
+
+  constructor(b: Buffer) {
     this.b = b;
     this.p = 0;
   }
@@ -47,14 +68,14 @@ class Reader {
     return v.toString(n < 0 ? "utf16le" : "utf8").replace(/\0$/, "");
   }
 }
-const report = [];
-const candidates = [];
+const report: DirectoryResult[] = [];
+const candidates: StringCandidate[] = [];
 for (const r of inventory) {
   const fd = fs.openSync(r.file, "r");
   try {
     const key = matches.find((k) => k.file === r.file)?.key;
     if (r.encrypted && !key) throw Error("no matching key");
-    const get = (o, n) => decrypt(read(fd, o, n), key);
+    const get = (o: number, n: number) => decrypt(read(fd, o, n), key);
     const b = get(r.offset, r.indexSize);
     if (crypto.createHash("sha1").update(b).digest("hex") !== r.hash)
       throw Error("primary hash mismatch");
@@ -75,8 +96,8 @@ for (const r of inventory) {
       throw Error("directory hash mismatch");
     const d = new Reader(db),
       dirs = d.i();
-    let files = 0,
-      targets = [];
+    let files = 0;
+    const targets: Pick<StringCandidate, "path" | "entry">[] = [];
     for (let i = 0; i < dirs; i++) {
       const dir = d.s(),
         len = d.i();
@@ -112,7 +133,10 @@ for (const r of inventory) {
       targets: targets.length,
     });
   } catch (e) {
-    report.push({ file: r.file, error: e.message });
+    report.push({
+      file: r.file,
+      error: e instanceof Error ? e.message : String(e),
+    });
   } finally {
     fs.closeSync(fd);
   }

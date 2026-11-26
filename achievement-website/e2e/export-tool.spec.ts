@@ -2,6 +2,34 @@ import { expect, test } from '@playwright/test'
 import { revealArchiveActions, revealToolbarActions, selectValue } from './select-helpers'
 import { appLanguages } from '../src/i18n/resources'
 
+for (const language of ['zh-CN', 'en']) {
+  test(`download link opens all three sources directly in ${language}`, async ({ page }) => {
+    await page.addInitScript(
+      (language) => localStorage.setItem('wuwa-language', language),
+      language,
+    )
+    await page.goto('/?download=1')
+    await expect(page).toHaveURL('/')
+    const downloads = page.getByTestId('export-tool-download-dialog')
+    await expect(downloads).toBeVisible()
+    await expect(downloads.locator('a')).toHaveCount(3)
+    await expect(page.getByTestId('export-tool-download-github')).toBeVisible()
+    await expect(page.getByTestId('export-tool-download-quark')).toBeVisible()
+    await expect(page.getByTestId('export-tool-download-baidu')).toBeVisible()
+    await expect(page.getByTestId('export-tool-dialog')).toHaveCount(0)
+    await page.getByTestId('close-export-tool-download-dialog').click()
+    await expect(downloads).toHaveCount(0)
+    await page.getByTestId('export-tool-intro').click()
+    await expect(page.getByTestId('export-tool-dialog')).toBeVisible()
+    await expect(downloads).toHaveCount(0)
+    await page.getByTestId('export-tool-download').click()
+    await expect(downloads.locator('a')).toHaveCount(language === 'zh-CN' ? 3 : 1)
+    await page.reload()
+    await expect(page.getByTestId('export-tool-intro')).toBeVisible()
+    await expect(downloads).toHaveCount(0)
+  })
+}
+
 test('export introduction opens, links to the video and download, and closes', async ({
   page,
   context,

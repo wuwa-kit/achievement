@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Interop;
 using Wuwa.Export;
 
@@ -25,7 +26,17 @@ public partial class MainWindow
     [DllImport("user32.dll")]
     private static extern bool SetWindowPlacement(IntPtr window, ref WindowPlacement placement);
 
-    private const int ShowNormal = 1, ShowMinimized = 2, ShowMaximized = 3, RestoreToMaximized = 2;
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr window, int command);
+
+    private const int ShowNormal = 1, ShowMinimized = 2, ShowMaximized = 3, ShowRestore = 9, RestoreToMaximized = 2;
+
+    internal void ActivateFromAnotherInstance()
+    {
+        // Restore synchronously so the owned notice is opened after the main window is visible.
+        if (WindowState == WindowState.Minimized) ShowWindow(new WindowInteropHelper(this).Handle, ShowRestore);
+        Activate();
+    }
 
     private void RestoreWindowPlacement()
     {

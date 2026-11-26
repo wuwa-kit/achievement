@@ -3,12 +3,10 @@ import type { UpdateAvailability, UpdateCheck, UpdateDownload } from '../src/des
 
 const available: UpdateAvailability = {
   status: 'checked',
-  currentVersion: 'v0.1.2',
-  currentEdition: 'lite',
   release: {
     version: 'v0.1.3',
     notes: 'Release notes for v0.1.3',
-    assets: { standard: { size: 50_000_000 }, lite: { size: 5_000_000 } },
+    size: 5_000_000,
   },
 }
 
@@ -48,7 +46,7 @@ async function openDesktop(page: Page) {
   await page.goto('/desktop')
 }
 
-type Call = { id: string; params?: { edition: string; version: string; attemptId: string } }
+type Call = { id: string; params?: { version: string; attemptId: string } }
 const calls = (page: Page, method: string): Promise<Call[]> =>
   page.evaluate((key) => JSON.parse(sessionStorage.getItem(`test-update.${key}`) ?? '[]'), method)
 const emit = (page: Page, message: unknown) =>
@@ -58,29 +56,47 @@ const emit = (page: Page, message: unknown) =>
 const checkButton = (page: Page) => page.getByTestId('desktop-check-update')
 const dialog = (page: Page) => page.getByTestId('desktop-update-dialog')
 
-test('startup opens the update, each edition has its own download, and progress keeps its space', async ({
+test('startup shows one update, uses the host-selected size, and keeps progress space', async ({
   page,
-}) => {
+  context,
+}, testInfo) => {
+  await context.route('https://wu.songe.li/?download=1', (route) =>
+    route.fulfill({ body: 'Download sources' }),
+  )
   await openDesktop(page)
   await expect.poll(async () => (await calls(page, 'check')).length).toBe(1)
   await emit(page, { id: (await calls(page, 'check'))[0].id, result: available })
   const update = dialog(page)
-  await expect(update).toContainText('发现新版本 v0.1.3')
+  await expect(update).toContainText('发现更新')
   await expect(update).toContainText('Release notes for v0.1.3')
-  await expect(update.getByTestId('desktop-update-lite')).toHaveAttribute('data-selected', 'true')
+  await expect(update.getByTestId('desktop-update-size')).toHaveText('下载大小：5.0 MB')
+  await expect(update).not.toContainText(/当前版本|标准版|Lite/)
+  await expect(
+    update.locator('[data-testid="desktop-update-lite"], [data-testid="desktop-update-standard"]'),
+  ).toHaveCount(0)
   const action = update.getByTestId('desktop-update-action')
   const progress = update.getByTestId('desktop-update-progress')
+  const externalDownload = update.getByTestId('desktop-update-external-download')
+  await expect(externalDownload).toHaveText('外部下载')
+  const [downloads] = await Promise.all([page.waitForEvent('popup'), externalDownload.click()])
+  await expect(downloads).toHaveURL('https://wu.songe.li/?download=1')
+  await downloads.close()
+  await expect(update).toBeVisible()
+  expect(await calls(page, 'download')).toHaveLength(0)
   await expect(progress).toBeEmpty()
   const emptyHeight = await progress.evaluate((element) => getComputedStyle(element).height)
+  await update.screenshot({ path: testInfo.outputPath('update-available.png') })
   await action.click()
   await expect.poll(async () => (await calls(page, 'download')).length).toBe(1)
+  await expect(externalDownload).toHaveCount(0)
   const lite = (await calls(page, 'download'))[0].params!
-  expect(lite).toMatchObject({ edition: 'lite', version: 'v0.1.3' })
+  expect(lite).toEqual({ version: 'v0.1.3', attemptId: expect.any(String) })
 
   const sendProgress = (data: UpdateDownload) => emit(page, { event: 'updateDownload', data })
   await sendProgress({ attemptId: lite.attemptId, status: 'downloading', received: 2_500_000 })
   await expect(progress).toContainText('50% · 2.5 / 5.0 MB')
   expect(await progress.evaluate((element) => getComputedStyle(element).height)).toBe(emptyHeight)
+  await update.screenshot({ path: testInfo.outputPath('update-downloading.png') })
   await update.getByText('取消', { exact: true }).click()
   await expect.poll(async () => (await calls(page, 'cancel')).length).toBe(1)
   await sendProgress({ attemptId: lite.attemptId, status: 'cancelled', received: 0 })
@@ -88,22 +104,63 @@ test('startup opens the update, each edition has its own download, and progress 
 
   await checkButton(page).click()
   await expect.poll(async () => (await calls(page, 'check')).length).toBe(2)
-  await emit(page, { id: (await calls(page, 'check'))[1].id, result: available })
-  await update.getByTestId('desktop-update-standard').click()
+  await emit(page, {
+    id: (await calls(page, 'check'))[1].id,
+    result: { ...available, release: { ...available.release!, size: 50_000_000 } },
+  })
+  await expect(externalDownload).toBeVisible()
+  await expect(update.getByTestId('desktop-update-size')).toHaveText('下载大小：50.0 MB')
   await action.click()
   await expect.poll(async () => (await calls(page, 'download')).length).toBe(2)
   const standard = (await calls(page, 'download'))[1].params!
-  expect(standard).toMatchObject({ edition: 'standard', version: 'v0.1.3' })
+  expect(standard).toEqual({ version: 'v0.1.3', attemptId: expect.any(String) })
   await sendProgress({ attemptId: standard.attemptId, status: 'ready', received: 50_000_000 })
   await expect(action).toHaveText('重启')
+  await expect(progress).toContainText('下载完成，重启后应用更新')
+  await update.screenshot({ path: testInfo.outputPath('update-ready.png') })
+  await expect(externalDownload).toHaveCount(0)
   expect(await calls(page, 'restart')).toHaveLength(0)
   await action.click()
   await expect
     .poll(async () => (await calls(page, 'restart'))[0]?.params)
     .toEqual({
-      edition: 'standard',
       version: 'v0.1.3',
     })
+})
+
+test('failed downloads allow retry and restore the external download option', async ({ page }) => {
+  await openDesktop(page)
+  await expect.poll(async () => (await calls(page, 'check')).length).toBe(1)
+  await emit(page, { id: (await calls(page, 'check'))[0].id, result: available })
+  await dialog(page).getByTestId('desktop-update-action').click()
+  await expect.poll(async () => (await calls(page, 'download')).length).toBe(1)
+  await emit(page, {
+    event: 'updateDownload',
+    data: {
+      attemptId: (await calls(page, 'download'))[0].params!.attemptId,
+      status: 'failed',
+      failure: 'downloadFailed',
+      received: 0,
+    },
+  })
+  await expect(dialog(page).getByTestId('desktop-update-external-download')).toBeVisible()
+  await expect(dialog(page).getByTestId('desktop-update-action')).toBeEnabled()
+  await expect(dialog(page).getByTestId('desktop-update-action')).toHaveText('重试下载')
+  await expect(page.locator('.w-message[data-type="error"]')).toHaveText('下载更新失败，请重试')
+  await dialog(page).getByTestId('desktop-update-action').click()
+  await expect.poll(async () => (await calls(page, 'download')).length).toBe(2)
+  const [first, retry] = await calls(page, 'download')
+  expect(retry.params!.attemptId).not.toBe(first.params!.attemptId)
+  await emit(page, {
+    event: 'updateDownload',
+    data: { attemptId: first.params!.attemptId, status: 'ready', received: 5_000_000 },
+  })
+  await expect(dialog(page).getByTestId('desktop-update-action')).toBeDisabled()
+  await emit(page, {
+    event: 'updateDownload',
+    data: { attemptId: retry.params!.attemptId, status: 'ready', received: 5_000_000 },
+  })
+  await expect(dialog(page).getByTestId('desktop-update-action')).toHaveText('重启')
 })
 
 test('manual checks share the startup request and distinguish update check failures', async ({

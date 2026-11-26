@@ -1,6 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import type {
+  MatchedPakKey,
+  PakInventoryEntry,
+} from "./static-string-types.ts";
+
+interface PublicKeys {
+  mainKey: string;
+  dynamicKeys: { key: string }[];
+}
 // Read-only PAK v12 inventory. Public keys are supplied explicitly; no network or process access.
 const root = path.resolve(
   process.argv[2] ??
@@ -8,12 +17,12 @@ const root = path.resolve(
 );
 const folder = "artifacts/static-strings";
 const keyFile = process.argv[3] ?? folder + "/public-keys.json";
-const supplied = JSON.parse(fs.readFileSync(keyFile, "utf8"));
+const supplied: PublicKeys = JSON.parse(fs.readFileSync(keyFile, "utf8"));
 const keys = [
   ...new Set([supplied.mainKey, ...supplied.dynamicKeys.map((k) => k.key)]),
 ].map((k) => Buffer.from(k.replace(/^0x/, ""), "hex"));
 if (keys.some((k) => k.length !== 32)) throw Error("Expected AES-256 keys");
-function walk(dir) {
+function walk(dir: string): string[] {
   return fs.existsSync(dir)
     ? fs
         .readdirSync(dir, { withFileTypes: true })
@@ -24,8 +33,8 @@ function walk(dir) {
         )
     : [];
 }
-const rows = [],
-  matches = [];
+const rows: PakInventoryEntry[] = [];
+const matches: MatchedPakKey[] = [];
 for (const file of [
   ...walk(path.join(root, "Content/Paks")),
   ...walk(path.join(root, "Saved/Resources")),

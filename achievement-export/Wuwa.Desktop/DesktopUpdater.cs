@@ -10,15 +10,7 @@ using System.Text.RegularExpressions;
 namespace Wuwa.Desktop;
 
 internal sealed record UpdateAsset(string FileName, long Size, string Sha256);
-internal sealed record UpdateAssets(UpdateAsset Standard, UpdateAsset Lite)
-{
-    public UpdateAsset Select(string edition) => edition switch
-    {
-        "standard" => Standard,
-        "lite" => Lite,
-        _ => throw new ArgumentException("Unknown desktop edition.", nameof(edition))
-    };
-}
+internal sealed record UpdateAssets(UpdateAsset Standard, UpdateAsset Lite);
 internal sealed record UpdateRelease(int SchemaVersion, string Version, string Notes, UpdateAssets Assets);
 internal sealed record UpdateCheckResult(string Status, UpdateRelease? Release = null, int? HttpStatus = null);
 

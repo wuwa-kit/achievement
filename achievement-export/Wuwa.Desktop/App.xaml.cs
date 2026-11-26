@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Windows;
 using Wuwa.Export;
 
@@ -12,6 +13,10 @@ public partial class App : Application
     private RegisteredWaitHandle? activationListener;
     internal const string UpdateParentArgument = "--update-parent";
     internal static string UpdateReadyEvent(Guid handoff) => $@"Local\WuwaAchievementUpdate-{handoff:D}";
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool AllowSetForegroundWindow(uint processId);
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -35,6 +40,9 @@ public partial class App : Application
             @"Local\WuwaAchievementExport.Desktop.Activate", out bool firstInstance);
         if (!firstInstance)
         {
+            // Transfer foreground permission before the existing instance handles the activation event.
+            const uint AllowAnyProcess = uint.MaxValue;
+            AllowSetForegroundWindow(AllowAnyProcess);
             activationEvent.Set();
             Shutdown();
             return;
@@ -47,8 +55,8 @@ public partial class App : Application
             (_, _) => Dispatcher.BeginInvoke(() =>
             {
                 if (!window.IsVisible) return;
-                if (window.WindowState == WindowState.Minimized) SystemCommands.RestoreWindow(window);
-                window.Activate();
+                window.ActivateFromAnotherInstance();
+                window.ShowAlreadyRunning();
             }), null, Timeout.Infinite, false);
 
         if (!window.IsActive && !window.Activate())

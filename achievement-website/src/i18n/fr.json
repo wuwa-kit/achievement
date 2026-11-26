@@ -24,13 +24,10 @@
   },
   "desktop": {
     "update": {
+      "externalDownload": "Téléchargement externe",
       "check": "Rechercher des mises à jour",
-      "available": "La version {{version}} est disponible",
-      "current": "Version actuelle : {{version}} ({{edition}})",
-      "standard": "Édition standard",
-      "lite": "Édition Lite",
-      "liteRequirement": "L’édition Lite nécessite .NET 10 Desktop Runtime (x64)",
-      "size": "{{total}} Mo",
+      "available": "Mise à jour disponible",
+      "size": "Taille du téléchargement : {{total}} Mo",
       "progress": "{{percent}} % · {{current}} / {{total}} Mo",
       "download": "Télécharger",
       "restart": "Redémarrer",
@@ -47,7 +44,9 @@
       "cancelling": "Annulation du téléchargement…",
       "cancelFailed": "Impossible d’annuler le téléchargement",
       "restartFailed": "Impossible de lancer la nouvelle version. La fenêtre actuelle reste ouverte",
-      "busy": "Attendez la fin de la capture ou du transfert pour redémarrer"
+      "busy": "Attendez la fin de la capture ou du transfert pour redémarrer",
+      "retry": "Réessayer le téléchargement",
+      "downloaded": "Téléchargement terminé, redémarrez pour appliquer la mise à jour"
     },
     "openWebsite": "Ouvrir le site des succès",
     "exportLogs": "Exporter les journaux",
@@ -408,7 +407,8 @@
     "chooseGame": "Sélectionnez Wuthering Waves.exe",
     "tooLarge": "Le fichier d’exportation dépasse 32 Mo",
     "wegameVersionMismatch": "Le programme installé diffère de la version officielle. L’environnement de capture ne peut pas être préparé automatiquement. Vérifiez les mises à jour du jeu ou réessayez plus tard",
-    "wegameGameRunning": "Quittez Wuthering Waves et relancez la collecte"
+    "wegameGameRunning": "Quittez Wuthering Waves et relancez la collecte",
+    "alreadyRunning": "L’application est déjà en cours d’exécution et ne peut pas être ouverte plusieurs fois ; utilisez la fenêtre existante"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

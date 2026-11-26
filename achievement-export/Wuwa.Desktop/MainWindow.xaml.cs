@@ -58,6 +58,9 @@ public partial class MainWindow : Window
     }
     private string Text(string key, string group = "native") => Locales[settings.Language].GetProperty(group).GetProperty(key).GetString()!;
     private void UpdateWindowTitle() => Title = $"{Text("desktopTitle", "common")} {CurrentReleaseTag}";
+    internal void ShowAlreadyRunning() => MessageBox.Show(this, Text("alreadyRunning"),
+        Text("desktopTitle", "common"), MessageBoxButton.OK, MessageBoxImage.Information);
+
     public MainWindow()
     {
         browserEnvironment = CoreWebView2Environment.CreateAsync(userDataFolder: Path.Combine(DataPath, "WebView2"));
@@ -95,7 +98,7 @@ public partial class MainWindow : Window
             core.NewWindowRequested += (_, e) =>
             {
                 e.Handled = true;
-                if (e.Uri is "https://github.com/wuwa-kit/achievement" or "https://wu.songe.li/")
+                if (e.Uri is "https://github.com/wuwa-kit/achievement" or "https://wu.songe.li/" or "https://wu.songe.li/?download=1")
                     Process.Start(new ProcessStartInfo(e.Uri) { UseShellExecute = true });
             };
             core.PermissionRequested += (_, e) => e.State = CoreWebView2PermissionState.Deny;
@@ -185,12 +188,12 @@ public partial class MainWindow : Window
                 case "update.check": result = await CheckUpdateAsync(); break;
                 case "update.download":
                     var update = message.GetProperty("params");
-                    StartUpdateDownload(update.GetProperty("edition").GetString()!, update.GetProperty("version").GetString()!, update.GetProperty("attemptId").GetString()!);
+                    StartUpdateDownload(update.GetProperty("version").GetString()!, update.GetProperty("attemptId").GetString()!);
                     break;
                 case "update.cancel": updateDownload?.Cancel(); break;
                 case "update.restart":
                     var restart = message.GetProperty("params");
-                    await RestartWithUpdateAsync(restart.GetProperty("edition").GetString()!, restart.GetProperty("version").GetString()!);
+                    await RestartWithUpdateAsync(restart.GetProperty("version").GetString()!);
                     break;
                 case "preferences.save":
                     var preferences = message.GetProperty("params");

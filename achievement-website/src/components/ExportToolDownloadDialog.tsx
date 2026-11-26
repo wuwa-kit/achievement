@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useLanguageStore } from '../stores/language'
+import { useExportToolStore } from '../stores/export-tool'
 import { WDialog } from './ui/WDialog'
 import { WIconButton } from './ui/WIconButton'
 import { WScrollArea } from './ui/WScrollArea'
@@ -20,22 +21,20 @@ const downloadSources = [
   },
 ] as const
 
-export function ExportToolDownloadDialog({
-  open,
-  onOpenChange,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
+export function ExportToolDownloadDialog() {
   const { t } = useTranslation()
+  const downloadMode = useExportToolStore((state) => state.downloadSources)
+  const closeDownload = useExportToolStore((state) => state.closeDownload)
   const language = useLanguageStore((state) => state.language)
-  const showMirrors = language === 'zh-CN' || language === 'zh-TW'
+  const showMirrors = downloadMode === 'all' || language === 'zh-CN' || language === 'zh-TW'
   const sources = downloadSources.filter((source) => source.id === 'github' || showMirrors)
 
   return (
     <WDialog
-      open={open}
-      onOpenChange={onOpenChange}
+      open={downloadMode !== null}
+      onOpenChange={(open) => {
+        if (!open) closeDownload()
+      }}
       closeOnBackdrop
       className="w-[420px] overflow-hidden"
       data-testid="export-tool-download-dialog"
@@ -51,7 +50,7 @@ export function ExportToolDownloadDialog({
               variant="ghost"
               className="text-(--color-muted)"
               data-testid="close-export-tool-download-dialog"
-              onClick={() => onOpenChange(false)}
+              onClick={closeDownload}
             >
               <WSvg name="x" size={20} />
             </WIconButton>

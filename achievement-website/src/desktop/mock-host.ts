@@ -60,8 +60,6 @@ export function createMockHost(emit: (message: Message) => void, overrides: Hand
     },
     'update.check': () => ({
       status: 'checked',
-      currentVersion: '0.1.5',
-      currentEdition: 'lite',
       release: null,
     }),
     ...overrides,

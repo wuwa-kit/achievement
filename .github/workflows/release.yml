@@ -33,6 +33,7 @@ jobs:
         with:
           cache: false
       - run: mise exec -- pnpm install --frozen-lockfile
+      - run: mise exec -- pnpm -w typecheck:research
       - name: Publish Windows desktop executables
         env:
           RELEASE_TAG: ${{ github.ref_name }}

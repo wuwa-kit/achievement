@@ -27,6 +27,7 @@ jobs:
         with:
           cache: false
       - run: mise exec -- pnpm install --frozen-lockfile
+      - run: mise exec -- pnpm typecheck:research
       - run: mise exec -- pnpm --filter achievement-website build
       - uses: actions/upload-artifact@v6
         with:

@@ -1,15 +1,43 @@
 import fs from "node:fs";
 import { DatabaseSync } from "node:sqlite";
-const folder = "artifacts/static-strings";
-const rows = JSON.parse(fs.readFileSync(folder + "/extraction-report.json"));
-const catalog = JSON.parse(fs.readFileSync("data/achievement-catalog.json"));
-const selected = new Map();
-for (const r of rows) {
-  if (!r.error) selected.set(r.path.replace(/\/+/g, "/"), r);
+import type {
+  ExtractedDatabase,
+  ExtractionResult,
+} from "./static-string-types.ts";
+
+interface CatalogTextItem {
+  titleKey?: string | null;
+  descriptionKey?: string | null;
+  texts: Record<string, { title: string | null; description?: string | null }>;
 }
-const texts = {},
-  report = [],
-  differences = [];
+
+interface TextCatalog {
+  languages: string[];
+  achievements: CatalogTextItem[];
+  groups: CatalogTextItem[];
+  categories: CatalogTextItem[];
+}
+
+interface MultiTextRow {
+  Id: string;
+  Content: string | null;
+  RedirectDbIndex?: number | null;
+}
+
+const folder = "artifacts/static-strings";
+const rows: ExtractionResult[] = JSON.parse(
+  fs.readFileSync(folder + "/extraction-report.json", "utf8"),
+);
+const catalog: TextCatalog = JSON.parse(
+  fs.readFileSync("data/achievement-catalog.json", "utf8"),
+);
+const selected = new Map<string, ExtractedDatabase>();
+for (const r of rows) {
+  if (r.error === undefined) selected.set(r.path.replace(/\/+/g, "/"), r);
+}
+const texts: Record<string, Record<string, string | null>> = {};
+const report = [];
+const differences = [];
 for (const language of catalog.languages) {
   const databases = [...selected.values()]
     .filter(
@@ -26,7 +54,7 @@ for (const language of catalog.languages) {
       .prepare("select name from sqlite_master where type='table'")
       .all()
       .filter((t) => t.name === "MultiText")
-      .map((t) => ({
+      .map(() => ({
         source,
         query: db.prepare("select * from MultiText where Id = ?"),
       })),
@@ -35,7 +63,7 @@ for (const language of catalog.languages) {
     matched = 0,
     missing = 0,
     redirected = 0;
-  const values = {};
+  const values: Record<string, string | null> = {};
   const records = [
     ...catalog.achievements,
     ...catalog.groups,
@@ -45,12 +73,13 @@ for (const language of catalog.languages) {
     for (const [keyField, field] of [
       ["titleKey", "title"],
       ["descriptionKey", "description"],
-    ]) {
+    ] as const) {
       const key = item[keyField];
       if (!key) continue;
-      const found = statements
-        .map((s) => ({ row: s.query.get(key), source: s.source.path }))
-        .filter((x) => x.row);
+      const found = statements.flatMap((s) => {
+        const row = s.query.get(key) as MultiTextRow | undefined;
+        return row ? [{ row, source: s.source.path }] : [];
+      });
       const nonempty = found.filter((x) => x.row.Content);
       const unique = [...new Set(nonempty.map((x) => x.row.Content))];
       if (found.some((x) => (x.row.RedirectDbIndex ?? 0) !== 0)) redirected++;

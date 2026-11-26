@@ -19,10 +19,11 @@
 ```powershell
 New-Item -ItemType Directory -Force artifacts/static-strings
 Invoke-WebRequest 'https://yarik0chka.github.io/wuwa-keys/keys.json' -OutFile artifacts/static-strings/public-keys.json
-mise exec -- node research/tools/inventory-static-paks.mjs
-mise exec -- node research/tools/inspect-static-strings.mjs
-mise exec -- node research/tools/extract-static-strings.mjs
-mise exec -- node research/tools/compare-static-strings.mjs
+mise exec -- pnpm typecheck:research
+mise exec -- node research/tools/inventory-static-paks.ts
+mise exec -- node research/tools/inspect-static-strings.ts
+mise exec -- node research/tools/extract-static-strings.ts
+mise exec -- node research/tools/compare-static-strings.ts
 ```
 
 第一步脚本可接受两个参数：`Client` 目录、公开密钥 JSON 路径。其余脚本读取上一步的本地结果，不执行网络请求。所有脚本只在仓库 `artifacts/static-strings` 下写入输出。

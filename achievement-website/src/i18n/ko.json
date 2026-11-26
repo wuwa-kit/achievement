@@ -24,13 +24,10 @@
   },
   "desktop": {
     "update": {
+      "externalDownload": "외부 다운로드",
       "check": "업데이트 확인",
-      "available": "새 버전 {{version}} 사용 가능",
-      "current": "현재 버전: {{version}} ({{edition}})",
-      "standard": "표준 버전",
-      "lite": "Lite 버전",
-      "liteRequirement": "Lite 버전에는 .NET 10 Desktop Runtime(x64)이 필요합니다",
-      "size": "{{total}} MB",
+      "available": "업데이트 사용 가능",
+      "size": "다운로드 크기: {{total}} MB",
       "progress": "{{percent}}% · {{current}} / {{total}} MB",
       "download": "다운로드",
       "restart": "다시 시작",
@@ -47,7 +44,9 @@
       "cancelling": "다운로드 취소 중…",
       "cancelFailed": "다운로드를 취소할 수 없습니다",
       "restartFailed": "새 버전을 시작할 수 없습니다. 현재 창은 열린 상태로 유지됩니다",
-      "busy": "수집 또는 전송이 끝난 후 다시 시작할 수 있습니다"
+      "busy": "수집 또는 전송이 끝난 후 다시 시작할 수 있습니다",
+      "retry": "다운로드 재시도",
+      "downloaded": "다운로드 완료, 다시 시작하면 업데이트가 적용됩니다"
     },
     "openWebsite": "업적 웹사이트 열기",
     "exportLogs": "로그 내보내기",
@@ -408,7 +407,8 @@
     "chooseGame": "Wuthering Waves.exe를 선택해 주세요",
     "tooLarge": "내보내기 파일이 32 MB를 초과합니다",
     "wegameVersionMismatch": "설치된 게임 실행 파일이 공식 버전과 달라 수집 환경을 자동으로 준비할 수 없습니다. 게임 업데이트를 확인하거나 나중에 다시 시도하세요",
-    "wegameGameRunning": "명조를 종료한 후 다시 수집해 주세요"
+    "wegameGameRunning": "명조를 종료한 후 다시 수집해 주세요",
+    "alreadyRunning": "프로그램이 이미 실행 중이며 중복 실행할 수 없습니다. 열려 있는 창을 사용해 주세요"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

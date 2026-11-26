@@ -69,22 +69,19 @@ export interface DesktopState {
   error: string | null
   collectionDiagnostic?: CollectionDiagnostic | null
 }
-export type UpdateEdition = 'standard' | 'lite'
 export interface UpdateAvailability {
   status: 'checked'
-  currentVersion: string
-  currentEdition: UpdateEdition
   release: {
     version: string
     notes: string
-    assets: Record<UpdateEdition, { size: number }>
+    size: number
   } | null
 }
 export type UpdateCheck =
   | UpdateAvailability
   | { status: 'manifestMissing' | 'networkError' | 'checkTimeout' | 'invalidManifest' }
   | { status: 'httpError'; httpStatus: number }
-type UpdateTarget = { edition: UpdateEdition; version: string }
+type UpdateTarget = { version: string }
 export type UpdateDownload = { attemptId: string; received: number } & (
   | { status: 'downloading' | 'ready' | 'cancelled' }
   | { status: 'failed'; failure: 'integrityFailed' | 'saveFailed' | 'downloadFailed' }

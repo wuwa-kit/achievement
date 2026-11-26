@@ -13,6 +13,7 @@ public partial class MainWindow
     private static readonly DesktopUpdater Updater = new(AppContext.BaseDirectory, DesktopUpdater.CreateClient());
     private Task<UpdateCheckResult>? updateCheck;
     private UpdateRelease? offeredRelease;
+    private UpdateAsset? offeredAsset;
     private UpdateAsset? preparedUpdate;
     private CancellationTokenSource? updateDownload;
     private bool closeAfterUpdateDownload;
@@ -28,8 +29,18 @@ public partial class MainWindow
         try
         {
             var result = await check;
-            if (result.Status == "checked") offeredRelease = result.Release;
-            return new { currentVersion = CurrentReleaseTag, currentEdition = UpdateEdition, result.Status, result.Release, result.HttpStatus };
+            if (result.Status == "checked")
+            {
+                offeredRelease = result.Release;
+                offeredAsset = result.Release is { } release ? DesktopRuntime.SelectAsset(release.Assets, UpdateEdition) : null;
+            }
+            return new
+            {
+                result.Status,
+                release = result.Release is { } available && offeredAsset is { } asset
+                    ? new { available.Version, available.Notes, asset.Size } : null,
+                result.HttpStatus
+            };
         }
         finally
         {
@@ -37,13 +48,12 @@ public partial class MainWindow
         }
     }
 
-    private void StartUpdateDownload(string edition, string version, string attemptId)
+    private void StartUpdateDownload(string version, string attemptId)
     {
         if (updateDownload is not null || updateRestarting || !Guid.TryParseExact(attemptId, "D", out _) ||
-            offeredRelease is not { } release || release.Version != version)
+            offeredRelease is not { } release || release.Version != version || offeredAsset is not { } asset)
             throw new InvalidOperationException("No matching desktop update can be downloaded.");
 
-        var asset = release.Assets.Select(edition);
         preparedUpdate = null;
         updateDownload = new CancellationTokenSource();
         _ = DownloadUpdateAsync(release.Version, asset, attemptId, updateDownload);
@@ -89,11 +99,11 @@ public partial class MainWindow
         }
     }
 
-    private async Task RestartWithUpdateAsync(string edition, string version)
+    private async Task RestartWithUpdateAsync(string version)
     {
         EnsureIdle();
         if (updateRestarting || updateDownload is not null || offeredRelease is not { } release || release.Version != version ||
-            preparedUpdate is not { } asset || asset != release.Assets.Select(edition))
+            preparedUpdate is not { } asset || asset != offeredAsset)
             throw new InvalidOperationException("No matching desktop update is ready.");
 
         updateRestarting = true;

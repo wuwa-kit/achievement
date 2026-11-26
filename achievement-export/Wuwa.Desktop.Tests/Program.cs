@@ -105,6 +105,7 @@ try
     Check(metadata?["scriptPakMount"]?.GetValue<string>() == scriptPak);
     Console.WriteLine("Diagnostic archive contents, epoch filename, and log redaction passed.");
     await DesktopUpdaterTests.RunAsync(directory);
+    DesktopRuntimeTests.Run(directory);
     await WeGameEnvironmentTests.RunAsync(directory);
     DiagnosticRetentionTests.Run(directory);
 }

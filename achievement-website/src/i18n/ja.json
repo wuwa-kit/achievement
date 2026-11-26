@@ -24,13 +24,10 @@
   },
   "desktop": {
     "update": {
+      "externalDownload": "外部ダウンロード",
       "check": "更新を確認",
-      "available": "新しいバージョン {{version}} が利用できます",
-      "current": "現在のバージョン：{{version}}（{{edition}}）",
-      "standard": "標準版",
-      "lite": "Lite 版",
-      "liteRequirement": "Lite 版には .NET 10 Desktop Runtime（x64）が必要です",
-      "size": "{{total}} MB",
+      "available": "アップデートがあります",
+      "size": "ダウンロードサイズ：{{total}} MB",
       "progress": "{{percent}}% · {{current}} / {{total}} MB",
       "download": "ダウンロード",
       "restart": "再起動",
@@ -47,7 +44,9 @@
       "cancelling": "ダウンロードをキャンセルしています…",
       "cancelFailed": "ダウンロードをキャンセルできませんでした",
       "restartFailed": "新しいバージョンを起動できませんでした。現在のウィンドウは開いたままです",
-      "busy": "再起動するには、取得または転送の完了をお待ちください"
+      "busy": "再起動するには、取得または転送の完了をお待ちください",
+      "retry": "再ダウンロード",
+      "downloaded": "ダウンロード完了、再起動して更新を適用します"
     },
     "openWebsite": "実績サイトを開く",
     "exportLogs": "ログをエクスポート",
@@ -408,7 +407,8 @@
     "chooseGame": "Wuthering Waves.exe を選択してください",
     "tooLarge": "エクスポートファイルが 32 MB を超えています",
     "wegameVersionMismatch": "インストール済みのゲームプログラムが公式版と異なるため、収集環境を自動で準備できません。ゲームの更新を確認するか、後で再試行してください",
-    "wegameGameRunning": "鳴潮を終了してから取得をやり直してください"
+    "wegameGameRunning": "鳴潮を終了してから取得をやり直してください",
+    "alreadyRunning": "アプリはすでに起動しています。複数起動はできないため、開いているウィンドウをご利用ください"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

@@ -2,7 +2,7 @@ import { usePreferencesStore } from './stores/preferences'
 import { WMessage } from './components/ui/WMessage'
 import { WDialogHost } from './components/ui/WDialogHost'
 import { WScrollArea } from './components/ui/WScrollArea'
-import { StrictMode, lazy, Suspense, useEffect } from 'react'
+import { StrictMode, lazy, Suspense, useEffect, type ComponentType } from 'react'
 import { createRoot } from 'react-dom/client'
 import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Route, Routes } from 'react-router'
@@ -17,7 +17,7 @@ const Desktop = desktopBuild ? (await loadDesktop()).default : lazy(loadDesktop)
 const websitePages = desktopBuild
   ? null
   : {
-      Viewer: lazy(() => import('./App.tsx')),
+      Viewer: lazy(() => import('./ViewerRoute.tsx')),
       NotFound: lazy(() => import('./NotFound.tsx')),
     }
 
@@ -25,7 +25,7 @@ function Page({
   component: Component,
   title,
 }: {
-  component: typeof Desktop
+  component: ComponentType
   title: 'ui.appTitle' | 'common.desktopTitle' | 'notFound.title'
 }) {
   const { t } = useTranslation()

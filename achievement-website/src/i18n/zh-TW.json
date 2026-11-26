@@ -24,13 +24,10 @@
   },
   "desktop": {
     "update": {
+      "externalDownload": "外部下載",
       "check": "檢查更新",
-      "available": "發現新版本 {{version}}",
-      "current": "目前版本：{{version}}（{{edition}}）",
-      "standard": "標準版",
-      "lite": "Lite 版",
-      "liteRequirement": "Lite 版需要 .NET 10 桌面執行階段（x64）",
-      "size": "{{total}} MB",
+      "available": "發現更新",
+      "size": "下載大小：{{total}} MB",
       "progress": "{{percent}}% · {{current}} / {{total}} MB",
       "download": "下載",
       "restart": "重新啟動",
@@ -47,7 +44,9 @@
       "cancelling": "正在取消下載…",
       "cancelFailed": "無法取消下載",
       "restartFailed": "無法啟動新版本，目前的視窗仍保持開啟",
-      "busy": "擷取或傳輸完成後即可重新啟動"
+      "busy": "擷取或傳輸完成後即可重新啟動",
+      "retry": "重試下載",
+      "downloaded": "下載完成，重新啟動後套用更新"
     },
     "openWebsite": "開啟成就網頁",
     "exportLogs": "匯出日誌",
@@ -408,7 +407,8 @@
     "chooseGame": "請選擇 Wuthering Waves.exe",
     "tooLarge": "匯出檔案超過 32 MB",
     "wegameVersionMismatch": "目前遊戲程式與官方版本不一致，暫時無法自動準備擷取環境。請檢查遊戲更新或稍後重試",
-    "wegameGameRunning": "請關閉正在執行的鳴潮，再重新擷取"
+    "wegameGameRunning": "請關閉正在執行的鳴潮，再重新擷取",
+    "alreadyRunning": "程式已在執行，無法重複開啟，請使用已開啟的視窗"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

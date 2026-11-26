@@ -1,18 +1,27 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import type {
+  ExtractionResult,
+  MatchedPakKey,
+  StringCandidate,
+} from "./static-string-types.ts";
+
 const folder = "artifacts/static-strings";
-const keys = JSON.parse(fs.readFileSync(folder + "/matched-keys.json"));
-const candidates = JSON.parse(
-  fs.readFileSync(folder + "/string-candidates.json"),
-).filter((r) =>
+const keys: MatchedPakKey[] = JSON.parse(
+  fs.readFileSync(folder + "/matched-keys.json", "utf8"),
+);
+const candidates: StringCandidate[] = JSON.parse(
+  fs.readFileSync(folder + "/string-candidates.json", "utf8"),
+);
+const selected = candidates.filter((r) =>
   /\/(?:lang_achievement|lang_multi_text|lang_multi_text_1sthalf|lang_hot_patch|db_achievement)\.db$/i.test(
     r.path,
   ),
 );
-const output = [];
+const output: ExtractionResult[] = [];
 fs.mkdirSync(folder + "/extracted", { recursive: true });
-for (const r of candidates) {
+for (const r of selected) {
   try {
     const b = fs.readFileSync(folder + "/" + r.entries);
     let p = r.entry,
@@ -28,7 +37,7 @@ for (const r of candidates) {
       0;
     const custom = b[p++];
     if ((f & 63) === 63) p += 4;
-    const num = (small) => {
+    const num = (small: boolean) => {
       const n = small ? b.readUInt32LE(p) : Number(b.readBigInt64LE(p));
       p += small ? 4 : 8;
       return n;
@@ -46,10 +55,17 @@ for (const r of candidates) {
     } finally {
       fs.closeSync(fd);
     }
-    const limit = { 0: raw.length, 1: 0x200000, 2: 0x800, 4: 0 }[custom];
+    const limits: Record<number, number | undefined> = {
+      0: raw.length,
+      1: 0x200000,
+      2: 0x800,
+      4: 0,
+    };
+    const limit = limits[custom];
     if (limit === undefined) throw Error("unknown custom flag");
     if (encrypted) {
-      const key = keys.find((k) => k.file === r.pak).key;
+      const key = keys.find((k) => k.file === r.pak)?.key;
+      if (!key) throw Error("no matching key");
       const d = crypto.createDecipheriv(
         "aes-256-ecb",
         Buffer.from(key.slice(2), "hex"),
@@ -72,7 +88,7 @@ for (const r of candidates) {
       header: content.subarray(0, 16).toString(),
     });
   } catch (e) {
-    output.push({ ...r, error: e.message });
+    output.push({ ...r, error: e instanceof Error ? e.message : String(e) });
   }
 }
 fs.writeFileSync(

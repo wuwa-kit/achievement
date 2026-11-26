@@ -24,13 +24,10 @@
   },
   "desktop": {
     "update": {
+      "externalDownload": "Download externo",
       "check": "Verificar atualizações",
-      "available": "A versão {{version}} está disponível",
-      "current": "Versão atual: {{version}} ({{edition}})",
-      "standard": "Edição padrão",
-      "lite": "Edição Lite",
-      "liteRequirement": "A edição Lite exige o .NET 10 Desktop Runtime (x64)",
-      "size": "{{total}} MB",
+      "available": "Atualização disponível",
+      "size": "Tamanho do download: {{total}} MB",
       "progress": "{{percent}}% · {{current}} / {{total}} MB",
       "download": "Baixar",
       "restart": "Reiniciar",
@@ -47,7 +44,9 @@
       "cancelling": "Cancelando o download…",
       "cancelFailed": "Não foi possível cancelar o download",
       "restartFailed": "Não foi possível iniciar a nova versão. A janela atual continua aberta",
-      "busy": "Aguarde o fim da captura ou transferência para reiniciar"
+      "busy": "Aguarde o fim da captura ou transferência para reiniciar",
+      "retry": "Tentar baixar novamente",
+      "downloaded": "Download concluído, reinicie para aplicar a atualização"
     },
     "openWebsite": "Abrir site de conquistas",
     "exportLogs": "Exportar logs",
@@ -408,7 +407,8 @@
     "chooseGame": "Selecione Wuthering Waves.exe",
     "tooLarge": "O arquivo de exportação excede 32 MB",
     "wegameVersionMismatch": "O executável instalado difere da versão oficial, impedindo a preparação automática do ambiente de captura. Verifique atualizações do jogo ou tente mais tarde",
-    "wegameGameRunning": "Feche Wuthering Waves e inicie uma nova coleta"
+    "wegameGameRunning": "Feche Wuthering Waves e inicie uma nova coleta",
+    "alreadyRunning": "O aplicativo já está em execução e não pode ser aberto novamente; use a janela existente"
   },
   "contentLanguages": {
     "zh-Hans": "简体中文",

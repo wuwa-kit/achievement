@@ -6,12 +6,12 @@ import { WScrollArea } from './ui/WScrollArea'
 import { WSvg } from './ui/WSvg'
 import { WTooltip } from './ui/WTooltip'
 import { WButton } from './ui/WButton'
-import { ExportToolDownloadDialog } from './ExportToolDownloadDialog'
+import { useExportToolStore } from '../stores/export-tool'
 
 export function ExportToolIntro() {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-  const [downloadOpen, setDownloadOpen] = useState(false)
+  const openDownload = useExportToolStore((state) => state.openDownload)
 
   return (
     <>
@@ -77,7 +77,7 @@ export function ExportToolIntro() {
             </a>
             <WButton
               className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md border border-(--color-border) px-4 py-2.5 text-center font-medium hover:bg-(--color-surface-soft)"
-              onClick={() => setDownloadOpen(true)}
+              onClick={() => openDownload()}
               data-testid="export-tool-download"
             >
               <WSvg name="arrow-down-to-line" size={18} className="shrink-0" />
@@ -86,7 +86,6 @@ export function ExportToolIntro() {
           </div>
         </div>
       </WDialog>
-      <ExportToolDownloadDialog open={downloadOpen} onOpenChange={setDownloadOpen} />
     </>
   )
 }
