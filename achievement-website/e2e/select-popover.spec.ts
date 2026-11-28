@@ -1,11 +1,18 @@
 import { expect, test } from '@playwright/test'
 import { revealToolbarActions } from './select-helpers'
 
-for (const route of ['/', '/desktop']) {
-  test(`select closes on repeated trigger clicks on ${route}`, async ({ page, isMobile }) => {
+for (const { route, selector } of [
+  { route: '/', selector: '[data-testid="theme-switch"]' },
+  { route: '/', selector: '.w-language-switch' },
+  { route: '/', selector: '[data-testid="账号档案"]' },
+  { route: '/desktop', selector: '[data-testid="theme-switch"]' },
+  { route: '/desktop', selector: '.w-language-switch' },
+  { route: '/desktop', selector: '[data-testid="resource-quality"]' },
+]) {
+  test(`${selector} closes on repeated trigger clicks on ${route}`, async ({ page, isMobile }) => {
     await page.goto(route)
-    await revealToolbarActions(page)
-    const trigger = page.getByTestId('theme-switch')
+    const trigger = page.locator(selector)
+    if (!(await trigger.isVisible())) await revealToolbarActions(page)
     const popover = page.locator('.w-select-popover')
     await expect(trigger).toBeEnabled()
     const value = await trigger.getAttribute('data-value')

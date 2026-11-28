@@ -1,5 +1,31 @@
 import { expect, test } from '@playwright/test'
 
+test('version filter closes on repeated trigger clicks without changing selection', async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto('/')
+  const trigger = page.getByTestId('版本筛选')
+  const popover = page.getByTestId('版本筛选弹层')
+  const clickTrigger = () => (isMobile ? trigger.tap() : trigger.click())
+
+  for (const selectedVersion of [null, '3.7']) {
+    await clickTrigger()
+    await expect(trigger).toHaveAttribute('data-expanded', 'true')
+    await expect(popover).toBeVisible()
+    if (selectedVersion) await popover.locator(`[data-version="${selectedVersion}"]`).check()
+    await clickTrigger()
+    await expect(trigger).toHaveAttribute('data-expanded', 'false')
+    await expect(popover).toHaveCount(0)
+    await expect(trigger).toHaveText(selectedVersion ?? '全部版本')
+  }
+
+  await clickTrigger()
+  await expect(popover.locator('[data-version="3.7"]')).toBeChecked()
+  await trigger.press('Escape')
+  await expect(popover).toHaveCount(0)
+})
+
 test('multiple versions filter together with search and show on achievement cards', async ({
   page,
 }) => {

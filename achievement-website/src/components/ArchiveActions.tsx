@@ -5,6 +5,7 @@ import { useViewerStore } from '../stores/viewer'
 import { WIconButton, iconButtonClass } from './ui/WIconButton'
 import { ArchiveDeleteDialog } from './ArchiveDeleteDialog'
 import { WPopover } from './ui/WPopover'
+import { usePopoverTrigger } from './ui/usePopoverTrigger'
 import { WSvg } from './ui/WSvg'
 import { WTooltip } from './ui/WTooltip'
 import { WButton } from './ui/WButton'
@@ -16,9 +17,12 @@ export function ArchiveActions({ onImport }: { onImport: () => void }) {
   const [expanded, setExpanded] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ key: string; uid: string | null } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const anchorRef = useRef<HTMLButtonElement>(null)
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const disabled = busy || receiving
+  const { anchorRef, triggerProps, popoverProps } = usePopoverTrigger(
+    expanded && !disabled,
+    (open) => (open ? openMenu() : closeMenu()),
+  )
   const actionClass = compact
     ? 'flex min-h-11 items-center gap-2 rounded-md px-3 py-2 text-start text-sm enabled:hover:bg-(--color-surface-soft)'
     : `topbar-icon text-(--color-accent) ${iconButtonClass}`
@@ -73,23 +77,15 @@ export function ArchiveActions({ onImport }: { onImport: () => void }) {
         >
           <WTooltip text={t('common.archiveActions')}>
             <WIconButton
-              ref={anchorRef}
+              {...triggerProps}
               className="topbar-icon text-(--color-accent) max-md:size-11"
               data-testid="档案更多操作"
               disabled={disabled}
-              data-expanded={expanded && !disabled}
-              onClick={() => (expanded ? closeMenu() : openMenu())}
             >
               <WSvg name="ellipsis" size={20} />
             </WIconButton>
           </WTooltip>
-          <WPopover
-            open={expanded && !disabled}
-            onOpenChange={(open) => (open ? openMenu() : closeMenu())}
-            anchorRef={anchorRef}
-            className="archive-actions-menu"
-            offset={4}
-          >
+          <WPopover {...popoverProps} className="archive-actions-menu" offset={4}>
             <div
               className={`archive-actions-buttons flex gap-1 p-1 ${compact ? 'w-[240px] flex-col' : ''}`}
             >

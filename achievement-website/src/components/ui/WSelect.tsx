@@ -14,6 +14,7 @@ import {
 } from 'react'
 import { WButton } from './WButton'
 import { WPopover, type WPopoverPlacement } from './WPopover'
+import { usePopoverTrigger } from './usePopoverTrigger'
 import { WScrollArea } from './WScrollArea'
 
 export const selectTriggerClass =
@@ -62,7 +63,10 @@ export function WSelect({
   const selected = options.findIndex((option) => option.value === value)
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(selected)
-  const anchorRef = useRef<HTMLButtonElement>(null)
+  const { anchorRef, triggerProps, popoverProps } = usePopoverTrigger(open, (nextOpen) => {
+    if (nextOpen) show()
+    else setOpen(false)
+  })
   useImperativeHandle(forwardedRef, () => anchorRef.current!, [])
   const id = useId()
   const search = useRef({ text: '', time: 0 })
@@ -93,24 +97,14 @@ export function WSelect({
     <>
       <WButton
         {...props}
+        {...triggerProps}
         blurOnPointerClick={false}
-        ref={anchorRef}
         className={`w-select ${selectTriggerClass} ${className}`}
         disabled={disabled}
-        popoverTarget={`${id}-popover`}
-
         data-value={value}
-
-        data-expanded={open}
-
         onClick={(event) => {
           onClick?.(event)
-          if (!event.defaultPrevented) {
-            // Keep React in control of toggling while marking this as the native invoker.
-            event.preventDefault()
-            if (open) setOpen(false)
-            else show()
-          }
+          triggerProps.onClick(event)
         }}
         onKeyDown={(event) => {
           onKeyDown?.(event)
@@ -181,13 +175,10 @@ export function WSelect({
       </WButton>
       {name && <input type="hidden" name={name} value={value} disabled={disabled} />}
       <WPopover
-        id={`${id}-popover`}
+        {...popoverProps}
         placement={placement}
         offset={offset}
         matchTriggerWidth={matchPopoverWidth}
-        open={open}
-        onOpenChange={setOpen}
-        anchorRef={anchorRef}
         className="w-select-popover"
       >
         <WScrollArea

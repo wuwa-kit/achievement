@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useResponsive } from 'ahooks'
 import { useTranslation } from 'react-i18next'
 import { WIconButton } from './ui/WIconButton'
 import { WPopover } from './ui/WPopover'
+import { usePopoverTrigger } from './ui/usePopoverTrigger'
 import { WScrollArea } from './ui/WScrollArea'
 import { WSvg } from './ui/WSvg'
 import { WTooltip } from './ui/WTooltip'
@@ -15,7 +16,7 @@ export function ViewerActions() {
   const { t } = useTranslation()
   const compact = !useResponsive().md
   const [expanded, setExpanded] = useState(false)
-  const anchorRef = useRef<HTMLButtonElement>(null)
+  const { anchorRef, triggerProps, popoverProps } = usePopoverTrigger(expanded, setExpanded)
 
   return (
     <div className="topbar-actions flex flex-none items-center gap-2 max-md:gap-1">
@@ -33,19 +34,15 @@ export function ViewerActions() {
         >
           <WTooltip text={t('ui.moreActions')}>
             <WIconButton
-              ref={anchorRef}
+              {...triggerProps}
               className="size-11 text-(--color-accent)"
               data-testid="viewer-more-actions"
-              data-expanded={expanded}
-              onClick={() => setExpanded(!expanded)}
             >
               <WSvg name="ellipsis" size={20} />
             </WIconButton>
           </WTooltip>
           <WPopover
-            open={expanded}
-            onOpenChange={setExpanded}
-            anchorRef={anchorRef}
+            {...popoverProps}
             className="viewer-actions-menu"
             placement="bottom-end"
             offset={4}

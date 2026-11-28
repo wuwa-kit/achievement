@@ -74,6 +74,10 @@ test('desktop zoom follows host changes and stays open across adjustments', asyn
   await page.getByTestId('desktop-zoom').click()
   const panel = page.locator('[popover]:popover-open').filter({ has: page.getByTestId('zoom-in') })
   await expect(panel).toContainText('110%')
+  await page.getByTestId('desktop-zoom').click()
+  await expect(panel).toHaveCount(0)
+  await page.getByTestId('desktop-zoom').click()
+  await expect(panel).toContainText('110%')
   await page.evaluate(() => window.dispatchEvent(new Event('test-host-zoom')))
   await expect(panel).toContainText('150%')
   await page.getByTestId('zoom-in').click()
@@ -389,6 +393,10 @@ test('desktop history replaces the previous snapshot and confirms deletion', asy
   expect(catalogRequests).toEqual([])
   const exportButton = card.getByTestId('历史记录导出')
   const deleteButton = card.getByTestId('删除档案')
+  await exportButton.click()
+  await expect(card.locator('.desktop-history-menu')).toBeVisible()
+  await exportButton.click()
+  await expect(card.locator('.desktop-history-menu')).toHaveCount(0)
   for (const [label, format] of [
     ['导出到网页', 'web'],
     ['导出成就文件', 'json'],

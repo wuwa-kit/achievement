@@ -1,10 +1,11 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { achievementVersions } from '../lib/achievement-versions'
 import { WButton } from './ui/WButton'
 import { WCheckBox } from './ui/WCheckBox'
 import { WEllipsis } from './ui/WEllipsis'
 import { WPopover } from './ui/WPopover'
+import { usePopoverTrigger } from './ui/usePopoverTrigger'
 import { WScrollArea } from './ui/WScrollArea'
 import { selectTriggerClass } from './ui/WSelect'
 import { WSvg } from './ui/WSvg'
@@ -20,7 +21,7 @@ export function AchievementVersionFilter({
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-  const anchorRef = useRef<HTMLButtonElement>(null)
+  const { triggerProps, popoverProps } = usePopoverTrigger(open, setOpen)
   const selected = new Set(versions)
   const allVersions = t('ui.allVersions')
 
@@ -33,11 +34,9 @@ export function AchievementVersionFilter({
   return (
     <>
       <WButton
-        ref={anchorRef}
+        {...triggerProps}
         className={`group w-[clamp(100px,29vw,138px)] flex-none ${selectTriggerClass}`}
         data-testid="版本筛选"
-        data-expanded={open}
-        onClick={() => setOpen(!open)}
       >
         <WEllipsis className="group-data-[expanded=true]:pointer-events-none">
           {versions.join(', ') || allVersions}
@@ -49,9 +48,7 @@ export function AchievementVersionFilter({
         />
       </WButton>
       <WPopover
-        open={open}
-        onOpenChange={setOpen}
-        anchorRef={anchorRef}
+        {...popoverProps}
         placement="bottom-end"
         matchTriggerWidth
         data-testid="版本筛选弹层"

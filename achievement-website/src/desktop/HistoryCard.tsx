@@ -1,7 +1,8 @@
 import { formatDate } from '../i18n/index.ts'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { WButton } from '../components/ui/WButton'
 import { WPopover } from '../components/ui/WPopover'
+import { usePopoverTrigger } from '../components/ui/usePopoverTrigger'
 import { WTooltip } from '../components/ui/WTooltip'
 import { WSvg } from '../components/ui/WSvg'
 import achievementTabIcon from '../assets/achievement-icons/achievement-tab.png?no-inline'
@@ -21,7 +22,7 @@ export function HistoryCard({
   onDelete: () => void
 }) {
   const [open, setOpen] = useState(false)
-  const exportRef = useRef<HTMLButtonElement>(null)
+  const { triggerProps, popoverProps } = usePopoverTrigger(open, setOpen)
   const { t } = useTranslation()
   return (
     <div className="desktop-history-card flex items-center gap-4 rounded-[9px] border border-(--color-border) bg-(--color-surface) px-[18px] py-2.5">
@@ -72,21 +73,17 @@ export function HistoryCard({
         </WTooltip>
         <WTooltip text={t('desktop.exportOptions')}>
           <WButton
-            ref={exportRef}
+            {...triggerProps}
             className="grid size-8 place-items-center rounded-md enabled:hover:bg-(--color-surface-soft) data-[expanded=true]:bg-(--color-surface-soft)"
             data-testid="历史记录导出"
             disabled={disabled}
-            data-expanded={open}
-            onClick={() => setOpen(!open)}
           >
             <WSvg name="arrow-down-to-line" size={18} />
           </WButton>
         </WTooltip>
       </div>
       <WPopover
-        open={open}
-        onOpenChange={setOpen}
-        anchorRef={exportRef}
+        {...popoverProps}
         placement="bottom-end"
         className="desktop-history-menu [--popover-padding:5px]"
       >

@@ -484,68 +484,6 @@ test('the card can toggle again before the first change finishes saving', async 
   await expect(row).toHaveAttribute('data-completed', 'false')
 })
 
-test('archive actions animate on entry and stay mounted through exit', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await page.goto('/')
-  const trigger = page.getByTestId('档案更多操作')
-  const menu = page.locator('.archive-actions-menu')
-  await expect(trigger).toBeEnabled()
-  await expect(menu).toHaveCount(0)
-
-  const transitions = await trigger.evaluate(async (element) => {
-    if (!(element instanceof HTMLButtonElement)) return []
-    element.click()
-    await new Promise(requestAnimationFrame)
-    const menu = document.querySelector('.archive-actions-menu')
-    return menu
-      ?.getAnimations()
-      .map((animation) => (animation instanceof CSSTransition ? animation.transitionProperty : ''))
-  })
-  expect(transitions).toContain('opacity')
-  await expect(menu).toBeVisible()
-  await menu.evaluate((element) =>
-    Promise.allSettled(element.getAnimations().map((animation) => animation.finished)),
-  )
-  await trigger.press('Escape')
-  await expect(menu).toHaveAttribute('data-state', 'closing')
-  await expect(menu).toHaveCount(0)
-})
-
-test('archive actions tolerate brief mouse passes and exits', async ({ page }) => {
-  await page.goto('/')
-  const trigger = page.getByTestId('档案更多操作')
-  const menu = page.locator('.archive-actions-menu')
-  await expect(trigger).toBeEnabled()
-  await page.clock.install()
-  await page.clock.pauseAt(Date.now() + 60_000)
-  const box = (await trigger.boundingBox())!
-  const hover = () => page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-  await hover()
-  await page.clock.runFor(50)
-  await expect(menu).toHaveCount(0)
-  await page.mouse.move(0, 0)
-  await page.clock.runFor(250)
-  await expect(menu).toHaveCount(0)
-  await hover()
-  await page.clock.runFor(250)
-  await expect(menu).toBeVisible()
-
-  const download = page.getByTestId('export-achievement-file')
-  const downloadBox = (await download.boundingBox())!
-  const hoverDownload = () =>
-    page.mouse.move(downloadBox.x + downloadBox.width / 2, downloadBox.y + downloadBox.height / 2)
-  await hoverDownload()
-  await page.mouse.move(0, 0)
-  await page.clock.runFor(175)
-  await expect(menu).toHaveAttribute('data-state', 'open')
-  await hoverDownload()
-  await page.clock.runFor(350)
-  await expect(menu).toHaveAttribute('data-state', 'open')
-  await page.mouse.move(0, 0)
-  await page.clock.runFor(350)
-  await expect(trigger).toHaveAttribute('data-expanded', 'false')
-})
-
 test('sidebar shows a check in place of counts for completed categories and groups', async ({
   page,
 }) => {

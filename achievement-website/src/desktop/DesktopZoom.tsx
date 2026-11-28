@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { WButton } from '../components/ui/WButton'
 import { WIconButton } from '../components/ui/WIconButton'
 import { WPopover } from '../components/ui/WPopover'
+import { usePopoverTrigger } from '../components/ui/usePopoverTrigger'
 import { WSvg } from '../components/ui/WSvg'
 import { WTooltip } from '../components/ui/WTooltip'
 import { useDesktopStore } from '../stores/desktop'
@@ -11,24 +12,17 @@ export function DesktopZoom() {
   const { t } = useTranslation()
   const zoom = useDesktopStore((state) => state.zoom)
   const adjust = useDesktopStore((state) => state.adjustZoom)
-  const anchor = useRef<HTMLButtonElement>(null)
   const [open, setOpen] = useState(false)
+  const { triggerProps, popoverProps } = usePopoverTrigger(open, setOpen)
   return (
     <>
       <WTooltip text={t('desktop.zoom.label') + ' · ' + zoom + '%'}>
-        <WIconButton
-          ref={anchor}
-          data-testid="desktop-zoom"
-          data-expanded={open}
-          onClick={() => setOpen(!open)}
-        >
+        <WIconButton {...triggerProps} data-testid="desktop-zoom">
           <WSvg name="zoom-in" size={20} />
         </WIconButton>
       </WTooltip>
       <WPopover
-        open={open}
-        onOpenChange={setOpen}
-        anchorRef={anchor}
+        {...popoverProps}
         placement="bottom-end"
         className="flex items-center gap-2 [--popover-padding:8px_12px]"
       >
